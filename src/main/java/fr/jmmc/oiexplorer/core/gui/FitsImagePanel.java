@@ -564,7 +564,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             chartPanel.addOverlay(rulerOverlay);            
         } else {
             chartPanel.removeOverlay(rulerOverlay);
-            rulerOverlay.destroy();
+            rulerOverlay.dispose();
             this.rulerOverlay = null;
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }

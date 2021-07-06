@@ -1,8 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/*******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui.chart;
 
 import java.awt.BasicStroke;
@@ -29,7 +27,10 @@ import org.jfree.chart.ui.RectangleEdge;
  */
 public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedChartMouseListener {
 
-    private PointDouble origin, end;
+    private Point2D.Double origin, end;
+    private final EnhancedChartPanel chartPanel;
+    private final MotionListener motionListener = new MotionListener();
+    private final int stringHeight;
 
     final static int RECT_SIZE = 5;
 
@@ -45,9 +46,6 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
     }
     private RulerState rulerState = RulerState.DISABLED;
 
-    private final EnhancedChartPanel chartPanel;
-    private final MotionListener motionListener = new MotionListener();
-
     /**
      *
      * @param chartPanel
@@ -56,12 +54,13 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
         this.chartPanel = (EnhancedChartPanel) chartPanel;
         this.chartPanel.addChartMouseListener(this);
         this.chartPanel.addMouseMotionListener(motionListener);
+        stringHeight = chartPanel.getSize().height;
     }
 
     /**
      * Free memory by removing listeners
      */
-    public void destroy() {
+    public void dispose() {
         this.chartPanel.removeChartMouseListener(this);
         this.chartPanel.removeMouseMotionListener(motionListener);
     }
@@ -75,8 +74,8 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
      * @param y
      * @return
      */
-    private PointDouble translate(PointDouble p, Translation translation) {
-        final Point2D pointOrigin = this.chartPanel.translateScreenToJava2D(p);
+    private Point2D.Double translate(Point2D.Double p, Translation translation) {
+        final Point2D pointOrigin = this.chartPanel.translateScreenToJava2D(new Point((int) p.getX(), (int) p.getY()));
         XYPlot plot = this.chartPanel.getChart().getXYPlot();
 
         Rectangle2D dataArea = null;
@@ -100,11 +99,11 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
 
             switch (translation) {
                 case VALUES_TO_COORDS:
-                    p = new PointDouble(xAxis.valueToJava2D(p.getX(), dataArea, xAxisEdge),
+                    p = new Point2D.Double(xAxis.valueToJava2D(p.getX(), dataArea, xAxisEdge),
                             yAxis.valueToJava2D(p.getY(), dataArea, yAxisEdge));
                     break;
                 case COORDS_TO_VALUES:
-                    p = new PointDouble(xAxis.java2DToValue(p.getX(), dataArea, xAxisEdge),
+                    p = new Point2D.Double(xAxis.java2DToValue(p.getX(), dataArea, xAxisEdge),
                             yAxis.java2DToValue(p.getY(), dataArea, yAxisEdge));
                     break;
             }
@@ -122,28 +121,30 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
     }
 
     private double calculateAngle() {
-        return Math.toDegrees(Math.atan2((end.getX() - origin.getX()), (end.getY() - origin.getY())));
+        return Math.toDegrees(Math.atan2(end.getY() - origin.getY(), end.getX() - origin.getX()));
     }
 
     @Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
         if (this.rulerState != RulerState.DISABLED) {
+            if () {
             g2.clip(chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea());
             g2.setColor(Color.green);
             g2.setStroke(new BasicStroke(2));
 
-            PointDouble originCoords = translate(origin, Translation.VALUES_TO_COORDS);
-            PointDouble endCoords = translate(end, Translation.VALUES_TO_COORDS);
+            Point2D originCoords = translate(origin, Translation.VALUES_TO_COORDS);
+            Point2D endCoords = translate(end, Translation.VALUES_TO_COORDS);
             g2.drawRect((int) originCoords.getX() - RECT_SIZE, (int) originCoords.getY() - RECT_SIZE, RECT_SIZE * 2, RECT_SIZE * 2);
             g2.drawRect((int) endCoords.getX() - RECT_SIZE, (int) endCoords.getY() - RECT_SIZE, RECT_SIZE * 2, RECT_SIZE * 2);
             g2.drawLine((int) originCoords.getX(), (int) originCoords.getY(), (int) endCoords.getX(), (int) endCoords.getY());
 
             g2.setClip(chartPanel.getChartRenderingInfo().getChartArea());
             g2.setColor(Color.black);
-            g2.drawString("Point 1: x=" + String.format("%.5f", origin.getX()) + " y=" + String.format("%.5f", origin.getY()), 100, chartPanel.getSize().height - 120);
-            g2.drawString("Point 2: x=" + String.format("%.5f", end.getX()) + " y=" + String.format("%.5f", end.getY()), 100, chartPanel.getSize().height - 105);
-            g2.drawString("Measure: " + String.format("%.5f", calculateMeasure()) + " mas", 100, chartPanel.getSize().height - 60);
-            g2.drawString("Angle: " + String.format("%.5f", calculateAngle()) + " °", 100, chartPanel.getSize().height - 45);
+            g2.drawString(String.format("Point 1: x=%.5f y=%.5f", origin.getX(), origin.getY()), 100, stringHeight - 120);
+            g2.drawString(String.format("Point 2: x=%.5f y=%.5f", end.getX(), end.getY()), 100, stringHeight - 105);
+            g2.drawString(String.format("Measure: %.5f mas", calculateMeasure()), 100, stringHeight - 60);
+            g2.drawString(String.format("Angle: %.5f °", calculateAngle()), 100, stringHeight - 45);
+        }
         }
     }
 
@@ -155,7 +156,7 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
     @Override
     public void chartMouseMoved(final ChartMouseEvent chartMouseEvent) {
         if (rulerState == RulerState.EDITING) {
-            end = translate(new PointDouble(
+            end = translate(new Point2D.Double(
                     chartMouseEvent.getTrigger().getX(),
                     chartMouseEvent.getTrigger().getY()),
                     Translation.COORDS_TO_VALUES
@@ -171,7 +172,7 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
             case DISABLED:
                 rulerState = RulerState.DONE;
             case DONE:
-                origin = translate(new PointDouble(
+                origin = translate(new Point2D.Double(
                         chartMouseEvent.getTrigger().getX(),
                         chartMouseEvent.getTrigger().getY()),
                         Translation.COORDS_TO_VALUES
@@ -182,7 +183,7 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
                 break;
 
             case EDITING:
-                end = translate(new PointDouble(
+                end = translate(new Point2D.Double(
                         chartMouseEvent.getTrigger().getX(),
                         chartMouseEvent.getTrigger().getY()),
                         Translation.COORDS_TO_VALUES
@@ -198,7 +199,7 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
      */
     private class MotionListener implements MouseMotionListener {
 
-        private boolean doPointsIntersect(PointDouble p1, PointDouble p2, int spacing) {
+        private boolean doPointsIntersect(Point2D.Double p1, Point2D.Double p2, int spacing) {
             return (p1.getX() < p2.getX() + spacing
                     && p1.getX() > p2.getX() - spacing
                     && p1.getY() < p2.getX() + spacing
@@ -207,56 +208,23 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            PointDouble p = translate(new PointDouble(
+            Point2D.Double p = translate(new Point2D.Double(
                     e.getPoint().getX(),
                     e.getPoint().getY()),
                     Translation.COORDS_TO_VALUES
             );
 
             if (doPointsIntersect(p, origin, RECT_SIZE)) {
-                origin = translate(new PointDouble(
-                        e.getX(),
-                        e.getY()),
-                        Translation.COORDS_TO_VALUES
-                );
+                origin = p;
                 chartPanel.repaint();
             } else if (doPointsIntersect(p, end, RECT_SIZE)) {
-                end = translate(new PointDouble(
-                        e.getX(),
-                        e.getY()),
-                        Translation.COORDS_TO_VALUES
-                );
+                end = p;
                 chartPanel.repaint();
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-        }
-
-    }
-
-    /**
-     * Extension of the Point class to allow coordinates of type Double
-     */
-    private class PointDouble extends Point {
-
-        private double x;
-        private double y;
-
-        PointDouble(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public double getX() {
-            return this.x;
-        }
-
-        @Override
-        public double getY() {
-            return this.y;
         }
     }
 }
