@@ -25,6 +25,7 @@ import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorModelPaintScale;
 import fr.jmmc.oiexplorer.core.gui.chart.PaintLogScaleLegend;
+import fr.jmmc.oiexplorer.core.gui.chart.RulerOverlay;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
@@ -37,9 +38,11 @@ import fr.jmmc.oitools.image.FitsUnit;
 import fr.jmmc.oitools.processing.Resampler;
 import fr.jmmc.oitools.processing.Resampler.Filter;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.ItemEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -124,6 +127,9 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     /* swing */
     /** chart panel */
     private SquareChartPanel chartPanel;
+    /* Overlays */
+    /** Ruler overlay */
+    private RulerOverlay rulerOverlay;
 
     /**
      * Constructor
@@ -206,6 +212,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jLabelColorScale = new javax.swing.JLabel();
         jComboBoxColorScale = new javax.swing.JComboBox();
         jButtonDisplayKeywords = new javax.swing.JButton();
+        jToggleButtonRuler = new javax.swing.JToggleButton();
 
         jPanelResample.setLayout(new java.awt.GridBagLayout());
 
@@ -496,6 +503,14 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         jPanelOptions.add(jButtonDisplayKeywords, gridBagConstraints);
 
+        jToggleButtonRuler.setText("Ruler");
+        jToggleButtonRuler.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jToggleButtonRulerItemStateChanged(evt);
+            }
+        });
+        jPanelOptions.add(jToggleButtonRuler, new java.awt.GridBagConstraints());
+
         add(jPanelOptions, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -541,6 +556,19 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             updateFovInRescaleForm();
         }
     }//GEN-LAST:event_jFormattedTextFieldScaleXPropertyChange
+
+    private void jToggleButtonRulerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jToggleButtonRulerItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            this.rulerOverlay = new RulerOverlay(chartPanel);
+            setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+            chartPanel.addOverlay(rulerOverlay);            
+        } else {
+            chartPanel.removeOverlay(rulerOverlay);
+            rulerOverlay.destroy();
+            this.rulerOverlay = null;
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }//GEN-LAST:event_jToggleButtonRulerItemStateChanged
 
     /**
      * Export the component as a document using the given action:
@@ -1620,6 +1648,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JPanel jPanelResample;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;
+    private javax.swing.JToggleButton jToggleButtonRuler;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;
