@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui.chart;
 
+import fr.jmmc.jmcs.gui.component.Disposable;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -25,12 +26,11 @@ import org.jfree.chart.ui.RectangleEdge;
  *
  * @author martin
  */
-public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedChartMouseListener {
+public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedChartMouseListener, Disposable {
 
     private Point2D.Double origin, end;
     private final EnhancedChartPanel chartPanel;
     private final MotionListener motionListener = new MotionListener();
-    private final int stringHeight;
 
     final static int RECT_SIZE = 5;
 
@@ -54,7 +54,6 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
         this.chartPanel = (EnhancedChartPanel) chartPanel;
         this.chartPanel.addChartMouseListener(this);
         this.chartPanel.addMouseMotionListener(motionListener);
-        stringHeight = chartPanel.getSize().height;
     }
 
     /**
@@ -127,7 +126,8 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
     @Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
         if (this.rulerState != RulerState.DISABLED) {
-            if () {
+            
+            int height = chartPanel.getSize().height;
             g2.clip(chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea());
             g2.setColor(Color.green);
             g2.setStroke(new BasicStroke(2));
@@ -140,11 +140,10 @@ public class RulerOverlay extends AbstractOverlay implements Overlay, EnhancedCh
 
             g2.setClip(chartPanel.getChartRenderingInfo().getChartArea());
             g2.setColor(Color.black);
-            g2.drawString(String.format("Point 1: x=%.5f y=%.5f", origin.getX(), origin.getY()), 100, stringHeight - 120);
-            g2.drawString(String.format("Point 2: x=%.5f y=%.5f", end.getX(), end.getY()), 100, stringHeight - 105);
-            g2.drawString(String.format("Measure: %.5f mas", calculateMeasure()), 100, stringHeight - 60);
-            g2.drawString(String.format("Angle: %.5f °", calculateAngle()), 100, stringHeight - 45);
-        }
+            g2.drawString(String.format("Point 1: x=%.5f y=%.5f", origin.getX(), origin.getY()), 100, height - 120);
+            g2.drawString(String.format("Point 2: x=%.5f y=%.5f", end.getX(), end.getY()), 100, height - 105);
+            g2.drawString(String.format("Measure: %.5f mas", calculateMeasure()), 100, height - 60);
+            g2.drawString(String.format("Angle: %.5f °", calculateAngle()), 100, height - 45);
         }
     }
 
