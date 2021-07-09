@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author martin
  */
-public class SliderPanel extends javax.swing.JPanel {
+public final class SliderPanel extends javax.swing.JPanel {
 
     List<FitsImage> fitsImages;
     FitsImagePanel fitsImagePanel;
@@ -76,10 +76,15 @@ public class SliderPanel extends javax.swing.JPanel {
     
     public void setFitsImages(List<FitsImage> fitsImages) {
         this.fitsImages = fitsImages;
-        this.jFitsImageCubeSlider.setMaximum(this.fitsImages.size());
-        this.sliderEditor = new SliderEditor(this.fitsImages.size());
+        this.jFitsImageCubeSlider.setMinimum(this.fitsImages.get(0).getImageIndex());
+        this.jFitsImageCubeSlider.setMaximum(this.fitsImages.get(this.fitsImages.size() - 1).getImageIndex());
+        this.sliderEditor = new SliderEditor(this.fitsImages.size(), this);
     }
-
+    
+    public void setRange(int min, int max) {
+        this.jFitsImageCubeSlider.setMinimum(min);
+        this.jFitsImageCubeSlider.setMaximum(max);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSlider jFitsImageCubeSlider;

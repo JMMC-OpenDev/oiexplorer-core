@@ -6,7 +6,7 @@
 package fr.jmmc.oiexplorer.core.gui;
 
 import com.jidesoft.swing.RangeSlider;
-import java.awt.GridBagConstraints;
+import javax.swing.SpinnerNumberModel;
 
 /**
  *
@@ -17,17 +17,21 @@ public class SliderEditor extends javax.swing.JFrame {
     SliderPanel sliderPanel;
     RangeSlider rangeSlider;
     int imagesCount = 0;
-    
+    int range[];
+
     /**
      * Creates new form SliderEditor
+     *
      * @param imagesCount
+     * @param sliderPanel
      */
-    public SliderEditor(int imagesCount) {
+    public SliderEditor(int imagesCount, SliderPanel sliderPanel) {
         initComponents();
-        
+
         this.imagesCount = imagesCount;
+        this.sliderPanel = sliderPanel;
         this.setLocationRelativeTo(null);
-        
+
         postInit();
     }
 
@@ -45,27 +49,29 @@ public class SliderEditor extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        jLabelFirstImage = new javax.swing.JLabel();
+        jLabelLastImage = new javax.swing.JLabel();
         jConfirmButton = new javax.swing.JButton();
         jCancelButton = new javax.swing.JButton();
         jRangeSliderPanel = new javax.swing.JPanel();
+        jSpinnerMinimum = new javax.swing.JSpinner();
+        jSpinnerMaximum = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Range selector");
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setText("First image");
+        jLabelFirstImage.setText("First image");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        getContentPane().add(jLabel1, gridBagConstraints);
+        gridBagConstraints.gridy = 1;
+        getContentPane().add(jLabelFirstImage, gridBagConstraints);
 
-        jLabel2.setText("Last image");
+        jLabelLastImage.setText("Last image");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        getContentPane().add(jLabel2, gridBagConstraints);
+        gridBagConstraints.gridy = 1;
+        getContentPane().add(jLabelLastImage, gridBagConstraints);
 
         jConfirmButton.setText("Confirm");
         jConfirmButton.addActionListener(new java.awt.event.ActionListener() {
@@ -75,7 +81,7 @@ public class SliderEditor extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         getContentPane().add(jConfirmButton, gridBagConstraints);
 
         jCancelButton.setText("Cancel");
@@ -86,7 +92,7 @@ public class SliderEditor extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         getContentPane().add(jCancelButton, gridBagConstraints);
 
         jRangeSliderPanel.setLayout(new java.awt.GridBagLayout());
@@ -96,21 +102,64 @@ public class SliderEditor extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 2;
         getContentPane().add(jRangeSliderPanel, gridBagConstraints);
 
+        jSpinnerMinimum.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinnerMinimumStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        getContentPane().add(jSpinnerMinimum, gridBagConstraints);
+
+        jSpinnerMaximum.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinnerMaximumStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        getContentPane().add(jSpinnerMaximum, gridBagConstraints);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void postInit() {
-        rangeSlider = new RangeSlider(1, this.imagesCount);
-        rangeSlider.setVisible(true);
+        SpinnerNumberModel model = new SpinnerNumberModel(1, 1, this.imagesCount, 1);
+        this.jSpinnerMinimum.setModel(model);
+        this.jSpinnerMinimum.setValue(1);
+        model = new SpinnerNumberModel(1, 1, this.imagesCount, 1);
+        this.jSpinnerMaximum.setModel(model);
+        this.jSpinnerMaximum.setValue(this.imagesCount);
     }
-    
+
     private void jCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCancelButtonActionPerformed
-        // TODO add your handling code here:
+        this.setVisible(false);
     }//GEN-LAST:event_jCancelButtonActionPerformed
 
     private void jConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jConfirmButtonActionPerformed
-        // TODO add your handling code here:
+        this.sliderPanel.setRange((Integer) jSpinnerMinimum.getValue(), (Integer) jSpinnerMaximum.getValue());
+        this.setVisible(false);
     }//GEN-LAST:event_jConfirmButtonActionPerformed
+
+    private void jSpinnerMinimumStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerMinimumStateChanged
+        if ((Integer) jSpinnerMinimum.getValue() < 1) {
+            jSpinnerMinimum.setValue(jSpinnerMinimum.getNextValue());
+        } else if ((Integer) jSpinnerMinimum.getValue() >= (Integer) jSpinnerMaximum.getValue()) {
+            jSpinnerMinimum.setValue(jSpinnerMinimum.getPreviousValue());
+        }
+    }//GEN-LAST:event_jSpinnerMinimumStateChanged
+
+    private void jSpinnerMaximumStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerMaximumStateChanged
+        if ((Integer) jSpinnerMaximum.getValue() > this.imagesCount) {
+            jSpinnerMaximum.setValue(jSpinnerMaximum.getPreviousValue());
+        } else if ((Integer) jSpinnerMaximum.getValue() <= (Integer) jSpinnerMinimum.getValue()) {
+            jSpinnerMaximum.setValue(jSpinnerMaximum.getNextValue());
+        }
+    }//GEN-LAST:event_jSpinnerMaximumStateChanged
 
     /**
      * @param args the command line arguments
@@ -128,15 +177,11 @@ public class SliderEditor extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SliderEditor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SliderEditor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SliderEditor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(SliderEditor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+
         //</editor-fold>
 
         /* Create and display the form */
@@ -144,14 +189,14 @@ public class SliderEditor extends javax.swing.JFrame {
             new SliderEditor().setVisible(true);
         });
     }
-    
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jCancelButton;
     private javax.swing.JButton jConfirmButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabelFirstImage;
+    private javax.swing.JLabel jLabelLastImage;
     private javax.swing.JPanel jRangeSliderPanel;
+    private javax.swing.JSpinner jSpinnerMaximum;
+    private javax.swing.JSpinner jSpinnerMinimum;
     // End of variables declaration//GEN-END:variables
 }
