@@ -206,6 +206,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jFormattedTextFieldRescaleFov = new javax.swing.JFormattedTextField();
         jLabelScale = new javax.swing.JLabel();
         jFormattedTextFieldScaleX = new javax.swing.JFormattedTextField();
+        jSliderFitsCube = new javax.swing.JSlider();
         jPanelOptions = new javax.swing.JPanel();
         jLabelLutTable = new javax.swing.JLabel();
         jComboBoxLUT = new javax.swing.JComboBox();
@@ -213,6 +214,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jComboBoxColorScale = new javax.swing.JComboBox();
         jButtonDisplayKeywords = new javax.swing.JButton();
         jToggleButtonRuler = new javax.swing.JToggleButton();
+        sliderPanel = new fr.jmmc.oiexplorer.core.gui.SliderPanel(this);
 
         jPanelResample.setLayout(new java.awt.GridBagLayout());
 
@@ -510,6 +512,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             }
         });
         jPanelOptions.add(jToggleButtonRuler, new java.awt.GridBagConstraints());
+        jPanelOptions.add(sliderPanel, new java.awt.GridBagConstraints());
 
         add(jPanelOptions, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
@@ -741,6 +744,10 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         }
     }
 
+    public SliderPanel getSliderPanel() {
+        return sliderPanel;
+    }
+    
     /**
      * Update the fits image to plot
      * @param image image to plot
@@ -1009,7 +1016,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         logger.debug("plot : {}", this.fitsImage);
 
         // check if fits image is available :
-        if (this.fitsImage == null) {
+        if (this.fitsImage == null || this.fitsImage.getImageCount() == 0) {
             resetPlot();
         } else {
 
@@ -1644,11 +1651,13 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JLabel jLabelRescaleFov;
     private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelViewport;
-    private javax.swing.JPanel jPanelOptions;
+    public javax.swing.JPanel jPanelOptions;
     private javax.swing.JPanel jPanelResample;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;
+    private javax.swing.JSlider jSliderFitsCube;
     private javax.swing.JToggleButton jToggleButtonRuler;
+    private fr.jmmc.oiexplorer.core.gui.SliderPanel sliderPanel;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;
