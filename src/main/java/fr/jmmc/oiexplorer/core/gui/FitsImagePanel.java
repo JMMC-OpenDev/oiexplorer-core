@@ -206,7 +206,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jFormattedTextFieldRescaleFov = new javax.swing.JFormattedTextField();
         jLabelScale = new javax.swing.JLabel();
         jFormattedTextFieldScaleX = new javax.swing.JFormattedTextField();
-        jSliderFitsCube = new javax.swing.JSlider();
         jPanelOptions = new javax.swing.JPanel();
         jLabelLutTable = new javax.swing.JLabel();
         jComboBoxLUT = new javax.swing.JComboBox();
@@ -214,7 +213,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jComboBoxColorScale = new javax.swing.JComboBox();
         jButtonDisplayKeywords = new javax.swing.JButton();
         jToggleButtonRuler = new javax.swing.JToggleButton();
-        sliderPanel = new fr.jmmc.oiexplorer.core.gui.SliderPanel(this);
 
         jPanelResample.setLayout(new java.awt.GridBagLayout());
 
@@ -512,7 +510,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             }
         });
         jPanelOptions.add(jToggleButtonRuler, new java.awt.GridBagConstraints());
-        jPanelOptions.add(sliderPanel, new java.awt.GridBagConstraints());
 
         add(jPanelOptions, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
@@ -744,10 +741,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         }
     }
 
-    public SliderPanel getSliderPanel() {
-        return sliderPanel;
-    }
-    
     /**
      * Update the fits image to plot
      * @param image image to plot
@@ -1019,7 +1012,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         if (this.fitsImage == null || this.fitsImage.getImageCount() == 0) {
             resetPlot();
         } else {
-
             // Use model image Preferences :
             final IndexColorModel colorModel = ColorModels.getColorModel((String) this.jComboBoxLUT.getSelectedItem());
             final ColorScale colorScale = (ColorScale) this.jComboBoxColorScale.getSelectedItem();
@@ -1655,9 +1647,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JPanel jPanelResample;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;
-    private javax.swing.JSlider jSliderFitsCube;
     private javax.swing.JToggleButton jToggleButtonRuler;
-    private fr.jmmc.oiexplorer.core.gui.SliderPanel sliderPanel;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;
