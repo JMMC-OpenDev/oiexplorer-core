@@ -1643,7 +1643,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JLabel jLabelRescaleFov;
     private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelViewport;
-    public javax.swing.JPanel jPanelOptions;
+    private javax.swing.JPanel jPanelOptions;
     private javax.swing.JPanel jPanelResample;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;

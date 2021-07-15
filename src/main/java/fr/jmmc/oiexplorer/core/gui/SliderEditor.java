@@ -1,8 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+/*******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui;
 
 import com.jidesoft.swing.RangeSlider;
@@ -141,8 +139,10 @@ public class SliderEditor extends javax.swing.JFrame {
     }//GEN-LAST:event_jCancelButtonActionPerformed
 
     private void jConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jConfirmButtonActionPerformed
-        this.sliderPanel.setRange((Integer) jSpinnerMinimum.getValue(), (Integer) jSpinnerMaximum.getValue());
-        this.setVisible(false);
+        if (this.sliderPanel != null) {
+            this.sliderPanel.setRange((Integer) jSpinnerMinimum.getValue(), (Integer) jSpinnerMaximum.getValue());
+            this.setVisible(false);
+        }
     }//GEN-LAST:event_jConfirmButtonActionPerformed
 
     private void jSpinnerMinimumStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerMinimumStateChanged
