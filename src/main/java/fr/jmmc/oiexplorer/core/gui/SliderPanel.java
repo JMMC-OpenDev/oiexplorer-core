@@ -54,9 +54,9 @@ public final class SliderPanel extends javax.swing.JPanel {
         this.jFitsImageCubeSlider.setMaximum(1);
 
         jSliderButton.setText("Edit range");
-        jSliderButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jSliderButtonMouseClicked(evt);
+        jSliderButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jSliderButtonActionPerformed(evt);
             }
         });
         add(jSliderButton, new java.awt.GridBagConstraints());
@@ -68,9 +68,9 @@ public final class SliderPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jFitsImageCubeSliderStateChanged
 
-    private void jSliderButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jSliderButtonMouseClicked
+    private void jSliderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSliderButtonActionPerformed
         this.sliderEditor.setVisible(true);
-    }//GEN-LAST:event_jSliderButtonMouseClicked
+    }//GEN-LAST:event_jSliderButtonActionPerformed
     
     public void setFitsImages(List<FitsImage> fitsImages) {
         this.fitsImages = fitsImages;
