@@ -203,15 +203,15 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jLabelResampleFov = new javax.swing.JLabel();
         jFormattedTextFieldResampleFov = new javax.swing.JFormattedTextField();
         jButtonResampleFovUpdate = new javax.swing.JButton();
-        jPanelResampleV2 = new javax.swing.JPanel();
-        jLabelResampleV2FOV = new javax.swing.JLabel();
-        jTextFieldResampleV2FOV = new javax.swing.JTextField();
-        jLabelResampleV2FovRounded = new javax.swing.JLabel();
-        jLabelResampleV2PixelSize = new javax.swing.JLabel();
-        jTextFieldResampleV2PixelSize = new javax.swing.JTextField();
-        jLabelResampleV2PixelSizeRounded = new javax.swing.JLabel();
-        jLabelResampleV2NbPixelsInfo = new javax.swing.JLabel();
-        jLabelResampleV2NbPixelsValue = new javax.swing.JLabel();
+        jPanelModifyImage = new javax.swing.JPanel();
+        jLabelModifyImageFOV = new javax.swing.JLabel();
+        jTextFieldModifyImageFOV = new javax.swing.JTextField();
+        jLabelModifyImageFOVAdjusted = new javax.swing.JLabel();
+        jLabelModifyImageInc = new javax.swing.JLabel();
+        jTextFieldModifyImageInc = new javax.swing.JTextField();
+        jLabelModifyImageIncAdjusted = new javax.swing.JLabel();
+        jLabelModifyImageNbPixels = new javax.swing.JLabel();
+        jLabelModifyImageNbPixelsValue = new javax.swing.JLabel();
         jPanelRescale = new javax.swing.JPanel();
         jLabelRescale = new javax.swing.JLabel();
         jLabelRescaleFov = new javax.swing.JLabel();
@@ -417,31 +417,31 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanelViewport.add(jButtonResampleFovUpdate, gridBagConstraints);
 
-        jPanelResampleV2.setLayout(new java.awt.GridLayout(3, 3, 5, 5));
+        jPanelModifyImage.setLayout(new java.awt.GridLayout(3, 3, 5, 5));
 
-        jLabelResampleV2FOV.setText("modify field of view in mas:");
-        jPanelResampleV2.add(jLabelResampleV2FOV);
+        jLabelModifyImageFOV.setText("modify field of view in mas:");
+        jPanelModifyImage.add(jLabelModifyImageFOV);
 
-        jTextFieldResampleV2FOV.setText("0.00000000000000");
-        jPanelResampleV2.add(jTextFieldResampleV2FOV);
+        jTextFieldModifyImageFOV.setText("0.00000000000000");
+        jPanelModifyImage.add(jTextFieldModifyImageFOV);
 
-        jLabelResampleV2FovRounded.setText("rounded to:  XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        jPanelResampleV2.add(jLabelResampleV2FovRounded);
+        jLabelModifyImageFOVAdjusted.setText("adjusted to:  0.00000000000000");
+        jPanelModifyImage.add(jLabelModifyImageFOVAdjusted);
 
-        jLabelResampleV2PixelSize.setText("then, modify pixel size in mas:");
-        jPanelResampleV2.add(jLabelResampleV2PixelSize);
+        jLabelModifyImageInc.setText("then, modify increment in mas:");
+        jPanelModifyImage.add(jLabelModifyImageInc);
 
-        jTextFieldResampleV2PixelSize.setText("0.00000000000000");
-        jPanelResampleV2.add(jTextFieldResampleV2PixelSize);
+        jTextFieldModifyImageInc.setText("0.00000000000000");
+        jPanelModifyImage.add(jTextFieldModifyImageInc);
 
-        jLabelResampleV2PixelSizeRounded.setText("rounded to:  XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        jPanelResampleV2.add(jLabelResampleV2PixelSizeRounded);
+        jLabelModifyImageIncAdjusted.setText("adjusted to:  0.00000000000000");
+        jPanelModifyImage.add(jLabelModifyImageIncAdjusted);
 
-        jLabelResampleV2NbPixelsInfo.setText("thus, image length in pixel is:");
-        jPanelResampleV2.add(jLabelResampleV2NbPixelsInfo);
+        jLabelModifyImageNbPixels.setText("thus, image width in pixel is:");
+        jPanelModifyImage.add(jLabelModifyImageNbPixels);
 
-        jLabelResampleV2NbPixelsValue.setText("1000000");
-        jPanelResampleV2.add(jLabelResampleV2NbPixelsValue);
+        jLabelModifyImageNbPixelsValue.setText("1000000");
+        jPanelModifyImage.add(jLabelModifyImageNbPixelsValue);
 
         jPanelRescale.setLayout(new java.awt.GridBagLayout());
 
@@ -718,16 +718,16 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateResampleV2Labels();
+                updateModifyImageLabels();
             }
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updateResampleV2Labels();
+                updateModifyImageLabels();
             }
         };
-        jTextFieldResampleV2FOV.getDocument().addDocumentListener(documentListener);
-        jTextFieldResampleV2PixelSize.getDocument().addDocumentListener(documentListener);
+        jTextFieldModifyImageFOV.getDocument().addDocumentListener(documentListener);
+        jTextFieldModifyImageInc.getDocument().addDocumentListener(documentListener);
     }
 
     /**
@@ -850,91 +850,34 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         return false;
     }
 
-    /** read and parse fovMas from formulary.
-    @return fovMas. null if could not parse or incorrect value.
+    /** update the swing labels in modify image form, to display computed pixel nb, and adjusted fov and inc.
      */
-    private Double getFormFovMas () {
-        final String strFormFovMas = jTextFieldResampleV2FOV.getText();
+    private void updateModifyImageLabels() {
 
-        // fov mas must not be empty
-        if (strFormFovMas.isEmpty()) {
-            return null;
-        }
+        final double newFov = parseDouble(jTextFieldModifyImageFOV.getText()); // unit MAS
+        final double newInc = parseDouble(jTextFieldModifyImageInc.getText()); // unit MAS
 
-        final double formFovMas = parseDouble(strFormFovMas);
-
-        // must not be zero or negative
-        if (formFovMas <= 0) {
-            return null;
-        }
-
-        return formFovMas;
-    }
-
-    /** read and parse pixelSize from formulary.
-    @param fovMas to check the value of pixel size. optional.
-    @return pixe size. null if could not parse or incorrect value.
-     */
-    private Double getFormPixelSize(final Double fovMas) {
-        final String strFormPixelSize = jTextFieldResampleV2PixelSize.getText();
-
-        // pixel size must not be empty
-        if (strFormPixelSize.isEmpty()) {
-            return null;
-        }
-
-        final double formPixelSize = parseDouble(strFormPixelSize);
-
-        // must not be zero or negative
-        if (formPixelSize <= 0) return null;
-
-        // must not be larger than fovMas
-        if (fovMas != null && formPixelSize > fovMas) {
-            return null;
+        ImageSize newImageSize = FitsImageUtils.foreseeModifyImage(fitsImage, newFov, newInc);
+        if (newImageSize == null) { // newFov or newInc were wrong
+            return;
         }
         
-        return formPixelSize;
-    }
+        jLabelModifyImageNbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
+        jLabelModifyImageFOVAdjusted.setText("adjusted to: " + newImageSize.fov);
+        jLabelModifyImageIncAdjusted.setText("adjusted to: " + newImageSize.inc);
 
-    /** update the swing labels in resample v2 form, to display computed pixel nb, and adjusted fov and pixel size. */
-    private void updateResampleV2Labels() {
-
-        final Double newFovMas = getFormFovMas();
-        if (newFovMas == null) {
-            return;
-        }
-
-        final Double newPixelSizeMas = getFormPixelSize(newFovMas);
-        if (newPixelSizeMas == null) {
-            return;
-        }
-
-        ImageSize newImageSize = FitsImageUtils.computeNewImageSizeIfResampleV2(fitsImage, newFovMas, newPixelSizeMas);
-        if (newImageSize == null) {
-            return;
-        }
-
-        jLabelResampleV2NbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
-        jLabelResampleV2FovRounded.setText("adjusted to: " + newImageSize.fovMas);
-        jLabelResampleV2PixelSizeRounded.setText("adjusted to: " + newImageSize.pixelSizeMas);
-
-        logger.debug("fov {} = length {} * size {}", newImageSize.fovMas, newImageSize.nbPixels, newImageSize.pixelSizeMas);
+        logger.debug("fov {} = length {} * size {}", newImageSize.fov, newImageSize.nbPixels, newImageSize.inc);
     }
 
     /** display a form to change viewport and resample the image.
-    * it has two input text fields : fov and pixelSize.
-    * fov will update number of pixel and will not touch pixel size.
-    * pixelSize will update number of pixel and will not touch fov.
-    * equation is: fov = number of pixel * pixelSize.
-    * there is also a label displaying future number of pixel resulting from
-    * the current values of fov and pixelSize in the input form.
-    * if the user clicks on OK and the values are correct,
-    * the image is modified.
-    * Note that fov and pixel size are adjusted, because nb of pixel is an integer,
-    * and cannot reflect precisely enough user's choice for fov and pixel size.
+    * it has two input text fields : fov and inc.
+     * fov will be used for changing viewport.
+    * inc will be used for resampling.
+     * There is additionnal labels, displaying the adjusted values for fov and inc,
+     * and the width of the image in number of pixels.
     @return true if changed image succesfully. false otherwise.
     */
-    public boolean resampleFitsImageV2 () {
+    public boolean dialogModifyImage() {
         // some checks
         if (fitsImage == null) {
             return false;
@@ -942,53 +885,31 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
         // initialise the form
 
-        // fov in mas
+        // write initial fov in input field
         final Rectangle2D.Double area = fitsImage.getArea();
         final double fovRad = area.getWidth();
         final double fovMas = FitsUnit.ANGLE_RAD.convert(fovRad, FitsUnit.ANGLE_MILLI_ARCSEC);
-        jTextFieldResampleV2FOV.setText(Double.toString(fovMas));
+        jTextFieldModifyImageFOV.setText(Double.toString(fovMas));
 
-        // pixel size in mas
-        double pixelSizeMas = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
-        jTextFieldResampleV2PixelSize.setText(Double.toString(pixelSizeMas));
+        // write initial inc in input field
+        final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
+        jTextFieldModifyImageInc.setText(Double.toString(inc));
 
-        updateResampleV2Labels();
+        // update the computed labels
+        updateModifyImageLabels();
 
-        if (MessagePane.showDialogPanel("Resample image", jPanelResampleV2)) {
+        // Display the dialog with the form, and returns true if users confirms the form.
+        final boolean userConfirm = MessagePane.showDialogPanel("Modify image", jPanelModifyImage);
 
-            final Double newFovMas = getFormFovMas();
-            if (newFovMas == null) {
-                return false;
-            }
+        // if the user confirmed, actually modify the image
+        if (userConfirm) {
 
-            final Rectangle2D.Double newArea = FitsImageUtils.computeNewAreaIfNewFov(fitsImage.getArea(), newFovMas);
-            if (newArea == null) {
-                return false;
-            }
+            final double newFov = parseDouble(jTextFieldModifyImageFOV.getText()); // unit MAS
+            final double newInc = parseDouble(jTextFieldModifyImageInc.getText()); // unit MAS
 
-            final Double newPixelSizeMas = getFormPixelSize(newFovMas);
-            if (newPixelSizeMas == null) {
-                return false;
-            }
-            // update viewport
+            final boolean success = FitsImageUtils.modifyImage(fitsImage, newFov, newInc);
 
-            FitsImageUtils.changeViewportImages(fitsImage.getFitsImageHDU(), newArea);
-
-            // resample
-
-            final int oldNbPixels = fitsImage.getNbCols(); // note fitsImage has been updated with new viewport
-            final double oldPixelSizeRad = fitsImage.getIncCol();
-            final double oldPixelSizeMas = FitsUnit.ANGLE_RAD.convert(oldPixelSizeRad, FitsUnit.ANGLE_MILLI_ARCSEC);
-
-            final int newNbPixels = FitsImageUtils.computeNbPixelsIfChangePixelSize(oldNbPixels, oldPixelSizeMas, newPixelSizeMas);
-
-            try {
-                FitsImageUtils.resampleImages(fitsImage.getFitsImageHDU(), newNbPixels, Filter.FILTER_LANCZOS2);
-            } catch (IllegalArgumentException | IllegalStateException iae) {
-                return false;
-            }
-
-            return true;
+            return success;
         }
 
         return false;
@@ -1148,7 +1069,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             return;
         }
         final double fov = parseDouble(jFormattedTextFieldResampleFov.getText());
-        Rectangle2D.Double newArea = FitsImageUtils.computeNewAreaIfNewFov(getEditedViewportArea(), fov);
+        Rectangle2D.Double newArea = FitsImageUtils.computeNewArea(getEditedViewportArea(), fov);
         if (newArea != null) {
             logger.debug("setFovInViewportForm: fov area: {}", newArea);
             // update the form:
@@ -1854,26 +1775,26 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JLabel jLabelFilter;
     private javax.swing.JLabel jLabelInfo;
     private javax.swing.JLabel jLabelLutTable;
+    private javax.swing.JLabel jLabelModifyImageFOV;
+    private javax.swing.JLabel jLabelModifyImageFOVAdjusted;
+    private javax.swing.JLabel jLabelModifyImageInc;
+    private javax.swing.JLabel jLabelModifyImageIncAdjusted;
+    private javax.swing.JLabel jLabelModifyImageNbPixels;
+    private javax.swing.JLabel jLabelModifyImageNbPixelsValue;
     private javax.swing.JLabel jLabelNewSize;
     private javax.swing.JLabel jLabelOldSize;
     private javax.swing.JLabel jLabelResampleFov;
-    private javax.swing.JLabel jLabelResampleV2FOV;
-    private javax.swing.JLabel jLabelResampleV2FovRounded;
-    private javax.swing.JLabel jLabelResampleV2NbPixelsInfo;
-    private javax.swing.JLabel jLabelResampleV2NbPixelsValue;
-    private javax.swing.JLabel jLabelResampleV2PixelSize;
-    private javax.swing.JLabel jLabelResampleV2PixelSizeRounded;
     private javax.swing.JLabel jLabelRescale;
     private javax.swing.JLabel jLabelRescaleFov;
     private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelViewport;
+    private javax.swing.JPanel jPanelModifyImage;
     private javax.swing.JPanel jPanelOptions;
     private javax.swing.JPanel jPanelResample;
-    private javax.swing.JPanel jPanelResampleV2;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;
-    private javax.swing.JTextField jTextFieldResampleV2FOV;
-    private javax.swing.JTextField jTextFieldResampleV2PixelSize;
+    private javax.swing.JTextField jTextFieldModifyImageFOV;
+    private javax.swing.JTextField jTextFieldModifyImageInc;
     private javax.swing.JToggleButton jToggleButtonRuler;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
