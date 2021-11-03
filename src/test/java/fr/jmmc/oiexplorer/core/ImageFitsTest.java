@@ -91,14 +91,14 @@ public final class ImageFitsTest {
                                         if (TEST_ANGLES) {
                                             // Test rotation:
                                             for (int i = 3; i <= 180; i += 7) {
-                                                final FitsImage copy = fitsImage.clone();
+                                                final FitsImage copy = new FitsImage(null, fitsImage);
                                                 copy.setRotAngle(i);
                                                 showFitsPanel(copy.getFitsImageIdentifier() + " ang: " + i, copy);
                                             }
                                         } else {
                                             showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 
-                                            final FitsImage copy = fitsImage.clone();
+                                            final FitsImage copy = new FitsImage(null, fitsImage);
                                             copy.setRotAngle(ROTATION_ANGLE);
                                             showFitsPanel(fitsImage.getFitsImageIdentifier() + " ang: " + ROTATION_ANGLE, copy);
                                         }
