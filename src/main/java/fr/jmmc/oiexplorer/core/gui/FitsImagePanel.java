@@ -1148,23 +1148,11 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             return;
         }
         final double fov = parseDouble(jFormattedTextFieldResampleFov.getText());
-        if (fov > 0.0) {
-            final double halfFov = 0.5 * axisUnit.convert(fov, FitsUnit.ANGLE_RAD);
-            logger.debug("setFovInViewportForm: halfFov: {}", halfFov);
-
-            final Rectangle2D.Double area = getEditedViewportArea();
-            logger.debug("setFovInViewportForm: area: {}", area);
-
-            if (area != null) {
-                final double cx = area.getCenterX();
-                final double cy = area.getCenterY();
-                area.setFrameFromDiagonal(cx - halfFov, cy - halfFov, cx + halfFov, cy + halfFov);
-
-                logger.debug("setFovInViewportForm: fov area: {}", area);
-
-                // update the form:
-                updateViewportForm(area, axisUnit);
-            }
+        Rectangle2D.Double newArea = FitsImageUtils.computeNewAreaIfNewFov(getEditedViewportArea(), fov);
+        if (newArea != null) {
+            logger.debug("setFovInViewportForm: fov area: {}", newArea);
+            // update the form:
+            updateViewportForm(newArea, axisUnit);
         }
     }
 
