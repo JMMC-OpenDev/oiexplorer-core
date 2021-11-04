@@ -43,6 +43,9 @@ public final class FitsImageUtils {
     /** Smallest positive number used in double comparisons (rounding). */
     public final static double MAS_EPSILON = 1e-6d * ALX.MILLI_ARCSEC_IN_DEGREES;
 
+    /** default filter for modifyImage() resample */
+    private final static Filter MODIFY_IMAGE_DEFAULT_FILTER = Filter.FILTER_LANCZOS2;
+
     /**
      * Forbidden constructor
      */
@@ -191,11 +194,21 @@ public final class FitsImageUtils {
     public static void prepareAllImages(final List<FitsImageHDU> hdus) throws IllegalArgumentException {
         if (hdus != null) {
             for (FitsImageHDU hdu : hdus) {
-                for (FitsImage fitsImage : hdu.getFitsImages()) {
-                    // note: fits image instance can be modified by image preparation:
-                    // can throw IllegalArgumentException if image has invalid keyword(s) / data:
-                    FitsImageUtils.prepareImage(fitsImage);
-                }
+                prepareImages(hdu);
+            }
+        }
+    }
+
+    /** Call prepareImage for each FitsImage of a FitsImageHDU. 
+    @param fitsImageHDU (can be null but then the function do nothing)
+    @throws IllegalArgumentException 
+     */
+    public static void prepareImages(final FitsImageHDU fitsImageHDU) throws IllegalArgumentException {
+        if (fitsImageHDU != null) {
+            for (FitsImage fitsImage : fitsImageHDU.getFitsImages()) {
+                // note: fits image instance can be modified by image preparation:
+                // can throw IllegalArgumentException if image has invalid keyword(s) / data:
+                FitsImageUtils.prepareImage(fitsImage);
             }
         }
     }
@@ -336,89 +349,128 @@ public final class FitsImageUtils {
     }
 
     public static class ImageSize {
-        public double fovMas;
+        public double fov; // unit MAS.
         public int nbPixels;
-        public double pixelSizeMas;
+        public double inc; // unit MAS.
     }
 
-    public static ImageSize computeNewImageSizeIfResampleV2(final FitsImage fitsImage, double newFovMas, double newPixelSizeMas) {
+    /** foresee the ImageSize resulting from modifyImage().
+    @param fitsImage required.
+    @param newFov required. unit MAS.
+    @param newInc required. unit MAS.
+    @return the fov, the nb of pixels, and the inc that would result from applying modifyImage(). null if cannot foresee for some reason.
+     */
+    public static ImageSize foreseeModifyImage(final FitsImage fitsImage, double newFov, double newInc) {
+
+        // some values checks
+        if (newFov <= 0 || newInc <= 0 || newFov <= newInc) {
+            logger.debug("Could not foreseeModifyImage because wrong values for newFov ({}) or newInc ({})",
+                    newFov, newInc);
+            return null;
+        }
+
+        final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
 
         final ImageSize newImageSize = new ImageSize();
 
         // VIEWPORT
-        // computing new Area from newFovMas
-        Rectangle2D.Double newArea = computeNewAreaIfNewFov(fitsImage.getArea(), newFovMas);
+
+        // computing the new area that we get with new fov
+        Rectangle2D.Double newArea = computeNewArea(fitsImage.getArea(), newFov);
         if (newArea == null) {
             return null;
         }
 
-        // computing new nbPixels from, newArea
-        Rectangle newSizes = computeNewSizesIfNewArea(fitsImage, newArea);
+        // get the width in number of pixels that we get with the new area
+        newImageSize.nbPixels = computeRectangle(fitsImage, newArea).width;
 
-        // we keep the nbPixels from computation
-        newImageSize.nbPixels = newSizes.width;
-
-        // pixelSize never changes when we change viewport (it is our choice)
-        newImageSize.pixelSizeMas = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncRow(), FitsUnit.ANGLE_MILLI_ARCSEC);
-
-        // we reajust fov: because nbPixels is an integer, it may not reflects exactly the change in the fov.
-        // So we reajust fov to be as close as possible to the ideal value (which could not be available because
-        // double is not a perfect precision format).
-        // the ideal value is such that: fov == pixelSize * nbPixels.
-        // in the function that actually modify the viewport, this reajustment is implicit
-        // by the fact that the area will be set to null (and recomputed on demand)
-        newImageSize.fovMas = newImageSize.pixelSizeMas * newImageSize.nbPixels;
+        // adjusting fov
+        newImageSize.fov = inc * newImageSize.nbPixels;
 
         // RESAMPLE
 
-        final double oldPixelSizeMas = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
+        newImageSize.nbPixels = computeNewNbPixels(newImageSize.nbPixels, inc, newInc);
 
-        newImageSize.fovMas = newSizes.width * oldPixelSizeMas;
+        // adjusting inc
+        newImageSize.inc = newImageSize.fov / newImageSize.nbPixels;
 
-        final int newNbPixels = computeNbPixelsIfChangePixelSize(newSizes.width, oldPixelSizeMas, newPixelSizeMas);
-
-        // nbPixels changes when we change pixelSizeMas
-        newImageSize.nbPixels = newNbPixels;
-
-        // for same reason as viewport, we reajust pixelSize to be the more accurate possible.
-        newImageSize.pixelSizeMas = (newNbPixels == 0) ? Double.POSITIVE_INFINITY : newImageSize.fovMas / newImageSize.nbPixels;
-
-        // fov is kept constant when resample (by our choice)
         return newImageSize;
+    }
+
+    /** Change viewPort with newFov, then resample with newInc (with a computation of nb of pixel).
+    @param fitsImage required. will be modified. data field will be copied before modified.
+    @param newFov required. unit MAS.
+    @param newInc required. unit MAS.
+    @return true of successfully modified FitsImage. false if something wrong happened.
+     */
+    public static boolean modifyImage(final FitsImage fitsImage, double newFov, double newInc) {
+
+        // change viewport
+
+        final Rectangle2D.Double newArea = computeNewArea(fitsImage.getArea(), newFov);
+        if (newArea == null) {
+            logger.info("Could not modifyImage because could not compute new area.");
+            return false;
+        }
+
+        try {
+            changeViewportImages(fitsImage.getFitsImageHDU(), newArea);
+        } catch (IllegalArgumentException err) {
+            logger.info("Could not modifyImage because could not change viewport. Error: {}", err.getMessage());
+            return false;
+        }
+
+        // resample
+
+        final int nbPixels = fitsImage.getNbCols();
+        final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
+
+        final int newNbPixels = computeNewNbPixels(nbPixels, inc, newInc);
+
+        try {
+            resampleImages(fitsImage.getFitsImageHDU(), newNbPixels, MODIFY_IMAGE_DEFAULT_FILTER);
+        } catch (IllegalArgumentException | IllegalStateException err) {
+            logger.info("Could not modifyImage because could not resample. Error: {}", err.getMessage());
+            return false;
+        }
+
+        // if we reach here, everything went fine
+        return true;
     }
 
     /** computes an Area resulting from a change in the fov.
      * it starts from center of the current fov, and extend to the new fov.
-     * @param oldArea optional.
-     * @param newFovMas  must be positive.
-     * @return new area. null if params were wrong.
+     * @param area required.
+     * @param newFov unit MAS. should be positive.
+     * @return new area in RAD. null if params were wrong.
      */
-    public static Rectangle2D.Double computeNewAreaIfNewFov(final Rectangle2D.Double oldArea, final double newFovMas) {
+    public static Rectangle2D.Double computeNewArea(final Rectangle2D.Double area, final double newFov) {
         // some checks
-        if (oldArea == null || newFovMas <= 0) {
+        if (area == null || newFov <= 0.0d) {
             return null;
         }
 
-        // convert to radians because it is the unit used in oldArea
-        final double newFovRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(newFovMas, FitsUnit.ANGLE_RAD);
+        // convert to radians because it is the unit used in areas
+        final double newFovRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(newFov, FitsUnit.ANGLE_RAD);
 
-        final double halfNewFovRad = newFovRad / 2.0D;
+        final double centerX = area.getCenterX();
+        final double centerY = area.getCenterY();
+        final double halfNewFovRad = newFovRad / 2.0d;
 
         // Starting from center, define top-left corner and bottom-right corner
         final Rectangle2D.Double newArea = new Rectangle2D.Double();
-        newArea.setFrameFromDiagonal(
-                oldArea.getCenterX() - halfNewFovRad, oldArea.getCenterY() - halfNewFovRad,
-                oldArea.getCenterX() + halfNewFovRad, oldArea.getCenterY() + halfNewFovRad);
+        newArea.setFrameFromDiagonal(centerX - halfNewFovRad, centerY - halfNewFovRad,
+                centerX + halfNewFovRad, centerY + halfNewFovRad);
 
         return newArea;
     }
 
-    /** computes sizes and coords for the new area.
-    @param fitsImage required.
-    @param newArea
-    @return Box containing sizes and coords.
+    /** compute rectangle of the image [x,y,w,h] in number of pixels, resulting from a change of area.
+    @param fitsImage the original image.
+    @param newArea the new area for the image.
+    @return Rectangle containing sizes in number of pixels.
      */
-    private static Rectangle computeNewSizesIfNewArea(final FitsImage fitsImage, final Rectangle2D.Double newArea) {
+    private static Rectangle computeRectangle(final FitsImage fitsImage, final Rectangle2D.Double newArea) {
         final int nbRows = fitsImage.getNbRows();
         final int nbCols = fitsImage.getNbCols();
 
@@ -461,7 +513,7 @@ public final class FitsImageUtils {
             final int nbRows = fitsImage.getNbRows();
             final int nbCols = fitsImage.getNbCols();
 
-            final Rectangle sizes = computeNewSizesIfNewArea(fitsImage, newArea);
+            final Rectangle sizes = computeRectangle(fitsImage, newArea);
             final int x = sizes.x, y = sizes.y, w = sizes.width, h = sizes.height;
 
             final float[][] data = fitsImage.getData();
@@ -500,22 +552,18 @@ public final class FitsImageUtils {
         }
     }
 
-    /** compute number of pixels with a new pixel sizes in mas.
-     * field of view is kept constant and number of pixels is modified:
-     *      FOV    =    oldNbPixels * oldPixelSizeMas
-     *      FOV * (newPixelSizeMas / oldPixelSizeMas)    =    oldNbPixels * oldPixelSizeMas * (newPixelSizeMas / oldPixelSizeMas)
-     *      FOV    =    oldNbPixels * (newPixelSizeMas / oldPixelSizeMas)   *   oldPixelSizeMas * (newPixelSizeMas / oldPixelSizeMas)
-     *      FOV    =    oldNbPixels * (newPixelSizeMas / oldPixelSizeMas)   *   newPixelSizeMas
-     *      newNbPixels    =    oldNbPixels * (newPixelSizeMas / oldPixelSizeMas)
+    /** compute number of pixels, resulting from a change of inc.
+     * field of view is kept constant and number of pixels is modified.
+     * FOV = nbPixels * inc
      * image must be a square.
-    @param oldNbPixels number of pixels.
-    @param oldPixelSizeMas size of a pixel in mas.
-    @param newPixelSizeMas new size of a pixel in mas.
+    @param nbPixels number of pixels.
+    @param inc size of a pixel in mas.
+    @param newInc new size of a pixel in mas.
     @return new nb of pixel. always even, never zero.
      */
-    public static int computeNbPixelsIfChangePixelSize(final int oldNbPixels, final double oldPixelSizeMas, final double newPixelSizeMas) {
+    public static int computeNewNbPixels(final int nbPixels, final double inc, final double newInc) {
 
-        final int newNbPixels = (int) Math.floor(oldNbPixels * (oldPixelSizeMas / newPixelSizeMas));
+        final int newNbPixels = (int) Math.floor(nbPixels * (inc / newInc));
 
         final int evenNewNbPixels = (newNbPixels % 2 == 0) ? newNbPixels : (newNbPixels + 1);
 
