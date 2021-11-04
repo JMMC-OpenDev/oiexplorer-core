@@ -36,7 +36,6 @@ import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.jmmc.oitools.image.FitsUnit;
-import fr.jmmc.oitools.processing.Resampler;
 import fr.jmmc.oitools.processing.Resampler.Filter;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -702,7 +701,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
             this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
 
-            this.jComboBoxFilter.setSelectedItem(Resampler.FILTER_DEFAULT);
+            this.jComboBoxFilter.setSelectedItem(FitsImageUtils.DEFAULT_FILTER);
         } finally {
             // restore the automatic refresh :
             setAutoRefresh(prevAutoRefresh);
@@ -833,19 +832,22 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
                 && !jFormattedTextFieldNewSize.getText().isEmpty()) {
 
             final int newSize = (int) Math.round(parseDouble(jFormattedTextFieldNewSize.getText()));
-            final Filter filter = (Filter) jComboBoxFilter.getSelectedItem();
-            logger.debug("resampleImages: newSize: {} - filter: {}", newSize, filter);
 
-            boolean ok = false;
-            try {
-                FitsImageUtils.resampleImages(fitsImage.getFitsImageHDU(), newSize, filter);
-                ok = true;
-            } catch (IllegalArgumentException iae) {
-                MessagePane.showErrorMessage("Unable to resample image", iae);
-            } catch (IllegalStateException ise) {
-                MessagePane.showErrorMessage("Unable to resample image", ise);
+            if (newSize != nbRows) {
+                final Filter filter = (Filter) jComboBoxFilter.getSelectedItem();
+                logger.debug("resampleImages: newSize: {} - filter: {}", newSize, filter);
+
+                boolean ok = false;
+                try {
+                    FitsImageUtils.resampleImages(fitsImage.getFitsImageHDU(), newSize, filter);
+                    ok = true;
+                } catch (IllegalArgumentException iae) {
+                    MessagePane.showErrorMessage("Unable to resample image", iae);
+                } catch (IllegalStateException ise) {
+                    MessagePane.showErrorMessage("Unable to resample image", ise);
+                }
+                return ok;
             }
-            return ok;
         }
         return false;
     }
@@ -861,7 +863,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         if (newImageSize == null) { // newFov or newInc were wrong
             return;
         }
-        
+
         jLabelModifyImageNbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
         jLabelModifyImageFOVAdjusted.setText("adjusted to: " + newImageSize.fov);
         jLabelModifyImageIncAdjusted.setText("adjusted to: " + newImageSize.inc);
@@ -869,14 +871,15 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         logger.debug("fov {} = length {} * size {}", newImageSize.fov, newImageSize.nbPixels, newImageSize.inc);
     }
 
-    /** display a form to change viewport and resample the image.
-    * it has two input text fields : fov and inc.
+    /** 
+    * Display a form to change viewport and resample the image.
+     * it has two input text fields : fov and inc.
      * fov will be used for changing viewport.
-    * inc will be used for resampling.
+     * inc will be used for resampling.
      * There is additionnal labels, displaying the adjusted values for fov and inc,
      * and the width of the image in number of pixels.
-    @return true if changed image succesfully. false otherwise.
-    */
+    * @return true if changed image succesfully. false otherwise.
+     */
     public boolean dialogModifyImage() {
         // some checks
         if (fitsImage == null) {
@@ -884,34 +887,35 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         }
 
         // initialise the form
-
         // write initial fov in input field
         final Rectangle2D.Double area = fitsImage.getArea();
-        final double fovRad = area.getWidth();
-        final double fovMas = FitsUnit.ANGLE_RAD.convert(fovRad, FitsUnit.ANGLE_MILLI_ARCSEC);
-        jTextFieldModifyImageFOV.setText(Double.toString(fovMas));
+        final double fov = FitsUnit.ANGLE_RAD.convert(area.getWidth(), FitsUnit.ANGLE_MILLI_ARCSEC);
+        jTextFieldModifyImageFOV.setText(Double.toString(fov));
 
         // write initial inc in input field
         final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
         jTextFieldModifyImageInc.setText(Double.toString(inc));
-
-        // update the computed labels
-        updateModifyImageLabels();
 
         // Display the dialog with the form, and returns true if users confirms the form.
         final boolean userConfirm = MessagePane.showDialogPanel("Modify image", jPanelModifyImage);
 
         // if the user confirmed, actually modify the image
         if (userConfirm) {
-
             final double newFov = parseDouble(jTextFieldModifyImageFOV.getText()); // unit MAS
             final double newInc = parseDouble(jTextFieldModifyImageInc.getText()); // unit MAS
 
-            final boolean success = FitsImageUtils.modifyImage(fitsImage, newFov, newInc);
-
-            return success;
+            if ((newFov != fov) || (newInc != inc)) {
+                boolean ok = false;
+                try {
+                    ok = FitsImageUtils.modifyImage(fitsImage, newFov, newInc);
+                } catch (IllegalArgumentException iae) {
+                    MessagePane.showErrorMessage("Unable to modify image", iae);
+                } catch (IllegalStateException ise) {
+                    MessagePane.showErrorMessage("Unable to modify image", ise);
+                }
+                return ok;
+            }
         }
-
         return false;
     }
 
@@ -997,8 +1001,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             } else {
                 boolean ok = false;
                 try {
-                    FitsImageUtils.changeViewportImages(fitsImage.getFitsImageHDU(), newArea);
-                    ok = true;
+                    ok = FitsImageUtils.changeViewportImages(fitsImage.getFitsImageHDU(), newArea);
                 } catch (IllegalArgumentException iae) {
                     MessagePane.showErrorMessage("Unable to change image viewport", iae);
                 } catch (IllegalStateException ise) {
