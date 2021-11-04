@@ -194,11 +194,21 @@ public final class FitsImageUtils {
     public static void prepareAllImages(final List<FitsImageHDU> hdus) throws IllegalArgumentException {
         if (hdus != null) {
             for (FitsImageHDU hdu : hdus) {
-                for (FitsImage fitsImage : hdu.getFitsImages()) {
-                    // note: fits image instance can be modified by image preparation:
-                    // can throw IllegalArgumentException if image has invalid keyword(s) / data:
-                    FitsImageUtils.prepareImage(fitsImage);
-                }
+                prepareImages(hdu);
+            }
+        }
+    }
+
+    /** Call prepareImage for each FitsImage of a FitsImageHDU. 
+    @param fitsImageHDU (can be null but then the function do nothing)
+    @throws IllegalArgumentException 
+     */
+    public static void prepareImages(final FitsImageHDU fitsImageHDU) throws IllegalArgumentException {
+        if (fitsImageHDU != null) {
+            for (FitsImage fitsImage : fitsImageHDU.getFitsImages()) {
+                // note: fits image instance can be modified by image preparation:
+                // can throw IllegalArgumentException if image has invalid keyword(s) / data:
+                FitsImageUtils.prepareImage(fitsImage);
             }
         }
     }
