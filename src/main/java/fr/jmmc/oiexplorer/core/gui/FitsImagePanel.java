@@ -416,31 +416,78 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanelViewport.add(jButtonResampleFovUpdate, gridBagConstraints);
 
-        jPanelModifyImage.setLayout(new java.awt.GridLayout(3, 3, 5, 5));
+        jPanelModifyImage.setLayout(new java.awt.GridBagLayout());
 
-        jLabelModifyImageFOV.setText("modify field of view in mas:");
-        jPanelModifyImage.add(jLabelModifyImageFOV);
+        jLabelModifyImageFOV.setLabelFor(jLabelModifyImageFOV);
+        jLabelModifyImageFOV.setText("field of view (mas):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 2, 2);
+        jPanelModifyImage.add(jLabelModifyImageFOV, gridBagConstraints);
 
+        jTextFieldModifyImageFOV.setColumns(16);
         jTextFieldModifyImageFOV.setText("0.00000000000000");
-        jPanelModifyImage.add(jTextFieldModifyImageFOV);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
+        jPanelModifyImage.add(jTextFieldModifyImageFOV, gridBagConstraints);
 
         jLabelModifyImageFOVAdjusted.setText("adjusted to:  0.00000000000000");
-        jPanelModifyImage.add(jLabelModifyImageFOVAdjusted);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 4);
+        jPanelModifyImage.add(jLabelModifyImageFOVAdjusted, gridBagConstraints);
 
-        jLabelModifyImageInc.setText("then, modify increment in mas:");
-        jPanelModifyImage.add(jLabelModifyImageInc);
+        jLabelModifyImageInc.setLabelFor(jLabelModifyImageInc);
+        jLabelModifyImageInc.setText("increment (mas):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
+        jPanelModifyImage.add(jLabelModifyImageInc, gridBagConstraints);
 
+        jTextFieldModifyImageInc.setColumns(16);
         jTextFieldModifyImageInc.setText("0.00000000000000");
-        jPanelModifyImage.add(jTextFieldModifyImageInc);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModifyImage.add(jTextFieldModifyImageInc, gridBagConstraints);
 
         jLabelModifyImageIncAdjusted.setText("adjusted to:  0.00000000000000");
-        jPanelModifyImage.add(jLabelModifyImageIncAdjusted);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
+        jPanelModifyImage.add(jLabelModifyImageIncAdjusted, gridBagConstraints);
 
-        jLabelModifyImageNbPixels.setText("thus, image width in pixel is:");
-        jPanelModifyImage.add(jLabelModifyImageNbPixels);
+        jLabelModifyImageNbPixels.setLabelFor(jLabelModifyImageNbPixelsValue);
+        jLabelModifyImageNbPixels.setText("image width (pixels):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
+        jPanelModifyImage.add(jLabelModifyImageNbPixels, gridBagConstraints);
 
         jLabelModifyImageNbPixelsValue.setText("1000000");
-        jPanelModifyImage.add(jLabelModifyImageNbPixelsValue);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
+        jPanelModifyImage.add(jLabelModifyImageNbPixelsValue, gridBagConstraints);
 
         jPanelRescale.setLayout(new java.awt.GridBagLayout());
 
