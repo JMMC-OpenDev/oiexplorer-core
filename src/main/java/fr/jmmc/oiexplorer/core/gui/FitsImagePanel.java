@@ -133,6 +133,9 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     /** Ruler overlay */
     private RulerOverlay rulerOverlay;
 
+    /** number format for Modify Image labels */
+    private static DecimalFormat numberForm = new DecimalFormat("#0.0##");
+
     /**
      * Constructor
      * @param prefs Preferences instance
@@ -204,13 +207,13 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jButtonResampleFovUpdate = new javax.swing.JButton();
         jPanelModifyImage = new javax.swing.JPanel();
         jLabelModifyImageFOV = new javax.swing.JLabel();
-        jTextFieldModifyImageFOV = new javax.swing.JTextField();
         jLabelModifyImageFOVAdjusted = new javax.swing.JLabel();
         jLabelModifyImageInc = new javax.swing.JLabel();
-        jTextFieldModifyImageInc = new javax.swing.JTextField();
         jLabelModifyImageIncAdjusted = new javax.swing.JLabel();
         jLabelModifyImageNbPixels = new javax.swing.JLabel();
         jLabelModifyImageNbPixelsValue = new javax.swing.JLabel();
+        jFormattedTextFieldModifyImageFOV = new javax.swing.JFormattedTextField();
+        jFormattedTextFieldModifyImageInc = new javax.swing.JFormattedTextField();
         jPanelRescale = new javax.swing.JPanel();
         jLabelRescale = new javax.swing.JLabel();
         jLabelRescaleFov = new javax.swing.JLabel();
@@ -418,24 +421,14 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
         jPanelModifyImage.setLayout(new java.awt.GridBagLayout());
 
-        jLabelModifyImageFOV.setLabelFor(jLabelModifyImageFOV);
-        jLabelModifyImageFOV.setText("field of view (mas):");
+        jLabelModifyImageFOV.setLabelFor(jFormattedTextFieldModifyImageFOV);
+        jLabelModifyImageFOV.setText("FOV (mas):");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 2, 2);
         jPanelModifyImage.add(jLabelModifyImageFOV, gridBagConstraints);
-
-        jTextFieldModifyImageFOV.setColumns(16);
-        jTextFieldModifyImageFOV.setText("0.00000000000000");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
-        jPanelModifyImage.add(jTextFieldModifyImageFOV, gridBagConstraints);
 
         jLabelModifyImageFOVAdjusted.setText("adjusted to:  0.00000000000000");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -445,24 +438,14 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 4);
         jPanelModifyImage.add(jLabelModifyImageFOVAdjusted, gridBagConstraints);
 
-        jLabelModifyImageInc.setLabelFor(jLabelModifyImageInc);
-        jLabelModifyImageInc.setText("increment (mas):");
+        jLabelModifyImageInc.setLabelFor(jFormattedTextFieldModifyImageInc);
+        jLabelModifyImageInc.setText("Increments (mas):");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
         jPanelModifyImage.add(jLabelModifyImageInc, gridBagConstraints);
-
-        jTextFieldModifyImageInc.setColumns(16);
-        jTextFieldModifyImageInc.setText("0.00000000000000");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelModifyImage.add(jTextFieldModifyImageInc, gridBagConstraints);
 
         jLabelModifyImageIncAdjusted.setText("adjusted to:  0.00000000000000");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -473,7 +456,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jPanelModifyImage.add(jLabelModifyImageIncAdjusted, gridBagConstraints);
 
         jLabelModifyImageNbPixels.setLabelFor(jLabelModifyImageNbPixelsValue);
-        jLabelModifyImageNbPixels.setText("image width (pixels):");
+        jLabelModifyImageNbPixels.setText("Image size:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -488,6 +471,28 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
         jPanelModifyImage.add(jLabelModifyImageNbPixelsValue, gridBagConstraints);
+
+        jFormattedTextFieldModifyImageFOV.setColumns(12);
+        jFormattedTextFieldModifyImageFOV.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0##"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
+        jPanelModifyImage.add(jFormattedTextFieldModifyImageFOV, gridBagConstraints);
+
+        jFormattedTextFieldModifyImageInc.setColumns(12);
+        jFormattedTextFieldModifyImageInc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0##"))));
+        jFormattedTextFieldModifyImageInc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jFormattedTextFieldModifyImageIncActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModifyImage.add(jFormattedTextFieldModifyImageInc, gridBagConstraints);
 
         jPanelRescale.setLayout(new java.awt.GridBagLayout());
 
@@ -772,8 +777,8 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
                 updateModifyImageLabels();
             }
         };
-        jTextFieldModifyImageFOV.getDocument().addDocumentListener(documentListener);
-        jTextFieldModifyImageInc.getDocument().addDocumentListener(documentListener);
+        jFormattedTextFieldModifyImageFOV.getDocument().addDocumentListener(documentListener);
+        jFormattedTextFieldModifyImageInc.getDocument().addDocumentListener(documentListener);
     }
 
     /**
@@ -903,17 +908,16 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
      */
     private void updateModifyImageLabels() {
 
-        final double newFov = parseDouble(jTextFieldModifyImageFOV.getText()); // unit MAS
-        final double newInc = parseDouble(jTextFieldModifyImageInc.getText()); // unit MAS
+        final double newFov = parseDouble(jFormattedTextFieldModifyImageFOV.getText()); // unit MAS
+        final double newInc = parseDouble(jFormattedTextFieldModifyImageInc.getText()); // unit MAS
 
         ImageSize newImageSize = FitsImageUtils.foreseeModifyImage(fitsImage, newFov, newInc);
         if (newImageSize == null) { // newFov or newInc were wrong
             return;
         }
-
         jLabelModifyImageNbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
-        jLabelModifyImageFOVAdjusted.setText("adjusted to: " + newImageSize.fov);
-        jLabelModifyImageIncAdjusted.setText("adjusted to: " + newImageSize.inc);
+        jLabelModifyImageFOVAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.fov));
+        jLabelModifyImageIncAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.inc));
 
         logger.debug("fov {} = length {} * size {}", newImageSize.fov, newImageSize.nbPixels, newImageSize.inc);
     }
@@ -937,19 +941,19 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         // write initial fov in input field
         final Rectangle2D.Double area = fitsImage.getArea();
         final double fov = FitsUnit.ANGLE_RAD.convert(area.getWidth(), FitsUnit.ANGLE_MILLI_ARCSEC);
-        jTextFieldModifyImageFOV.setText(Double.toString(fov));
+        jFormattedTextFieldModifyImageFOV.setValue(fov);
 
         // write initial inc in input field
         final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
-        jTextFieldModifyImageInc.setText(Double.toString(inc));
+        jFormattedTextFieldModifyImageInc.setValue(inc);
 
         // Display the dialog with the form, and returns true if users confirms the form.
         final boolean userConfirm = MessagePane.showDialogPanel("Modify image", jPanelModifyImage);
 
         // if the user confirmed, actually modify the image
         if (userConfirm) {
-            final double newFov = parseDouble(jTextFieldModifyImageFOV.getText()); // unit MAS
-            final double newInc = parseDouble(jTextFieldModifyImageInc.getText()); // unit MAS
+            final double newFov = parseDouble(jFormattedTextFieldModifyImageFOV.getText()); // unit MAS
+            final double newInc = parseDouble(jFormattedTextFieldModifyImageInc.getText()); // unit MAS
 
             if ((newFov != fov) || (newInc != inc)) {
                 boolean ok = false;
@@ -1813,6 +1817,8 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JComboBox jComboBoxLUT;
     private javax.swing.JFormattedTextField jFormattedTextFieldDEMax;
     private javax.swing.JFormattedTextField jFormattedTextFieldDEMin;
+    private javax.swing.JFormattedTextField jFormattedTextFieldModifyImageFOV;
+    private javax.swing.JFormattedTextField jFormattedTextFieldModifyImageInc;
     private javax.swing.JFormattedTextField jFormattedTextFieldNewSize;
     private javax.swing.JFormattedTextField jFormattedTextFieldRAMax;
     private javax.swing.JFormattedTextField jFormattedTextFieldRAMin;
@@ -1843,8 +1849,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JPanel jPanelResample;
     private javax.swing.JPanel jPanelRescale;
     private javax.swing.JPanel jPanelViewport;
-    private javax.swing.JTextField jTextFieldModifyImageFOV;
-    private javax.swing.JTextField jTextFieldModifyImageInc;
     private javax.swing.JToggleButton jToggleButtonRuler;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
