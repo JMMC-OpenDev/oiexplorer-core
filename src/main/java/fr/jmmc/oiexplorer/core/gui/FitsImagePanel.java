@@ -134,7 +134,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private RulerOverlay rulerOverlay;
 
     /** number format for Modify Image labels */
-    private static DecimalFormat numberForm = new DecimalFormat("#0.0##");
+    private static DecimalFormat numberForm = new DecimalFormat("#0.000");
 
     /**
      * Constructor
@@ -430,7 +430,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 2, 2);
         jPanelModifyImage.add(jLabelModifyImageFOV, gridBagConstraints);
 
-        jLabelModifyImageFOVAdjusted.setText("adjusted to:  0.00000000000000");
+        jLabelModifyImageFOVAdjusted.setText("adjusted to:  000.000");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -447,7 +447,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
         jPanelModifyImage.add(jLabelModifyImageInc, gridBagConstraints);
 
-        jLabelModifyImageIncAdjusted.setText("adjusted to:  0.00000000000000");
+        jLabelModifyImageIncAdjusted.setText("adjusted to:  000.000");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -464,7 +464,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
         jPanelModifyImage.add(jLabelModifyImageNbPixels, gridBagConstraints);
 
-        jLabelModifyImageNbPixelsValue.setText("1000000");
+        jLabelModifyImageNbPixelsValue.setText("1000");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -473,24 +473,22 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jPanelModifyImage.add(jLabelModifyImageNbPixelsValue, gridBagConstraints);
 
         jFormattedTextFieldModifyImageFOV.setColumns(12);
-        jFormattedTextFieldModifyImageFOV.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0##"))));
+        jFormattedTextFieldModifyImageFOV.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
         jPanelModifyImage.add(jFormattedTextFieldModifyImageFOV, gridBagConstraints);
 
         jFormattedTextFieldModifyImageInc.setColumns(12);
-        jFormattedTextFieldModifyImageInc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.0##"))));
-        jFormattedTextFieldModifyImageInc.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jFormattedTextFieldModifyImageIncActionPerformed(evt);
-            }
-        });
+        jFormattedTextFieldModifyImageInc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModifyImage.add(jFormattedTextFieldModifyImageInc, gridBagConstraints);
 

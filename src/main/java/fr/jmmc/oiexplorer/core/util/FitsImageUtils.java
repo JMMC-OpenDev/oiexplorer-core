@@ -359,7 +359,6 @@ public final class FitsImageUtils {
                     newFov, newInc);
             return null;
         }
-
         // VIEWPORT
         // computing the new area that we get with new fov
         Rectangle2D.Double newArea = computeNewArea(fitsImage.getArea(), newFov);
@@ -368,12 +367,10 @@ public final class FitsImageUtils {
         }
 
         final double inc = FitsUnit.ANGLE_RAD.convert(fitsImage.getIncCol(), FitsUnit.ANGLE_MILLI_ARCSEC);
-
         final ImageSize newImageSize = new ImageSize();
 
         // get the width in number of pixels that we get with the new area
         newImageSize.nbPixels = computeAreaRectangle(fitsImage, newArea).width;
-
         // adjusting fov
         newImageSize.fov = inc * newImageSize.nbPixels;
 
