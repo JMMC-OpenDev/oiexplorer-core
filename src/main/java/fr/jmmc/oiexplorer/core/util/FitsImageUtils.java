@@ -541,6 +541,12 @@ public final class FitsImageUtils {
      * @return new nb of pixel. always even, never zero.
      */
     public static int computeNewNbPixels(final int nbPixels, final double inc, final double newInc) {
+        // minimal difference to actually modify the number of pixels.
+        // this permits the GUI to use only 3 digits precision numbers
+        if (Math.abs(newInc - inc) < 1e-3) {
+            return nbPixels;
+        }
+
         int newSize = (int) Math.ceil(nbPixels * (inc / newInc));
 
         // check bounds:

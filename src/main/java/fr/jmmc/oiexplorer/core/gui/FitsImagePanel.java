@@ -48,6 +48,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
@@ -906,13 +907,21 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
      */
     private void updateModifyImageLabels() {
 
-        final double newFov = parseDouble(jFormattedTextFieldModifyImageFOV.getText()); // unit MAS
-        final double newInc = parseDouble(jFormattedTextFieldModifyImageInc.getText()); // unit MAS
+        final double newFov; // unit MAS
+        final double newInc; // unit MAS
+
+        try {
+            newFov = numberForm.parse(jFormattedTextFieldModifyImageFOV.getText()).doubleValue();
+            newInc = numberForm.parse(jFormattedTextFieldModifyImageInc.getText()).doubleValue();
+        } catch (ParseException e) {
+            return;
+        }
 
         ImageSize newImageSize = FitsImageUtils.foreseeModifyImage(fitsImage, newFov, newInc);
         if (newImageSize == null) { // newFov or newInc were wrong
             return;
         }
+
         jLabelModifyImageNbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
         jLabelModifyImageFOVAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.fov));
         jLabelModifyImageIncAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.inc));
