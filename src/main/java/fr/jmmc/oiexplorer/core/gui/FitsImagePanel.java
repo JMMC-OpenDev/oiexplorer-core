@@ -221,6 +221,20 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jFormattedTextFieldRescaleFov = new javax.swing.JFormattedTextField();
         jLabelScale = new javax.swing.JLabel();
         jFormattedTextFieldScaleX = new javax.swing.JFormattedTextField();
+        jPanelCreateImage = new javax.swing.JPanel();
+        jLabelCreateImageFOV = new javax.swing.JLabel();
+        jLabelCreateImageFOVAdjusted = new javax.swing.JLabel();
+        jLabelCreateImageInc1 = new javax.swing.JLabel();
+        jLabelCreateImageIncAdjusted = new javax.swing.JLabel();
+        jLabelCreateImageNbPixels = new javax.swing.JLabel();
+        jLabelCreateImageNbPixelsValue = new javax.swing.JLabel();
+        jFormattedTextFieldCreateImageFOV = new javax.swing.JFormattedTextField();
+        jFormattedTextFieldCreateImageInc = new javax.swing.JFormattedTextField();
+        jLabelCreateImageFWHM = new javax.swing.JLabel();
+        jFormattedTextFieldCreateImageFWHM = new javax.swing.JFormattedTextField();
+        jLabelCreateImageHduName = new javax.swing.JLabel();
+        jFormattedTextFieldCreateImageHduName = new javax.swing.JFormattedTextField();
+        jLabelCreateImageHduNameMsg = new javax.swing.JLabel();
         jPanelOptions = new javax.swing.JPanel();
         jLabelLutTable = new javax.swing.JLabel();
         jComboBoxLUT = new javax.swing.JComboBox();
@@ -546,6 +560,124 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelRescale.add(jFormattedTextFieldScaleX, gridBagConstraints);
+
+        jPanelCreateImage.setLayout(new java.awt.GridBagLayout());
+
+        jLabelCreateImageFOV.setLabelFor(jFormattedTextFieldModifyImageFOV);
+        jLabelCreateImageFOV.setText("FOV (mas):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 2, 2);
+        jPanelCreateImage.add(jLabelCreateImageFOV, gridBagConstraints);
+
+        jLabelCreateImageFOVAdjusted.setText("adjusted to:  000.000");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 4);
+        jPanelCreateImage.add(jLabelCreateImageFOVAdjusted, gridBagConstraints);
+
+        jLabelCreateImageInc1.setLabelFor(jFormattedTextFieldModifyImageInc);
+        jLabelCreateImageInc1.setText("Increments (mas):");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
+        jPanelCreateImage.add(jLabelCreateImageInc1, gridBagConstraints);
+
+        jLabelCreateImageIncAdjusted.setText("adjusted to:  000.000");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
+        jPanelCreateImage.add(jLabelCreateImageIncAdjusted, gridBagConstraints);
+
+        jLabelCreateImageNbPixels.setLabelFor(jLabelModifyImageNbPixelsValue);
+        jLabelCreateImageNbPixels.setText("Image size:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
+        jPanelCreateImage.add(jLabelCreateImageNbPixels, gridBagConstraints);
+
+        jLabelCreateImageNbPixelsValue.setText("1000");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
+        jPanelCreateImage.add(jLabelCreateImageNbPixelsValue, gridBagConstraints);
+
+        jFormattedTextFieldCreateImageFOV.setColumns(12);
+        jFormattedTextFieldCreateImageFOV.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
+        jPanelCreateImage.add(jFormattedTextFieldCreateImageFOV, gridBagConstraints);
+
+        jFormattedTextFieldCreateImageInc.setColumns(12);
+        jFormattedTextFieldCreateImageInc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelCreateImage.add(jFormattedTextFieldCreateImageInc, gridBagConstraints);
+
+        jLabelCreateImageFWHM.setLabelFor(jFormattedTextFieldModifyImageInc);
+        jLabelCreateImageFWHM.setText("FWHM:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 2, 2);
+        jPanelCreateImage.add(jLabelCreateImageFWHM, gridBagConstraints);
+
+        jFormattedTextFieldCreateImageFWHM.setColumns(12);
+        jFormattedTextFieldCreateImageFWHM.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.000"))));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelCreateImage.add(jFormattedTextFieldCreateImageFWHM, gridBagConstraints);
+
+        jLabelCreateImageHduName.setLabelFor(jLabelModifyImageNbPixelsValue);
+        jLabelCreateImageHduName.setText("HDU_NAME:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 4, 2);
+        jPanelCreateImage.add(jLabelCreateImageHduName, gridBagConstraints);
+
+        jFormattedTextFieldCreateImageHduName.setColumns(12);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelCreateImage.add(jFormattedTextFieldCreateImageHduName, gridBagConstraints);
+
+        jLabelCreateImageHduNameMsg.setText("already used, will be renamed.");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 4);
+        jPanelCreateImage.add(jLabelCreateImageHduNameMsg, gridBagConstraints);
 
         setLayout(new java.awt.BorderLayout());
 
@@ -975,6 +1107,39 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             }
         }
         return false;
+    }
+
+    /** Display a form to create a gaussian image.
+     * @return the FitsImageHDU containing the gaussian image.
+     */
+    public FitsImageHDU dialogCreateImage() {
+
+        final boolean userConfirm = MessagePane.showDialogPanel("Create an image", jPanelCreateImage);
+
+        if (userConfirm) {
+
+            final double fov = parseDouble(jFormattedTextFieldCreateImageFOV.getText());
+            final double inc = parseDouble(jFormattedTextFieldCreateImageInc.getText());
+            final double fwhm = parseDouble(jFormattedTextFieldCreateImageFWHM.getText());
+
+            if ((fov > 0) && (inc > 0) && (fwhm > 0)) {
+
+                final String hduNameRaw = jFormattedTextFieldCreateImageHduName.getText();
+                final String hduName = hduNameRaw.substring(0, Math.min(68, hduNameRaw.length()));
+
+                final FitsImageHDU newHdu = new FitsImageHDU();
+                newHdu.setHduName(hduName);
+
+                final FitsImage gaussianFitsImage = FitsImageUtils.createGaussian(fov, inc, fwhm);
+
+                newHdu.getFitsImages().add(gaussianFitsImage);
+
+                return newHdu;
+            }
+        }
+        
+        // if we reach here, something went wrong
+        return null;
     }
 
     public boolean rescaleFitsImage() {
@@ -1822,6 +1987,10 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JComboBox jComboBoxColorScale;
     private javax.swing.JComboBox jComboBoxFilter;
     private javax.swing.JComboBox jComboBoxLUT;
+    private javax.swing.JFormattedTextField jFormattedTextFieldCreateImageFOV;
+    private javax.swing.JFormattedTextField jFormattedTextFieldCreateImageFWHM;
+    private javax.swing.JFormattedTextField jFormattedTextFieldCreateImageHduName;
+    private javax.swing.JFormattedTextField jFormattedTextFieldCreateImageInc;
     private javax.swing.JFormattedTextField jFormattedTextFieldDEMax;
     private javax.swing.JFormattedTextField jFormattedTextFieldDEMin;
     private javax.swing.JFormattedTextField jFormattedTextFieldModifyImageFOV;
@@ -1833,6 +2002,15 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JFormattedTextField jFormattedTextFieldRescaleFov;
     private javax.swing.JFormattedTextField jFormattedTextFieldScaleX;
     private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelCreateImageFOV;
+    private javax.swing.JLabel jLabelCreateImageFOVAdjusted;
+    private javax.swing.JLabel jLabelCreateImageFWHM;
+    private javax.swing.JLabel jLabelCreateImageHduName;
+    private javax.swing.JLabel jLabelCreateImageHduNameMsg;
+    private javax.swing.JLabel jLabelCreateImageInc1;
+    private javax.swing.JLabel jLabelCreateImageIncAdjusted;
+    private javax.swing.JLabel jLabelCreateImageNbPixels;
+    private javax.swing.JLabel jLabelCreateImageNbPixelsValue;
     private javax.swing.JLabel jLabelDeltaDE;
     private javax.swing.JLabel jLabelDeltaRA;
     private javax.swing.JLabel jLabelFilter;
@@ -1851,6 +2029,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private javax.swing.JLabel jLabelRescaleFov;
     private javax.swing.JLabel jLabelScale;
     private javax.swing.JLabel jLabelViewport;
+    private javax.swing.JPanel jPanelCreateImage;
     private javax.swing.JPanel jPanelModifyImage;
     private javax.swing.JPanel jPanelOptions;
     private javax.swing.JPanel jPanelResample;

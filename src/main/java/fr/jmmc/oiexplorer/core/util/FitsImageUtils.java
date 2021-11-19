@@ -21,6 +21,7 @@ import fr.nom.tam.fits.FitsException;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -649,5 +650,37 @@ public final class FitsImageUtils {
             return max;
         }
         return value;
+    }
+
+    /** Create a gaussian image.
+     * Computes also the edge (in number of pixels) of the image, based on (fov = inc * edge).
+     * @param fov field of view (mas) (must be > 0).
+     * @param incRaw increment (mas) (must be > 0). will be adjusted to fit best into (fov = inc * edge).
+     * @param fwhm full width half maximum (mas) (must be > 0).
+     * @return a gaussian image, with edge size non-zero and even.
+     */
+    public static FitsImage createGaussian(final double fov, final double incRaw, final double fwhm) {
+
+        final int edgeRaw = ((int) Math.ceil(fov / incRaw));
+        final int edgeEven = (edgeRaw % 2 == 0) ? edgeRaw : edgeRaw + 1;
+        final int edge = Math.min(MAX_IMAGE_SIZE, Math.max(2, edgeEven));
+
+        // adjust inc to keep closer to (edge = fov / inc)
+        final double inc = (fov / (double) edge);
+
+        final float data[][] = new float[edge][edge];
+
+        // fill gaussian with the help of edge and inc and fwhm
+        for (float[] row : data) {
+            Arrays.fill(row, 42f);
+        }
+
+        final double pixRef = (edge / 2d) + 1d;
+
+        final double incRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(inc, FitsUnit.ANGLE_RAD);
+
+        final FitsImage fitsImage = createFitsImage(data, pixRef, pixRef, incRad, incRad);
+
+        return fitsImage;
     }
 }
