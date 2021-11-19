@@ -716,6 +716,8 @@ public final class FitsImageUtils {
         final double[] weights = new double[nbPixels];
 
         final double f = -GAUSS_CST / (fwhm * fwhm);
+        
+        double gauss_sum =0.0;
 
         for (int i = 0; i < nbPixels; i++) {
             final double dist = Math.abs(half - i - 0.5) * inc;
@@ -732,8 +734,19 @@ public final class FitsImageUtils {
             // iterate on columns:
             for (c = 0; c < nbPixels; c++) {
                 row[c] = (float) (weights[r] * weights[c]);
+                gauss_sum += row[c];
             }
         }
+        
+        // normalization to 1.
+        double normalization = 1.0/gauss_sum; 
+        for (int r = 0; r < nbPixels; r++) {
+            // iterate on columns:
+            for (int c = 0; c < nbPixels; c++) {
+                data[r][c] *= normalization;
+            }
+        }
+            
         return data;
     }
 
