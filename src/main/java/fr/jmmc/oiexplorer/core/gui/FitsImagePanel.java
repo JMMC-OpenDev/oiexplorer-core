@@ -120,6 +120,8 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private final DecimalFormat df = new DecimalFormat("0.0#E0");
     /** angle formatter for legend title */
     private final DecimalFormat df3 = new DecimalFormat("0.0##");
+    /** number format for Create / Modify labels */
+    private final DecimalFormat df3f = new DecimalFormat("#0.000");
     /* plot data */
     /** last zoom event to check if the zoom area changed */
     private ZoomEvent lastZoomEvent = null;
@@ -133,9 +135,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     /* Overlays */
     /** Ruler overlay */
     private RulerOverlay rulerOverlay;
-
-    /** number format for Modify Image labels */
-    private static DecimalFormat numberForm = new DecimalFormat("#0.000");
 
     /**
      * Constructor
@@ -1042,48 +1041,48 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         return false;
     }
 
-    /** update the swing labels in modify image form, to display computed pixel nb, and adjusted fov and inc.
+    /** 
+     * update the swing labels in modify image form, to display computed pixel nb, and adjusted fov and inc.
      */
     private void updateModifyImageLabels() {
-
         final double newFov; // unit MAS
         final double newInc; // unit MAS
 
         try {
-            newFov = numberForm.parse(jFormattedTextFieldModifyImageFOV.getText()).doubleValue();
-            newInc = numberForm.parse(jFormattedTextFieldModifyImageInc.getText()).doubleValue();
+            newFov = df3f.parse(jFormattedTextFieldModifyImageFOV.getText()).doubleValue();
+            newInc = df3f.parse(jFormattedTextFieldModifyImageInc.getText()).doubleValue();
         } catch (ParseException e) {
             return;
         }
 
         ImageSize newImageSize = FitsImageUtils.foreseeModifyImage(fitsImage, newFov, newInc);
-        if (newImageSize == null) { // newFov or newInc were wrong
+        if (newImageSize == null) {
             return;
         }
 
         jLabelModifyImageNbPixelsValue.setText(Integer.toString(newImageSize.nbPixels));
-        jLabelModifyImageFOVAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.fov));
-        jLabelModifyImageIncAdjusted.setText("adjusted to: " + numberForm.format(newImageSize.inc));
+        jLabelModifyImageFOVAdjusted.setText("adjusted to: " + df3f.format(newImageSize.fov));
+        jLabelModifyImageIncAdjusted.setText("adjusted to: " + df3f.format(newImageSize.inc));
 
         logger.debug("fov {} = length {} * size {}", newImageSize.fov, newImageSize.nbPixels, newImageSize.inc);
     }
 
-    /** update the swing labels in create image form,
+    /** 
+     * update the swing labels in create image form,
      * to display computed pixel nb, adjusted fov, inc, fwhm, and uniqueness of hduName.
      */
     private void updateCreateImageLabels() {
-
-        final double fwhm, fov, inc;
+        final double fov, inc;
         try {
-            fov = numberForm.parse(jFormattedTextFieldCreateImageFOV.getText()).doubleValue();
-            inc = numberForm.parse(jFormattedTextFieldCreateImageInc.getText()).doubleValue();
+            fov = df3f.parse(jFormattedTextFieldCreateImageFOV.getText()).doubleValue();
+            inc = df3f.parse(jFormattedTextFieldCreateImageInc.getText()).doubleValue();
         } catch (ParseException e) {
             return;
         }
 
-        if ((fov > 0d) && (inc > 0d)) {
+        if ((fov > 0.0) && (inc > 0.0)) {
             ImageSize imgSize = FitsImageUtils.foreseeCreateImage(fov, inc);
-            jLabelCreateImageIncAdjusted.setText("adjusted to: " + numberForm.format(imgSize.inc));
+            jLabelCreateImageIncAdjusted.setText("adjusted to: " + df3f.format(imgSize.inc));
             jLabelCreateImageNbPixelsValue.setText(String.valueOf(imgSize.nbPixels));
         }
     }
