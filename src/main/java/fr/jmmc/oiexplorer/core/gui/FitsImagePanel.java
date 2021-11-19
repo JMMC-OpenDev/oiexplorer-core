@@ -37,7 +37,6 @@ import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.jmmc.oitools.image.FitsUnit;
 import fr.jmmc.oitools.processing.Resampler.Filter;
-import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -1088,7 +1087,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             jLabelCreateImageNbPixelsValue.setText(String.valueOf(imgSize.nbPixels));
         }
     }
-    
+
     /** 
      * Display a form to change viewport and resample the image.
      * it has two input text fields : fov and inc.
@@ -1143,38 +1142,27 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
      */
     public FitsImageHDU dialogCreateImage() {
 
-        final boolean userConfirm = MessagePane.showDialogPanel("Create an image", jPanelCreateImage);
+        final boolean userConfirm = MessagePane.showDialogPanel("Create image", jPanelCreateImage);
 
         if (userConfirm) {
-
             final double fov = parseDouble(jFormattedTextFieldCreateImageFOV.getText());
             final double inc = parseDouble(jFormattedTextFieldCreateImageInc.getText());
             final double fwhm = parseDouble(jFormattedTextFieldCreateImageFWHM.getText());
 
-            if ((fov > 0) && (inc > 0) && (fwhm > 0)) {
-
+            if ((fov > 0.0) && (inc > 0.0) && (fwhm > 0.0)) {
                 final FitsImageHDU newHdu = new FitsImageHDU();
-                
+
                 final String hduNameRaw = jFormattedTextFieldCreateImageHduName.getText();
                 final String hduName = hduNameRaw.substring(0, Math.min(68, hduNameRaw.length()));
                 newHdu.setHduName(hduName);
 
-                final FitsImage gaussianFitsImage = FitsImageUtils.createImage(fov, inc, fwhm);
-                newHdu.getFitsImages().add(gaussianFitsImage);
-                gaussianFitsImage.setFitsImageHDU(newHdu);
-
-                try {
-                    // update checksum:
-                    newHdu.updateChecksum();
-                } catch (FitsException fe) {
-                    logger.info("unable to update checksum on {}", newHdu, fe);
-                }
+                final FitsImage createdFitsImage = FitsImageUtils.createImage(fov, inc, fwhm);
+                newHdu.getFitsImages().add(createdFitsImage);
+                createdFitsImage.setFitsImageHDU(newHdu);
 
                 return newHdu;
             }
         }
-        
-        // if we reach here, something went wrong
         return null;
     }
 

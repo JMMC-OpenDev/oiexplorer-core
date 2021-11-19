@@ -21,7 +21,6 @@ import fr.nom.tam.fits.FitsException;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -675,7 +674,8 @@ public final class FitsImageUtils {
         return imageSize;
     }
 
-    /** Create a gaussian FitsImage.
+    /** 
+     * Create a gaussian FitsImage.
      * Computes also the edge (in number of pixels) of the image, based on (fov = inc * edge).
      * @param fov field of view (mas) (must be > 0).
      * @param inc increment (mas) (must be > 0). will be adjusted to fit best into (fov = inc * edge).
@@ -687,32 +687,57 @@ public final class FitsImageUtils {
         // this computes nbPixels, and adjust inc. it keeps the same fov.
         ImageSize imgSize = foreseeCreateImage(fov, inc);
 
-        final float data[][] = createGaussianData(imgSize.nbPixels, imgSize.inc, fwhm);
-
-        final double pixRef = (imgSize.nbPixels / 2d) + 1d;
-
         final double incRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(imgSize.inc, FitsUnit.ANGLE_RAD);
+        final double fwhmRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(fwhm, FitsUnit.ANGLE_RAD);
+
+        final float data[][] = createGaussianData(imgSize.nbPixels, incRad, fwhmRad);
+
+        final double pixRef = 0.5 + (imgSize.nbPixels / 2d);
 
         final FitsImage fitsImage = createFitsImage(data, pixRef, pixRef, incRad, incRad);
 
         return fitsImage;
     }
 
-    /** Creates a float 2D array containing a gaussian.
+    /** 
+     * Create a float 2D array containing a gaussian intensity distribution.
      * @param nbPixels length in rows and cols of the 2D arrays
-     * @param inc increment (mas)
-     * @param fwhm full width half maximum (mas)
+     * @param inc increment (rad)
+     * @param fwhm full width half maximum (rad)
      * @return a 2D float array containing the gaussian.
      */
     private static float[][] createGaussianData(final int nbPixels, final double inc, final double fwhm) {
-
         final float data[][] = new float[nbPixels][nbPixels];
 
-        // TODO
-        for (float[] row : data) {
-            Arrays.fill(row, 42f);
+        final int half = nbPixels / 2;
+
+        // separable
+        // 1D weights
+        final double[] weights = new double[nbPixels];
+
+        final double f = -GAUSS_CST / (fwhm * fwhm);
+
+        for (int i = 0; i < nbPixels; i++) {
+            final double dist = Math.abs(half - i - 0.5) * inc;
+
+            weights[i] = 1.0 * Math.exp(f * (dist * dist)); // 1 = normalized
         }
 
+        // iterate on rows:
+        float[] row;
+
+        for (int r = 0, c; r < nbPixels; r++) {
+            row = data[r];
+
+            // iterate on columns:
+            for (c = 0; c < nbPixels; c++) {
+                row[c] = (float) (weights[r] * weights[c]);
+            }
+        }
         return data;
     }
+
+    /** constant used to compute the gaussian model */
+    private final static double GAUSS_CST = 4d * Math.log(2d);
+
 }
