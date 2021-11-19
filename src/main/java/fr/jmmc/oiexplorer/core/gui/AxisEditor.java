@@ -82,7 +82,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
 
         // hidden until request and valid code to get a correct behaviour
         final JComponent[] components = new JComponent[]{
-            includeZeroCheckBox, jRadioModeAuto, jRadioModeDefault, jRadioModeFixed, jFieldMin, jFieldMax
+            includeZeroCheckBox, includeDataRangeCheckBox, jRadioModeAuto, jRadioModeDefault, jRadioModeFixed, jFieldMin, jFieldMax
         };
         for (JComponent c : components) {
             c.setVisible(c.isEnabled());
@@ -163,6 +163,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
 
             includeZeroCheckBox.setSelected(axis.isIncludeZero());
             logScaleCheckBox.setSelected(axis.isLogScale());
+            includeDataRangeCheckBox.setSelected(axis.isIncludeDataRangeOrDefault());
 
             // Add popup menus to min/max fields:
             keyMin = axisName + ".min";
@@ -365,6 +366,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
         nameComboBox = new javax.swing.JComboBox();
         logScaleCheckBox = new javax.swing.JCheckBox();
         includeZeroCheckBox = new javax.swing.JCheckBox();
+        includeDataRangeCheckBox = new javax.swing.JCheckBox();
         jPanelBounds = new javax.swing.JPanel();
         jRadioModeAuto = new javax.swing.JRadioButton();
         jRadioModeDefault = new javax.swing.JRadioButton();
@@ -410,6 +412,18 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         add(includeZeroCheckBox, gridBagConstraints);
+
+        includeDataRangeCheckBox.setText("def. range");
+        includeDataRangeCheckBox.setToolTipText("Include default range ([0;1] for visibility or [-180;180] for phases)");
+        includeDataRangeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AxisEditor.this.actionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        add(includeDataRangeCheckBox, gridBagConstraints);
 
         jPanelBounds.setLayout(new java.awt.GridBagLayout());
 
@@ -488,7 +502,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
         jPanelBounds.add(rangeListComboBox, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.2;
@@ -505,6 +519,8 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
 
         if (evt.getSource() == includeZeroCheckBox) {
             axisToEdit.setIncludeZero(includeZeroCheckBox.isSelected());
+        } else if (evt.getSource() == includeDataRangeCheckBox) {
+            axisToEdit.setIncludeDataRange(includeDataRangeCheckBox.isSelected());
         } else if (evt.getSource() == logScaleCheckBox) {
             axisToEdit.setLogScale(logScaleCheckBox.isSelected());
         } else if (evt.getSource() == nameComboBox) {
@@ -562,6 +578,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupRangeModes;
+    private javax.swing.JCheckBox includeDataRangeCheckBox;
     private javax.swing.JCheckBox includeZeroCheckBox;
     private javax.swing.JFormattedTextField jFieldMax;
     private javax.swing.JFormattedTextField jFieldMin;

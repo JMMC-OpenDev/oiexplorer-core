@@ -12,8 +12,6 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.oiexplorer.core.model.OIBase;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -283,8 +281,8 @@ public class Identifiable
      * @param <K> identifiable class type
      * @return list of identifiers
      */
-    public static <K extends Identifiable> List<String> getIds(final java.util.List<K> list) {
-        final ArrayList<String> ids = new ArrayList<String>(list.size());
+    public static <K extends Identifiable> java.util.List<String> getIds(final java.util.List<K> list) {
+        final java.util.ArrayList<String> ids = new java.util.ArrayList<String>(list.size());
         for (K identifiable : list) {
             ids.add(identifiable.getId());
         }

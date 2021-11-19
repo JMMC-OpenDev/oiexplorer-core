@@ -1842,6 +1842,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         final boolean modeAuto = (axis.getRangeModeOrDefault() == AxisRangeMode.AUTO);
         final boolean modeRange = (axis.getRangeModeOrDefault() == AxisRangeMode.RANGE);
+        
+        final boolean includeDataRange = axis.isIncludeDataRangeOrDefault();
 
         // bounds = data+err range:
         double bmin = axisInfo.dataErrRange.getLowerBound();
@@ -1889,7 +1891,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             final ColumnMeta colMeta = axisInfo.columnMeta;
 
             // use column meta's default range:
-            if (colMeta != null && colMeta.getDataRange() != null) {
+            if (includeDataRange && (colMeta != null) && (colMeta.getDataRange() != null)) {
                 final DataRange dataRange = colMeta.getDataRange();
 
                 if (!Double.isNaN(dataRange.getMin())) {
@@ -1938,7 +1940,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             }
 
             // handle fixed axis range:
-            if (modeRange && axis.getRange() != null) {
+            if (modeRange && (axis.getRange() != null)) {
                 if (!Double.isNaN(axis.getRange().getMin())) {
                     fix_vmin = true;
                     vmin = axis.getRange().getMin();

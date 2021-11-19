@@ -741,7 +741,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             FitsImageHDU fitsImageHDU = this.fitsImage.getFitsImageHDU();
             // note: only possible with one Fits image or one Fits cube (single HDU):
             final String hduHeader = "ImageHDU#" + fitsImageHDU.getExtNb() + " has " + fitsImageHDU.getImageCount() + " images.\n\n" + fitsImageHDU.getHeaderAsString("\n");
-            MessagePane.showMessage(hduHeader);
+            MessagePane.showMessage(hduHeader, "Header [" + fitsImage.getFitsImageIdentifier() + "]");
         } else {
             MessagePane.showMessage("Sorry, no associated Fits HDU to display.");
         }
@@ -1089,14 +1089,14 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         }
     }
     
-        /**
-         * Display a form to change viewport and resample the image.
+    /** 
+     * Display a form to change viewport and resample the image.
      * it has two input text fields : fov and inc.
      * fov will be used for changing viewport.
      * inc will be used for resampling.
      * There is additionnal labels, displaying the adjusted values for fov and inc,
      * and the width of the image in number of pixels.
-    * @return true if changed image succesfully. false otherwise.
+     * @return true if changed image succesfully. false otherwise.
      */
     public boolean dialogModifyImage() {
         // some checks

@@ -4,7 +4,6 @@ package fr.jmmc.oiexplorer.core.model.plot;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.oiexplorer.core.model.OIBase;
 
@@ -26,6 +25,7 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
  *         &lt;element name="logScale" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
  *         &lt;element name="includeZero" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="includeDataRange" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="rangeMode" type="{http://www.jmmc.fr/oiexplorer-core-plot-definition/0.1}AxisRangeMode"/&gt;
  *         &lt;element name="range" type="{http://www.jmmc.fr/oiexplorer-core-plot-definition/0.1}Range" minOccurs="0"/&gt;
  *         &lt;element name="converter" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
@@ -42,6 +42,7 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
     "name",
     "logScale",
     "includeZero",
+    "includeDataRange",
     "rangeMode",
     "range",
     "converter"
@@ -54,6 +55,7 @@ public class Axis
     protected String name;
     protected boolean logScale;
     protected boolean includeZero;
+    protected Boolean includeDataRange;
     @XmlElement(required = true)
     
     protected AxisRangeMode rangeMode;
@@ -114,6 +116,30 @@ public class Axis
      */
     public void setIncludeZero(boolean value) {
         this.includeZero = value;
+    }
+
+    /**
+     * Gets the value of the includeDataRange property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isIncludeDataRange() {
+        return includeDataRange;
+    }
+
+    /**
+     * Sets the value of the includeDataRange property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setIncludeDataRange(Boolean value) {
+        this.includeDataRange = value;
     }
 
     /**
@@ -189,11 +215,21 @@ public class Axis
     }
     
 //--simple--preserve
-    
     /**
-    * Return the axis range mode or AxisRangeMode.DEFAULT
-    * @return axis range mode or AxisRangeMode.DEFAULT
-    */
+     * Return the includeDataRange flag or true (default)
+     * @return includeDataRange flag or true (default)
+     */
+    public boolean isIncludeDataRangeOrDefault() {
+        if (this.includeDataRange == null) {
+            return true;
+        }
+        return includeDataRange.booleanValue();
+    }
+
+    /**
+     * Return the axis range mode or AxisRangeMode.DEFAULT
+     * @return axis range mode or AxisRangeMode.DEFAULT
+     */
     public AxisRangeMode getRangeModeOrDefault() {
         if (this.rangeMode == null) {
             this.rangeMode = AxisRangeMode.DEFAULT;
@@ -217,6 +253,7 @@ public class Axis
         this.name = axis.getName();
         this.logScale = axis.isLogScale();
         this.includeZero = axis.isIncludeZero();
+        this.includeDataRange = axis.isIncludeDataRange();
         this.rangeMode = axis.getRangeMode();
         this.converter = axis.getConverter();
 
@@ -244,6 +281,9 @@ public class Axis
             return false;
         }
         if (this.includeZero != other.includeZero) {
+            return false;
+        }
+        if ((this.includeDataRange == null) ? (other.includeDataRange != null) : !this.includeDataRange.equals(other.includeDataRange)) {
             return false;
         }
         if ((this.rangeMode == null) ? (other.rangeMode != null) : !this.rangeMode.equals(other.rangeMode)) {
