@@ -652,35 +652,67 @@ public final class FitsImageUtils {
         return value;
     }
 
-    /** Create a gaussian image.
+    /** compute nbPixels from fov and inc parameters, based on (fov = inc * nbPixels).
+     * also adjust the inc, so it fits better in the equation.
+     * @param fov field of view (mas) (must be > 0).
+     * @param inc increments (mas) (must be > 0). will be adjusted to fit best into (fov = inc * edge).
+     * @return ImageSize containing fov, adjusted inc, and nbPixels
+     */
+    public static ImageSize foreseeCreateImage(final double fov, final double inc) {
+
+        final int nbPixelsRaw = (int) Math.ceil(fov / inc);
+        final int nbPixelsEven = (nbPixelsRaw % 2 == 0) ? nbPixelsRaw : nbPixelsRaw + 1;
+        final int nbPixels = checkBounds(nbPixelsEven, 2, MAX_IMAGE_SIZE);
+
+        // adjust inc to keep closer to (edge = fov / inc)
+        final double incAdjusted = (fov / (double) nbPixels);
+
+        ImageSize imageSize = new ImageSize();
+        imageSize.fov = fov;
+        imageSize.inc = incAdjusted;
+        imageSize.nbPixels = nbPixels;
+
+        return imageSize;
+    }
+
+    /** Create a gaussian FitsImage.
      * Computes also the edge (in number of pixels) of the image, based on (fov = inc * edge).
      * @param fov field of view (mas) (must be > 0).
-     * @param incRaw increment (mas) (must be > 0). will be adjusted to fit best into (fov = inc * edge).
+     * @param inc increment (mas) (must be > 0). will be adjusted to fit best into (fov = inc * edge).
      * @param fwhm full width half maximum (mas) (must be > 0).
      * @return a gaussian image, with edge size non-zero and even.
      */
-    public static FitsImage createGaussian(final double fov, final double incRaw, final double fwhm) {
+    public static FitsImage createImage(final double fov, final double inc, final double fwhm) {
 
-        final int edgeRaw = ((int) Math.ceil(fov / incRaw));
-        final int edgeEven = (edgeRaw % 2 == 0) ? edgeRaw : edgeRaw + 1;
-        final int edge = Math.min(MAX_IMAGE_SIZE, Math.max(2, edgeEven));
+        // this computes nbPixels, and adjust inc. it keeps the same fov.
+        ImageSize imgSize = foreseeCreateImage(fov, inc);
 
-        // adjust inc to keep closer to (edge = fov / inc)
-        final double inc = (fov / (double) edge);
+        final float data[][] = createGaussianData(imgSize.nbPixels, imgSize.inc, fwhm);
 
-        final float data[][] = new float[edge][edge];
+        final double pixRef = (imgSize.nbPixels / 2d) + 1d;
 
-        // fill gaussian with the help of edge and inc and fwhm
-        for (float[] row : data) {
-            Arrays.fill(row, 42f);
-        }
-
-        final double pixRef = (edge / 2d) + 1d;
-
-        final double incRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(inc, FitsUnit.ANGLE_RAD);
+        final double incRad = FitsUnit.ANGLE_MILLI_ARCSEC.convert(imgSize.inc, FitsUnit.ANGLE_RAD);
 
         final FitsImage fitsImage = createFitsImage(data, pixRef, pixRef, incRad, incRad);
 
         return fitsImage;
+    }
+
+    /** Creates a float 2D array containing a gaussian.
+     * @param nbPixels length in rows and cols of the 2D arrays
+     * @param inc increment (mas)
+     * @param fwhm full width half maximum (mas)
+     * @return a 2D float array containing the gaussian.
+     */
+    private static float[][] createGaussianData(final int nbPixels, final double inc, final double fwhm) {
+
+        final float data[][] = new float[nbPixels][nbPixels];
+
+        // TODO
+        for (float[] row : data) {
+            Arrays.fill(row, 42f);
+        }
+
+        return data;
     }
 }
