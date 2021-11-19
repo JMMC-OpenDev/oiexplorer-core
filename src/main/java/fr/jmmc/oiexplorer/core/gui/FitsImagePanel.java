@@ -33,11 +33,19 @@ import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.oiexplorer.core.util.FitsImageUtils;
 import fr.jmmc.oiexplorer.core.util.FitsImageUtils.ImageSize;
 import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.checkBounds;
+import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.createGaussianData;
+import static fr.jmmc.oiexplorer.core.util.FitsImageUtils.foreseeCreateImage;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
+import fr.jmmc.oitools.image.FitsImageHDUFactory;
+import fr.jmmc.oitools.image.FitsImageLoader;
 import fr.jmmc.oitools.image.FitsUnit;
+import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.processing.Resampler.Filter;
 import fr.nom.tam.fits.FitsException;
+import fr.nom.tam.fits.Header;
+import fr.nom.tam.fits.ImageData;
+import fr.nom.tam.fits.ImageHDU;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -48,6 +56,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Observable;
@@ -1153,24 +1162,22 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
             if ((fov > 0) && (inc > 0) && (fwhm > 0)) {
 
-                final FitsImageHDU newHdu = new FitsImageHDU();
-                
                 final String hduNameRaw = jFormattedTextFieldCreateImageHduName.getText();
                 final String hduName = hduNameRaw.substring(0, Math.min(68, hduNameRaw.length()));
-                newHdu.setHduName(hduName);
 
-                final FitsImage gaussianFitsImage = FitsImageUtils.createImage(fov, inc, fwhm);
-                newHdu.getFitsImages().add(gaussianFitsImage);
-                gaussianFitsImage.setFitsImageHDU(newHdu);
+                ImageSize imgSize = foreseeCreateImage(fov, inc);
+                final float data[][] = createGaussianData(imgSize.nbPixels, imgSize.inc, fwhm);
+                final ImageData imageData = new ImageData(data);
 
                 try {
-                    // update checksum:
-                    newHdu.updateChecksum();
-                } catch (FitsException fe) {
-                    logger.info("unable to update checksum on {}", newHdu, fe);
+                    final Header header = ImageHDU.manufactureHeader(imageData);
+                    final ImageHDU imageHDU = new ImageHDU(header, imageData);
+                    final FitsImageHDU fitsImageHDU = FitsImageLoader.processHDUnit(new OIFitsChecker(), hduName,
+                            imageHDU, false, 0, FitsImageHDUFactory.DEFAULT_FACTORY);
+                    return fitsImageHDU;
+                } catch (FitsException | IOException e) {
+                    return null;
                 }
-
-                return newHdu;
             }
         }
         

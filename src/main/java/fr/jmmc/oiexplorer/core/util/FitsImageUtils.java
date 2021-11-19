@@ -704,7 +704,7 @@ public final class FitsImageUtils {
      * @param fwhm full width half maximum (mas)
      * @return a 2D float array containing the gaussian.
      */
-    private static float[][] createGaussianData(final int nbPixels, final double inc, final double fwhm) {
+    public static float[][] createGaussianData(final int nbPixels, final double inc, final double fwhm) {
 
         final float data[][] = new float[nbPixels][nbPixels];
 
