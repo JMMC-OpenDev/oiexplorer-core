@@ -200,7 +200,10 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
                 // Add IMAGE-OI table if any
                 if (oiFitsFile.getExistingImageOiData() != null) {
                     hduRefs.add(getHduRef(0, oiFitsFile.getExistingImageOiData().getInputParam()));
-                    hduRefs.add(getHduRef(1, oiFitsFile.getExistingImageOiData().getExistingOutputParam()));
+
+                    if (oiFitsFile.getExistingImageOiData().getExistingOutputParam() != null) {
+                        hduRefs.add(getHduRef(1, oiFitsFile.getExistingImageOiData().getExistingOutputParam()));
+                    }
                 }
 
             } else {
