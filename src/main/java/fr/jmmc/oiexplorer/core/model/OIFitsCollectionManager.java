@@ -543,9 +543,13 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 // Add new OIDataFile in collection
                 final OIDataFile dataFile = new OIDataFile();
 
-                final String id = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getFileName());
+                String id = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getFileName());
 
-                // TODO: make it unique !!
+                // TODO: make it unique in a better way (this one can aggregate "_bis" suffixes)
+                while (Identifiable.hasIdentifiable(id, getOIDataFileList())) {
+                    id += "_bis";
+                }
+
                 dataFile.setId(id);
 
                 dataFile.setName(oiFitsFile.getFileName());
