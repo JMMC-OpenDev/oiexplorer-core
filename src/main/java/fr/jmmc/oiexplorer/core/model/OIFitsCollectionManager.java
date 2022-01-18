@@ -545,9 +545,22 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
                 String id = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getFileName());
 
-                // TODO: make it unique in a better way (this one can aggregate "_bis" suffixes)
+                // make it unique with a _bisN suffix
                 while (Identifiable.hasIdentifiable(id, getOIDataFileList())) {
-                    id += "_bis";
+                    int index = id.lastIndexOf("_bis");
+                    if (index == -1) {
+                        id += "_bis1";
+                    } else {
+                        String strNumber = id.substring(index + 4);
+                        try {
+                            int number = Integer.decode(strNumber);
+                            number++;
+                            id = id.substring(0, index);
+                            id += "_bis" + number;
+                        } catch (NumberFormatException e) {
+                            id += "_bis1";
+                        }
+                    }
                 }
 
                 dataFile.setId(id);
