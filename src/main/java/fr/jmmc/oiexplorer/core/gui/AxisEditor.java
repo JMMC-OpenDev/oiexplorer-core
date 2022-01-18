@@ -125,7 +125,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable {
     @Override
     public void dispose() {
         if (logger.isDebugEnabled()) {
-            logger.debug("AxisEditor[{}]: dispose", axisToEdit.getName());
+            logger.debug("AxisEditor[{}]: dispose", axisToEdit == null ? null : axisToEdit.getName());
         }
         reset();
     }
