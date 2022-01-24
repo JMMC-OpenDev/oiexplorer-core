@@ -500,8 +500,10 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Reset the OIFits file collection and start firing events
      */
     public void start() {
-        enableEvents = true;
-        reset();
+        if (!enableEvents) {
+            enableEvents = true;
+            reset();
+        }
     }
 
     /**
@@ -598,13 +600,15 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
             for (final Iterator<OIDataFile> it = getOIDataFileList().iterator(); it.hasNext();) {
                 final OIDataFile dataFile = it.next();
                 if (filePath.equals(dataFile.getFile())) {
+                    // reset oiFitsFile reference:
+                    dataFile.setOIFitsFile(null);
+
                     it.remove();
                 }
             }
 
             fireOIFitsCollectionChanged();
         }
-
         return previous;
     }
 
