@@ -547,28 +547,27 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
                 String id = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getFileName());
 
-                // make it unique with a _bisN suffix
+                // make the id unique with a _bisN suffix
+                final String idSuffix = "_bis";
+
                 while (Identifiable.hasIdentifiable(id, getOIDataFileList())) {
-                    int index = id.lastIndexOf("_bis");
-                    if (index == -1) {
-                        id += "_bis1";
-                    } else {
-                        String strNumber = id.substring(index + 4);
+                    int index = id.lastIndexOf(idSuffix);
+                    int number = 1;
+                    if (index != -1) {
+                        String strNumber = id.substring(index + idSuffix.length());
+                        id = id.substring(0, index);
                         try {
-                            int number = Integer.decode(strNumber);
+                            number = Integer.parseInt(strNumber);
                             number++;
-                            id = id.substring(0, index);
-                            id += "_bis" + number;
-                        } catch (NumberFormatException e) {
-                            id += "_bis1";
+                        } catch (NumberFormatException nfe) {
+                            logger.debug("Unable to parse '{}'", strNumber);
                         }
                     }
+                    id += idSuffix + number;
                 }
 
                 dataFile.setId(id);
-
                 dataFile.setName(oiFitsFile.getFileName());
-
                 dataFile.setFile(oiFitsFile.getAbsoluteFilePath());
                 // checksum !
 
