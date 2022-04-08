@@ -1149,6 +1149,20 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
      * @return the FitsImageHDU containing the gaussian image.
      */
     public FitsImageHDU createFitsImage() {
+        return createFitsImage(50.0, 1.0, 10);
+    }
+
+    /** Display a form to create a gaussian image.
+     * @param initFovValue initial value for the FOV field
+     * @param initIncValue initial value for the INC field
+     * @param initFWMHValue initial value for the FWMH field
+     * @return the FitsImageHDU containing the gaussian image.
+     */
+    public FitsImageHDU createFitsImage(double initFovValue, double initIncValue, double initFWMHValue) {
+
+        jFormattedTextFieldCreateImageFOV.setValue((initFovValue));
+        jFormattedTextFieldCreateImageInc.setValue((initIncValue));
+        jFormattedTextFieldCreateImageFWHM.setValue(initFWMHValue);
 
         // Display the dialog with the form, and returns true if users confirms the form (async):
         if (MessagePane.showDialogPanel("Create image", jPanelCreateImage)) {
