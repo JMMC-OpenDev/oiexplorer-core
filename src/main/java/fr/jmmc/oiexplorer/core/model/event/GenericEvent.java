@@ -5,6 +5,7 @@ package fr.jmmc.oiexplorer.core.model.event;
 
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.ToStringable;
+import java.util.Set;
 
 /**
  * Base class for OIFits collection events consumed by OIFitsCollectionListener
@@ -19,6 +20,8 @@ public abstract class GenericEvent<V, O> implements ToStringable {
     private final V type;
     /** subject id i.e. related object id (null allowed) */
     private final String subjectId;
+    /** event's unique sources */
+    private Set<Object> sources = null;
     /** subject value (resolved before firing event) */
     private O subjectValue = null;
 
@@ -64,6 +67,22 @@ public abstract class GenericEvent<V, O> implements ToStringable {
      */
     protected void setSubjectValue(final O value) {
         this.subjectValue = value;
+    }
+
+    /**
+     * Return event's unique sources
+     * @return event's unique sources
+     */
+    public Set<Object> getSources() {
+        return sources;
+    }
+
+    /**
+     * Define event's unique sources
+     * @param sources event's unique sources
+     */
+    public void setSources(final Set<Object> sources) {
+        this.sources = sources;
     }
 
     /**
@@ -135,6 +154,10 @@ public abstract class GenericEvent<V, O> implements ToStringable {
             if (this.subjectValue != null) {
                 sb.append(", subjectValue=");
                 ObjectUtils.toString(sb, full, this.subjectValue);
+            }
+            if (this.sources != null) {
+                sb.append(", sources=");
+                ObjectUtils.toString(sb, full, this.sources);
             }
         }
         sb.append('}');

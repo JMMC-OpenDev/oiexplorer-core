@@ -122,7 +122,8 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
         for (OIFitsCollectionManagerEventType eventType : OIFitsCollectionManagerEventType.values()) {
             // false argument means allow self notification:
-            final boolean skipSourceListener = (eventType != OIFitsCollectionManagerEventType.COLLECTION_CHANGED);
+            final boolean skipSourceListener = (eventType != OIFitsCollectionManagerEventType.COLLECTION_CHANGED)
+                    && (eventType != OIFitsCollectionManagerEventType.SUBSET_CHANGED);
 
             eventNotifier = new EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object>(eventType.name(), priority, skipSourceListener);
 

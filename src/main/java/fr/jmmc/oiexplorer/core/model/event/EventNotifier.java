@@ -255,6 +255,9 @@ public final class EventNotifier<K extends GenericEvent<V, O>, V, O> implements 
 
         // event source(s):
         final Set<Object> sources = context.getSources();
+        
+        // Define event's sources:
+        event.setSources(sources);
 
         // optional event destination(s):
         final Set<GenericEventListener<? extends GenericEvent<V, O>, V, O>> destinations = context.getDestinations();
@@ -344,6 +347,9 @@ public final class EventNotifier<K extends GenericEvent<V, O>, V, O> implements 
             }
 
         } while (!done);
+
+        // Reset event's sources:
+        event.setSources(null);
 
         if (logger.isDebugEnabled()) {
             logger.debug("fireEvent: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
