@@ -283,7 +283,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
                     AxisInfo axisInfo = plotInfos[0].xAxisInfo;
 
                     // check axis name to be sure
-                    if (axisInfo.getColumnMeta().getName().equals(xAxisEditor.getAxis().getName())) {
+                    if (axisInfo.columnMeta.getName().equals(xAxisEditor.getAxis().getName())) {
                         changed |= xAxisEditor.setAxisRange(axisInfo.plotRange.getLowerBound(), axisInfo.plotRange.getUpperBound());
                     }
 
@@ -295,7 +295,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
                         final AxisEditor editor = yAxisEditorArray[idxEditor];
                         axisInfo = plotInfos[idxPlot].yAxisInfo;
 
-                        if (axisInfo.getColumnMeta().getName().equals(editor.getAxis().getName())) {
+                        if (axisInfo.columnMeta.getName().equals(editor.getAxis().getName())) {
                             changed |= editor.setAxisRange(axisInfo.plotRange.getLowerBound(), axisInfo.plotRange.getUpperBound());
 
                             if (++idxPlot == plotInfos.length) {

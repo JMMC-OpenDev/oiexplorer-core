@@ -24,6 +24,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.ColorModelPaintScale;
 import fr.jmmc.oiexplorer.core.gui.chart.CombinedCrosshairOverlay;
 import fr.jmmc.oiexplorer.core.gui.chart.EnhancedChartMouseListener;
 import fr.jmmc.oiexplorer.core.gui.chart.EnhancedCombinedDomainXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.FastCrosshairLabelGenerator;
 import fr.jmmc.oiexplorer.core.gui.chart.FastXYErrorRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.SelectionOverlay;
 import fr.jmmc.oiexplorer.core.gui.chart.dataset.FastIntervalXYDataset;
@@ -651,6 +652,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private static Crosshair createCrosshair() {
         final Crosshair crosshair = new Crosshair(Double.NaN);
         // crosshair.setPaint(Color.BLUE);
+        crosshair.setLabelGenerator(FastCrosshairLabelGenerator.INSTANCE);
         crosshair.setLabelVisible(true);
         crosshair.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
         crosshair.setLabelBackgroundPaint(COLOR_LABEL_BCKG);
@@ -1682,10 +1684,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         logger.debug("updateChart: plot {} usedStaNamesMap: {} OUT", this.plotId, usedStaNamesMap);
 
         boolean useWaveLengths = false;
-        AxisInfo xCombinedAxisInfo = null;
         boolean xUseLog = false;
         ColumnMeta xMeta = null;
         String xUnit = null;
+        AxisInfo xCombinedAxisInfo = null;
 
         for (PlotInfo info : getPlotInfos()) {
             if (xCombinedAxisInfo == null) {
@@ -1699,6 +1701,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 xCombinedAxisInfo.combineRanges(info.xAxisInfo);
             }
             useWaveLengths |= info.useWaveLengths;
+        }
+
+        if (xCombinedAxisInfo == null) {
+            return;
         }
 
         // adjust combined bounds & view range:
@@ -1870,10 +1876,13 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private static void adjustAxisRanges(final Axis axis, final AxisInfo axisInfo) {
 
         final boolean modeAuto = (axis.getRangeModeOrDefault() == AxisRangeMode.AUTO);
-        final boolean modeRange = (axis.getRangeModeOrDefault() == AxisRangeMode.RANGE);
+        final boolean modeRange = (axis.getRangeModeOrDefault() == AxisRangeMode.RANGE) && (axis.getRange() != null);
 
         final boolean includeDataRange = axis.isIncludeDataRangeOrDefault();
 
+        final boolean useLog = axisInfo.useLog;
+
+        // if log: data ranges are > 0.0
         // bounds = data+err range:
         double bmin = axisInfo.dataErrRange.getLowerBound();
         double bmax = axisInfo.dataErrRange.getUpperBound();
@@ -1883,154 +1892,170 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         double vmax = axisInfo.dataRange.getUpperBound();
 
         if (logger.isDebugEnabled()) {
+            logger.debug("useLog: {}", useLog);
             logger.debug("axis dataErrRange: {} - {}", bmin, bmax);
             logger.debug("axis dataRange:    {} - {}", vmin, vmax);
         }
 
-        if (axisInfo.useLog) {
-            // bounds:
-            double minTen = Math.floor(Math.log10(bmin));
-            double maxTen = Math.ceil(Math.log10(bmax));
+        final ColumnMeta colMeta = axisInfo.columnMeta;
 
-            if (maxTen == minTen) {
-                minTen -= 1;
-            }
+        boolean fix_bmin = false;
+        boolean fix_bmax = false;
 
-            bmin = (0.999 * Math.pow(10.0, minTen)); // lower power of ten
-            bmax = (1.001 * Math.pow(10.0, maxTen)); // upper power of ten
+        boolean fix_vmin = false;
+        boolean fix_vmax = false;
 
-            // view range:
-            minTen = Math.floor(Math.log10(vmin) * 2.0);
-            maxTen = Math.ceil(Math.log10(vmax) * 2.0);
+        // use column meta's default range:
+        if (includeDataRange && (colMeta != null) && (colMeta.getDataRange() != null)) {
+            final DataRange dataRange = colMeta.getDataRange();
 
-            if (maxTen == minTen) {
-                minTen -= 1;
-            }
-
-            vmin = (0.999 * Math.pow(10.0, 0.5 * minTen)); // lower power of ten
-            vmax = (1.001 * Math.pow(10.0, 0.5 * maxTen)); // upper power of ten
-
-        } else {
-            boolean fix_bmin = false;
-            boolean fix_bmax = false;
-
-            boolean fix_vmin = false;
-            boolean fix_vmax = false;
-
-            final ColumnMeta colMeta = axisInfo.columnMeta;
-
-            // use column meta's default range:
-            if (includeDataRange && (colMeta != null) && (colMeta.getDataRange() != null)) {
-                final DataRange dataRange = colMeta.getDataRange();
-
-                if (!Double.isNaN(dataRange.getMin())) {
-                    final double v = dataRange.getMin();
-                    if (v < bmin) {
-                        fix_bmin = true;
-                        bmin = v;
-                    }
-                    if (!modeAuto || (v < vmin)) {
-                        fix_vmin = true;
-                        vmin = v;
-                    }
-                }
-
-                if (!Double.isNaN(dataRange.getMax())) {
-                    final double v = dataRange.getMax();
-                    if (v > bmax) {
-                        fix_bmax = true;
-                        bmax = v;
-                    }
-                    if (!modeAuto || (v > vmax)) {
-                        fix_vmax = true;
-                        vmax = v;
-                    }
-                }
-            }
-
-            // use include zero flag:
-            if (axis.isIncludeZero()) {
-                if (bmin > 0.0) {
+            if (isBoundValid(useLog, dataRange.getMin())) {
+                final double v = dataRange.getMin();
+                if (v < bmin) {
                     fix_bmin = true;
-                    bmin = 0.0;
+                    bmin = v;
                 }
-                if (vmin > 0.0) {
+                if (!modeAuto || (v < vmin)) {
                     fix_vmin = true;
-                    vmin = 0.0;
-                }
-                if (bmax < 0.0) {
-                    fix_bmax = true;
-                    vmax = bmax = 0.0;
-                }
-                if (vmax < 0.0) {
-                    fix_vmax = true;
-                    vmax = 0.0;
+                    vmin = v;
                 }
             }
-
-            // handle fixed axis range:
-            if (modeRange && (axis.getRange() != null)) {
-                if (!Double.isNaN(axis.getRange().getMin())) {
-                    fix_vmin = true;
-                    vmin = axis.getRange().getMin();
+            if (isBoundValid(useLog, dataRange.getMax())) {
+                final double v = dataRange.getMax();
+                if (v > bmax) {
+                    fix_bmax = true;
+                    bmax = v;
                 }
-                if (!Double.isNaN(axis.getRange().getMax())) {
+                if (!modeAuto || (v > vmax)) {
                     fix_vmax = true;
-                    vmax = axis.getRange().getMax();
+                    vmax = v;
                 }
+            }
+        }
+
+        // use includeZero flag:
+        if (!useLog && axis.isIncludeZero()) {
+            if (bmin > 0.0) {
+                fix_bmin = true;
+                bmin = 0.0;
+            }
+            if (vmin > 0.0) {
+                fix_vmin = true;
+                vmin = 0.0;
+            }
+            if (bmax < 0.0) {
+                fix_bmax = true;
+                bmax = 0.0;
+            }
+            if (vmax < 0.0) {
+                fix_vmax = true;
+                vmax = 0.0;
+            }
+        }
+
+        // handle fixed axis range:
+        if (modeRange) {
+            if (isBoundValid(useLog, axis.getRange().getMin())) {
+                fix_vmin = true;
+                vmin = axis.getRange().getMin();
+            }
+            if (isBoundValid(useLog, axis.getRange().getMax())) {
+                fix_vmax = true;
+                vmax = axis.getRange().getMax();
+            }
+        }
+
+        if (axisInfo.useLog) {
+            // adjust bounds:
+            double minTen = Math.floor(Math.log10(bmin) * 4.0);
+            double maxTen = Math.ceil(Math.log10(bmax) * 4.0);
+
+            if (maxTen == minTen) {
+                minTen -= 1;
+            }
+
+            bmin = 0.999 * Math.pow(10.0, 0.25 * minTen); // lower power of ten
+            bmax = 1.001 * Math.pow(10.0, 0.25 * maxTen); // upper power of ten
+
+            // adjust view range:
+            if (!fix_vmin || !fix_vmax) {
+                minTen = Math.floor(Math.log10(vmin) * 4.0);
+                maxTen = Math.ceil(Math.log10(vmax) * 4.0);
+
+                if (maxTen == minTen) {
+                    minTen -= 1;
+                }
+
+                vmin = (((fix_vmin) ? 1.0 : 0.999) * Math.pow(10.0, 0.25 * minTen)); // lower power of ten
+                vmax = (((fix_vmax) ? 1.0 : 1.001) * Math.pow(10.0, 0.25 * maxTen)); // upper power of ten
+            }
+        } else {
+            // adjust bounds:
+            double margin;
+            if (!fix_bmin || !fix_bmax) {
+                margin = (bmax - bmin) * MARGIN_PERCENTS;
+                if (margin > 0.0) {
+                    if (!fix_bmin) {
+                        bmin -= margin;
+                    }
+                    if (!fix_bmax) {
+                        bmax += margin;
+                    }
+                } else {
+                    margin = Math.abs(bmin) * MARGIN_PERCENTS;
+                    if (margin > 0.0) {
+                        if (!fix_bmin) {
+                            bmin -= margin;
+                        }
+                        if (!fix_bmax) {
+                            bmax += margin;
+                        }
+                    }
+                }
+            }
+            if (bmax <= bmin) {
+                bmax = bmin + 1.0;
             }
 
             // ensure vmin < vmax:
             if (vmin > vmax) {
                 // fix range boundaries: data is out of range
                 if (fix_vmin) {
-                    vmax = vmin + 1d;
-                }
-                if (fix_vmax) {
-                    vmin = vmax - 1d;
+                    vmax = vmin + 1.0;
+                } else if (fix_vmax) {
+                    vmin = vmax - 1.0;
                 }
             }
 
-            // adjust bounds margins:
-            double margin = (bmax - bmin) * MARGIN_PERCENTS;
-            if (margin > 0.0) {
-                if (!fix_bmin) {
-                    bmin -= margin;
+            // adjust view range:
+            if (!fix_vmin || !fix_vmax) {
+                margin = (vmax - vmin) * MARGIN_PERCENTS;
+                if (margin > 0.0) {
+                    if (!fix_vmin) {
+                        vmin -= margin;
+                    }
+                    if (!fix_vmax) {
+                        vmax += margin;
+                    }
+                } else {
+                    margin = Math.abs(vmin) * MARGIN_PERCENTS;
+                    if (margin > 0.0) {
+                        if (!fix_vmin) {
+                            vmin -= margin;
+                        }
+                        if (!fix_vmax) {
+                            vmax += margin;
+                        }
+                    }
                 }
-                if (!fix_bmax) {
-                    bmax += margin;
-                }
-            } else {
-                margin = Math.abs(bmin) * MARGIN_PERCENTS;
-                bmin -= margin;
-                bmax += margin;
-            }
-            if (bmax <= bmin) {
-                bmax = bmin + 1d;
-            }
-
-            // adjust view margins:
-            margin = (vmax - vmin) * MARGIN_PERCENTS;
-            if (margin > 0.0) {
-                if (!fix_vmin) {
-                    vmin -= margin;
-                }
-                if (!fix_vmax) {
-                    vmax += margin;
-                }
-            } else {
-                margin = Math.abs(vmin) * MARGIN_PERCENTS;
-                vmin -= margin;
-                vmax += margin;
             }
             if (vmax <= vmin) {
-                vmax = vmin + 1d;
+                vmax = vmin + 1.0;
             }
-
-            // ensure bounds > view range:
-            bmin = Math.min(bmin, vmin);
-            bmax = Math.max(bmax, vmax);
-        } // not log
+        }
+        // ensure bounds > view range:
+        bmin = Math.min(bmin, vmin);
+        bmax = Math.max(bmax, vmax);
 
         if (logger.isDebugEnabled()) {
             logger.debug("fixed view bounds: {} - {}", bmin, bmax);
@@ -2038,10 +2063,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         }
 
         // update view bounds & range:
-        final Range viewBounds = new Range(bmin, bmax);
-        final Range viewRange = new Range(vmin, vmax);
-        axisInfo.viewBounds = viewBounds;
-        axisInfo.viewRange = viewRange;
+        axisInfo.viewBounds = new Range(bmin, bmax);
+        axisInfo.viewRange = new Range(vmin, vmax);
     }
 
     private static void resetXYPlot(final XYPlot plot) {
@@ -3219,5 +3242,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
     private static Range convert(final fr.jmmc.oitools.model.range.Range r) {
         return new Range(r.getMin(), r.getMax());
+    }
+
+    private static boolean isBoundValid(final boolean useLog, final double value) {
+        return (useLog) ? (value > 0.0) : !Double.isNaN(value);
     }
 }

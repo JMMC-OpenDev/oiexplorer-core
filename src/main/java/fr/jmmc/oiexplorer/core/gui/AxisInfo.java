@@ -6,16 +6,12 @@ package fr.jmmc.oiexplorer.core.gui;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oitools.meta.ColumnMeta;
 import org.jfree.data.Range;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author bourgesl
  */
 public final class AxisInfo {
-    /** Logger */
-    private static final Logger logger = LoggerFactory.getLogger(AxisInfo.class.getName());
 
     /** colum meta data */
     ColumnMeta columnMeta = null;
@@ -56,42 +52,6 @@ public final class AxisInfo {
         this.dataErrRange = Range.combine(dataErrRange, src.dataErrRange);
     }
 
-    public ColumnMeta getColumnMeta() {
-        return columnMeta;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public boolean isUseLog() {
-        return useLog;
-    }
-
-    public Range getDataRange() {
-        return dataRange;
-    }
-
-    public Range getDataErrRange() {
-        return dataErrRange;
-    }
-
-    public boolean isHasDataError() {
-        return hasDataError;
-    }
-
-    public Range getViewBounds() {
-        return viewBounds;
-    }
-
-    public Range getViewRange() {
-        return viewRange;
-    }
-
-    public Range getPlotRange() {
-        return plotRange;
-    }
-    
     public boolean isCompatible(final AxisInfo other) {
         return columnMeta.getName().equals(other.columnMeta.getName())
                 && useLog == other.useLog

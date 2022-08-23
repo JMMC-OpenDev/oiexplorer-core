@@ -324,6 +324,9 @@ public final class GenericFilterEditor extends javax.swing.JPanel
             for (RangeEditor rangeEditor : rangeEditors) {
                 rangeEditor.setEnabled(enabled);
             }
+            
+            checkBoxListValues.setEnabled(enabled);
+            
             fireStateChanged();
         }
     }
