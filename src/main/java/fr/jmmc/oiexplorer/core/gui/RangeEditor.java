@@ -6,13 +6,13 @@ package fr.jmmc.oiexplorer.core.gui;
 import fr.jmmc.jmal.AbsorptionLineRange;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
+import fr.jmmc.jmcs.gui.util.FormatterFactoryUtils;
 import fr.jmmc.jmcs.service.RecentValuesManager;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.model.plot.Range;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.NumberFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,12 +172,10 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     }
 
     private boolean setFieldValue(final JFormattedTextField field, final double value) {
-        final Object newValue = value;
-        final Object prev = field.getValue();
-        if (ObjectUtils.areEquals(prev, newValue)) {
+        if (ObjectUtils.areEquals(field.getValue(), value)) {
             return false;
         }
-        field.setValue(newValue);
+        field.setValue(value);
         return true;
     }
 
@@ -324,17 +321,14 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     }
 
     /**
-     * (Dis)ables the RangeEditor fields and panel
+     * Enable or disable the RangeEditor fields
      *
      * @param enabled true to enable
      */
     @Override
     public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        if (false) {
-            this.jFieldMin.setEnabled(enabled);
-            this.jFieldMax.setEnabled(enabled);
-        }
+        this.jFieldMin.setEnabled(enabled);
+        this.jFieldMax.setEnabled(enabled);
         this.rangeListComboBox.setEnabled(enabled);
     }
 
@@ -357,14 +351,14 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jFieldMin = new JFormattedTextField(getNumberFieldFormatter());
-        jFieldMax = new JFormattedTextField(getNumberFieldFormatter());
+        jFieldMin = new javax.swing.JFormattedTextField();
+        jFieldMax = new javax.swing.JFormattedTextField();
         rangeListComboBox = new javax.swing.JComboBox();
 
         setLayout(new java.awt.GridBagLayout());
 
         jFieldMin.setColumns(2);
-        jFieldMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(getNumberFieldFormatter()));
+        jFieldMin.setFormatterFactory(FormatterFactoryUtils.getDecimalFormatterFactory());
         jFieldMin.setMinimumSize(new java.awt.Dimension(30, 27));
         jFieldMin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -380,7 +374,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
         add(jFieldMin, gridBagConstraints);
 
         jFieldMax.setColumns(2);
-        jFieldMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(getNumberFieldFormatter()));
+        jFieldMax.setFormatterFactory(FormatterFactoryUtils.getDecimalFormatterFactory());
         jFieldMax.setMinimumSize(new java.awt.Dimension(30, 27));
         jFieldMax.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -447,7 +441,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     }//GEN-LAST:event_actionPerformed
 
     private void rangeListComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rangeListComboBoxActionPerformed
-        RangeEditor.this.actionPerformed(evt);
+        this.actionPerformed(evt);
     }//GEN-LAST:event_rangeListComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -455,31 +449,6 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     private javax.swing.JFormattedTextField jFieldMin;
     private javax.swing.JComboBox rangeListComboBox;
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * Return the custom double formatter that accepts null values
-     * @return number formatter
-     */
-    private static NumberFormatter getNumberFieldFormatter() {
-        final NumberFormatter nf = new NumberFormatter(new DecimalFormat("###0.####")) {
-            /** default serial UID for Serializable interface */
-            private static final long serialVersionUID = 1;
-
-            /**
-             * Hack to allow empty string
-             */
-            @Override
-            public Object stringToValue(final String text) throws ParseException {
-                if (text == null || text.length() == 0) {
-                    return null;
-                }
-                return super.stringToValue(text);
-            }
-        };
-        nf.setValueClass(Double.class);
-        nf.setCommitsOnValidEdit(false);
-        return nf;
-    }
 
     private static boolean isFinite(final double value) {
         return !(Double.isNaN(value) && !Double.isInfinite(value));
