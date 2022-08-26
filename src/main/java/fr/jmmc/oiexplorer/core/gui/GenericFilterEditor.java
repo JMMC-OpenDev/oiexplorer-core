@@ -6,6 +6,8 @@ package fr.jmmc.oiexplorer.core.gui;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
 import fr.jmmc.oiexplorer.core.function.Converter;
 import fr.jmmc.oiexplorer.core.function.ConverterFactory;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -65,10 +68,10 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     /* related GenericFilter */
     private transient GenericFilter genericFilter;
     /* associated Range editors */
-    private final transient List<RangeEditor> rangeEditors;
+    private final transient List<RangeEditor> rangeEditors = new ArrayList<>();
 
     /* for DataType.STRING list of checkboxes for accepted values */
-    private final transient List<String> checkBoxListValuesModel;
+    private final transient List<String> checkBoxListValuesModel = new ArrayList<>(16);
 
     /** converter associated to the column name of the generic filter. It allows us to make the range editor use a
      * different unit more user friendly. */
@@ -82,13 +85,23 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     /** Creates new form GenericFilterEditor */
     public GenericFilterEditor() {
         initComponents();
-        rangeEditors = new ArrayList<>();
+        postInit();
+    }
 
-        checkBoxListValuesModel = new ArrayList<>(16);
+    /**
+     * This method is useful to set the models and specific features of initialized swing components :
+     */
+    private void postInit() {
         checkBoxListValues.setModel(new GenericListModel<String>(checkBoxListValuesModel));
         checkBoxListValues.getCheckBoxListSelectionModel().addListSelectionListener(this);
 
         updatingGUI = false;
+
+        // use small variant:
+        SwingUtils.adjustSize(this.jButtonReset, ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     @Override
@@ -199,6 +212,9 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         button.putClientProperty(BUTTON_PROP_INDEX, rangeIndex);
         button.addActionListener(this);
 
+        // use small variant:
+        SwingUtils.adjustSize(button, ComponentSizeVariant.small);
+
         gridBagConstraints.gridx = 1;
         gridBagConstraints.fill = GridBagConstraints.NONE;
         gridBagConstraints.weightx = 0;
@@ -207,6 +223,8 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         // method `removeRange` relies on the fact that `button` is the component with index 1 in `panel`
 
         jPanelRanges.add(panel);
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(jPanelRanges);
     }
 
     /**
@@ -324,9 +342,9 @@ public final class GenericFilterEditor extends javax.swing.JPanel
             for (RangeEditor rangeEditor : rangeEditors) {
                 rangeEditor.setEnabled(enabled);
             }
-            
+
             checkBoxListValues.setEnabled(enabled);
-            
+
             fireStateChanged();
         }
     }

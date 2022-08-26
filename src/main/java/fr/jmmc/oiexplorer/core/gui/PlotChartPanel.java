@@ -8,6 +8,7 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmcs.gui.util.EDTDelayedEventHandler;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -79,6 +80,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartPanel;
@@ -615,6 +617,12 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         this.jLabelPoints.setFont(fixedFont);
         this.jLabelDataRange.setFont(fixedFont);
         this.jLabelDataErrRange.setFont(fixedFont);
+
+        // use small variant:
+        SwingUtils.adjustSize(this.jButtonHideCrossHair, ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     private void addXYPlot() {

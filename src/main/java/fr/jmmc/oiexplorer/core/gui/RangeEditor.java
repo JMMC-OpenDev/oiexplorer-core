@@ -7,6 +7,8 @@ import fr.jmmc.jmal.AbsorptionLineRange;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.util.FormatterFactoryUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
 import fr.jmmc.jmcs.service.RecentValuesManager;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
@@ -20,6 +22,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
@@ -58,7 +61,8 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
     /**
      * predefined ranges
      */
-    private final GenericListModel<String> rangeComboBoxModel;
+    private final GenericListModel<String> rangeComboBoxModel
+                                           = new GenericListModel<String>(new ArrayList<String>(10), true);
     private final Map<String, double[]> rangeList = new HashMap<>(16);
 
     /**
@@ -81,9 +85,15 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
      */
     public RangeEditor() {
         initComponents();
+        postInit();
+    }
 
+    /**
+     * This method is useful to set the models and specific features of initialized swing components :
+     */
+    private void postInit() {
         setAlias(null);
-        rangeComboBoxModel = new GenericListModel<String>(new ArrayList<String>(10), true);
+
         rangeListComboBox.setModel(rangeComboBoxModel);
 
         jFieldMin.addPropertyChangeListener("value", new java.beans.PropertyChangeListener() {
@@ -103,6 +113,12 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
                 }
             }
         });
+
+        // use small variant:
+        SwingUtils.adjustSize(this.rangeListComboBox, ComponentSizeVariant.small);
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
