@@ -42,14 +42,9 @@ public final class FitsTableViewerPanel extends javax.swing.JPanel {
 
     // colors for table cell rendering. we need to register the default colors.
     private static final Color COLOR_MASKED = Color.YELLOW;
-    private static final Color COLOR_SELECTED
-                               = (UIManager.getColor("Table.selectionBackground") == null)
-            ? new Color(173, 216, 230)
-            : UIManager.getColor("Table.selectionBackground");
-    private static final Color COLOR_NORMAL
-                               = (UIManager.getColor("Table.background") == null)
-            ? Color.WHITE
-            : UIManager.getColor("Table.background");
+
+    private static final Color COLOR_NORMAL = (UIManager.getColor("Table.background") != null)
+            ? UIManager.getColor("Table.background") : Color.WHITE;
 
     /* members */
     private final transient TableCellRenderer RDR_NUM_MASK_INSTANCE = new TableCellNumberMaskRenderer();
@@ -415,10 +410,9 @@ public final class FitsTableViewerPanel extends javax.swing.JPanel {
             if (bgColor == COLOR_MASKED) {
                 setBorder(_orangeBorder);
             }
-            if (isSelected) {
-                bgColor = COLOR_SELECTED;
+            if (!isSelected) {
+                setBackground(bgColor);
             }
-            setBackground(bgColor);
             return this;
         }
     }
