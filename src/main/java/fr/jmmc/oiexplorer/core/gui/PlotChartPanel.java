@@ -2602,7 +2602,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             isYErrValid = true;
                             useYErrInBounds = false;
 
-                            if (!NumberUtils.isFinite(yErr)) {
+                            if (!NumberUtils.isFinite(yErr) && !hasErrY) {
                                 yValues[idx] = y;
                                 yLowers[idx] = NaN;
                                 yUppers[idx] = NaN;
@@ -2656,7 +2656,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             isXErrValid = true;
                             useXErrInBounds = false;
 
-                            if (!NumberUtils.isFinite(xErr)) {
+                            if (!NumberUtils.isFinite(xErr) && !hasErrX) {
                                 xValues[idx] = x;
                                 xLowers[idx] = NaN;
                                 xUppers[idx] = NaN;
