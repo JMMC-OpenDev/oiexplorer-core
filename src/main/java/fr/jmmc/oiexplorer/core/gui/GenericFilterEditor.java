@@ -207,7 +207,6 @@ public final class GenericFilterEditor extends javax.swing.JPanel
 
         final JButton button = new JButton();
         button.setIcon(rangeIndex == 0 ? ResourceImage.LIST_ADD.icon() : ResourceImage.LIST_DEL.icon());
-        button.setMargin(new Insets(0, 0, 0, 0));
         button.setActionCommand(rangeIndex == 0 ? "add" : "del");
         button.putClientProperty(BUTTON_PROP_INDEX, rangeIndex);
         button.addActionListener(this);
