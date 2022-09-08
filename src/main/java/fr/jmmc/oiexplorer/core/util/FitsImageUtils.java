@@ -235,11 +235,11 @@ public final class FitsImageUtils {
                 final float threshold = 0f;
 
                 final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, threshold, 0f);
-                logger.info("ImageLowerThresholdJob - threshold = {} (ignore negative values)", threshold);
+                logger.debug("ImageLowerThresholdJob - threshold = {} (ignore negative values)", threshold);
 
                 thresholdJob.forkAndJoin();
 
-                logger.info("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
+                logger.debug("ImageLowerThresholdJob - updateCount: {}", thresholdJob.getUpdateCount());
 
                 // update boundaries excluding zero values:
                 FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
@@ -250,7 +250,7 @@ public final class FitsImageUtils {
                 final double normFactor = 1d / fitsImage.getSum();
 
                 final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
-                logger.info("ImageNormalizeJob - factor: {}", normFactor);
+                logger.debug("ImageNormalizeJob - factor: {}", normFactor);
 
                 normJob.forkAndJoin();
 
@@ -275,7 +275,7 @@ public final class FitsImageUtils {
                 nbRows = fitsImage.getNbRows();
                 nbCols = fitsImage.getNbCols();
 
-                logger.info("Square size = {} x {}", nbRows, nbCols);
+                logger.debug("Square size = {} x {}", nbRows, nbCols);
             }
         }
     }
@@ -326,8 +326,8 @@ public final class FitsImageUtils {
 
             minMaxJob.forkAndJoin();
 
-            if (logger.isInfoEnabled()) {
-                logger.info("ImageMinMaxJob min: {} - max: {} - nData: {} - sum: {}",
+            if (logger.isDebugEnabled()) {
+                logger.debug("ImageMinMaxJob min: {} - max: {} - nData: {} - sum: {}",
                         minMaxJob.getMin(), minMaxJob.getMax(), minMaxJob.getNData(), minMaxJob.getSum());
             }
 
