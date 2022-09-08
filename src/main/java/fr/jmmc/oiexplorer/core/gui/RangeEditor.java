@@ -10,7 +10,6 @@ import fr.jmmc.jmcs.gui.util.FormatterFactoryUtils;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
 import fr.jmmc.jmcs.service.RecentValuesManager;
-import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.model.plot.Range;
 import java.awt.event.ActionEvent;
@@ -172,7 +171,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
         }
     }
 
-    public boolean setRangeFieldValues(final Double min, final Double max) {
+    public boolean setRangeFieldValues(final double min, final double max) {
         logger.debug("setRangeFieldValues: [{} - {}]", min, max);
 
         boolean changed = false;
@@ -191,7 +190,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
         if (ObjectUtils.areEquals(field.getValue(), value)) {
             return false;
         }
-        field.setValue(value);
+        field.setValue(getDouble(value));
         return true;
     }
 
@@ -204,7 +203,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
 
     public void updateRangeList(final Map<String, double[]> predefinedRanges) {
         try {
-            this.notify = this.user_input = false;
+            notify = user_input = false;
 
             this.rangeComboBoxModel.clear();
             this.rangeList.clear();
@@ -222,7 +221,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
                 this.rangeList.putAll(predefinedRanges);
             }
         } finally {
-            this.notify = this.user_input = true;
+            notify = user_input = true;
         }
     }
 
@@ -241,12 +240,12 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
 
             if (isFinite(min) || isFinite(max)) {
                 try {
-                    user_input = false;
+                    notify = user_input = false;
 
-                    jFieldMin.setValue(Double.valueOf(min));
-                    jFieldMax.setValue(Double.valueOf(max));
+                    jFieldMin.setValue(getDouble(min));
+                    jFieldMax.setValue(getDouble(max));
                 } finally {
-                    user_input = true;
+                    notify = user_input = true;
                 }
             }
         }
@@ -258,8 +257,8 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
                 jFieldMin.setValue(null);
                 jFieldMax.setValue(null);
             } else {
-                jFieldMin.setValue(isFinite(range.getMin()) ? Double.valueOf(range.getMin()) : null);
-                jFieldMax.setValue(isFinite(range.getMax()) ? Double.valueOf(range.getMax()) : null);
+                jFieldMin.setValue(getDouble(range.getMin()));
+                jFieldMax.setValue(getDouble(range.getMax()));
             }
         }
 
@@ -276,21 +275,11 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
 
         if (value instanceof Double) {
             min = ((Double) value);
-        } else {
-            final Double tryMin = NumberUtils.parseDouble(jFieldMin.getText());
-            if (tryMin != null) {
-                min = tryMin;
-            }
         }
 
         value = this.jFieldMax.getValue();
         if (value instanceof Double) {
             max = ((Double) value);
-        } else {
-            final Double tryMax = NumberUtils.parseDouble(jFieldMax.getText());
-            if (tryMax != null) {
-                max = tryMax;
-            }
         }
 
         final boolean minFinite = isFinite(min);
@@ -299,7 +288,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
         Range range = null;
 
         if ((minFinite != maxFinite)
-                || (minFinite && maxFinite && (min < max))) {
+                || (minFinite && maxFinite && (!user_input || (min < max)))) {
             range = new Range();
             range.setMin(min);
             range.setMax(max);
@@ -322,7 +311,7 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
         try {
             return fmt.valueToString(value);
         } catch (ParseException pe) {
-            logger.info("parseField: value = {}", value, pe);
+            logger.debug("parseField: value = {}", value, pe);
         }
         return Double.toString(value);
     }
@@ -468,6 +457,10 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
 
     private static boolean isFinite(final double value) {
         return !(Double.isNaN(value) && !Double.isInfinite(value));
+    }
+
+    private static Double getDouble(final double value) {
+        return isFinite(value) ? Double.valueOf(value) : null;
     }
 
     private static final class FieldSetter implements ActionListener {
