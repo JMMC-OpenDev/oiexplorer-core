@@ -35,7 +35,7 @@ public final class SharedSeriesAttributes {
     private final String name;
     private final SharedSeriesAttributes parent;
     private final Set<String> labelNames = new HashSet<String>(64);
-    private final Set<WeightedLabel> labels = new HashSet<WeightedLabel>(64);
+    private final Set<SeriesLabel> labels = new HashSet<SeriesLabel>(64);
     private final Map<String, Integer> colorMap = new HashMap<String, Integer>(64);
     private int offsetIdx = 0;
     private int colIdx = 0;
@@ -64,32 +64,24 @@ public final class SharedSeriesAttributes {
     }
 
     public void addLabel(final String label) {
-        addLabel(label, null, 0.0);
-    }
-
-    public void addLabel(final String label, final double weight) {
-        addLabel(label, null, weight);
+        addLabel(label, null);
     }
 
     public void addLabel(final String label, final String alias) {
-        addLabel(label, alias, 0.0);
-    }
-
-    public void addLabel(final String label, final String alias, final double weight) {
         if (!hasLabel(label)) {
             labelNames.add(label);
             if (alias != null) {
                 labelNames.add(alias);
             }
-            labels.add(new WeightedLabel(label, alias, weight));
+            labels.add(new SeriesLabel(label, alias));
         }
     }
 
     public void define() {
         logger.debug("labels (raw):  {}", labels);
 
-        // Sort labels by names and / or weights:
-        final List<WeightedLabel> sortedLabels = new ArrayList<WeightedLabel>(labels);
+        // Sort labels by names:
+        final List<SeriesLabel> sortedLabels = new ArrayList<SeriesLabel>(labels);
         Collections.sort(sortedLabels);
 
         logger.debug("labels (sort): {}", sortedLabels);
@@ -98,7 +90,7 @@ public final class SharedSeriesAttributes {
         int c = colIdx;
 
         for (int n = 0, len = sortedLabels.size(); n < len; n++) {
-            final WeightedLabel l = sortedLabels.get(n);
+            final SeriesLabel l = sortedLabels.get(n);
             final Integer idx = NumberUtils.valueOf(c++);
 
             colorMap.put(l.label, idx);
@@ -133,7 +125,7 @@ public final class SharedSeriesAttributes {
             }
             logger.warn("Missing color for label: {}", label);
             // Use first color in the palette:
-            return 0; 
+            return 0;
         }
         return idx;
     }
@@ -164,24 +156,20 @@ public final class SharedSeriesAttributes {
                 + ", labels=" + labels + ", colorMap=" + colorMap + '}';
     }
 
-    private final static class WeightedLabel implements Comparable<WeightedLabel> {
+    protected final static class SeriesLabel implements Comparable<SeriesLabel> {
 
         /* members */
         final String label;
         final String alias;
-        final double weight;
 
-        WeightedLabel(final String label, final String alias, final double weight) {
+        protected SeriesLabel(final String label, final String alias) {
             this.label = label;
             this.alias = alias;
-            this.weight = weight;
         }
 
         @Override
-        public int compareTo(final WeightedLabel other) {
-            int cmp = Double.compare(weight, other.weight);
-
-            return (cmp == 0) ? StationNamesComparator.INSTANCE.compare(label, other.label) : cmp;
+        public int compareTo(final SeriesLabel other) {
+            return StationNamesComparator.INSTANCE.compare(label, other.label);
         }
 
         @Override
@@ -200,16 +188,13 @@ public final class SharedSeriesAttributes {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final WeightedLabel other = (WeightedLabel) obj;
-            if ((this.label == null) ? (other.label != null) : !this.label.equals(other.label)) {
-                return false;
-            }
-            return true;
+            final SeriesLabel other = (SeriesLabel) obj;
+            return !((this.label == null) ? (other.label != null) : !this.label.equals(other.label));
         }
 
         @Override
         public String toString() {
-            return "WeightedLabel{label=" + label + ", alias=" + alias + ", weight=" + weight + '}';
+            return "SeriesLabel{label=" + label + ", alias=" + alias + '}';
         }
 
     }

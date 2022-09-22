@@ -30,6 +30,7 @@ import fr.jmmc.oiexplorer.core.model.plot.Range;
  *         &lt;element name="acceptedValues" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="acceptedRanges" type="{http://www.jmmc.fr/oiexplorer-core-plot-definition/0.1}Range" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="enabled" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="not" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/extension&gt;
  *   &lt;/complexContent&gt;
@@ -44,7 +45,8 @@ import fr.jmmc.oiexplorer.core.model.plot.Range;
     "dataType",
     "acceptedValues",
     "acceptedRanges",
-    "enabled"
+    "enabled",
+    "not"
 })
 public class GenericFilter
     extends Identifiable
@@ -58,6 +60,7 @@ public class GenericFilter
     protected List<String> acceptedValues;
     protected List<Range> acceptedRanges;
     protected boolean enabled;
+    protected Boolean not;
 
     /**
      * Gets the value of the columnName property.
@@ -180,8 +183,37 @@ public class GenericFilter
     public void setEnabled(boolean value) {
         this.enabled = value;
     }
+
+    /**
+     * Gets the value of the not property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isNot() {
+        return not;
+    }
+
+    /**
+     * Sets the value of the not property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setNot(Boolean value) {
+        this.not = value;
+    }
     
 //--simple--preserve
+    
+    public boolean isInclusive() {
+        return isNot() == null || !(isNot().booleanValue());
+    }
+    
     /**
      * Perform a deep-copy EXCEPT Identifiable attributes of the given other instance into this instance
      * 
@@ -197,6 +229,7 @@ public class GenericFilter
         this.columnName = filter.getColumnName();
         this.dataType = filter.getDataType();
         this.enabled = filter.isEnabled();
+        this.not = filter.isNot();
 
         // deep copy acceptedValues, acceptedRanges:
         this.acceptedValues = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.acceptedValues);
@@ -224,7 +257,7 @@ public class GenericFilter
         if (this.enabled != other.enabled) {
             return false;
         }
-        return true;
+        return this.isInclusive() == other.isInclusive();
     }
 
     /**
@@ -245,6 +278,7 @@ public class GenericFilter
             sb.append(", acceptedRanges=");
             fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, acceptedRanges);
             sb.append(", enabled=").append(enabled);
+            sb.append(", not=").append(not);
         }
 
         sb.append(" }");

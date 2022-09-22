@@ -371,11 +371,11 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.3;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         add(jFieldMin, gridBagConstraints);
 
         jFieldMax.setColumns(2);
@@ -387,11 +387,11 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.3;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 0);
         add(jFieldMax, gridBagConstraints);
 
         rangeListComboBox.setPrototypeDisplayValue("XXXX");
@@ -401,11 +401,11 @@ public final class RangeEditor extends javax.swing.JPanel implements Disposable 
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 2, 0);
         add(rangeListComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 

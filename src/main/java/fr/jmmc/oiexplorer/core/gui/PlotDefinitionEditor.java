@@ -17,6 +17,7 @@ import fr.jmmc.oiexplorer.core.model.plot.AxisRangeMode;
 import fr.jmmc.oiexplorer.core.model.plot.ColorMapping;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oiexplorer.core.model.util.ColorMappingListCellRenderer;
+import fr.jmmc.oitools.processing.BaseSelectorResult;
 import fr.jmmc.oitools.processing.SelectorResult;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
@@ -371,7 +372,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
      * @return a Set of Strings with every distinct column names
      */
     private Set<String> getDistinctColumns(final SelectorResult selectorResult) {
-        return SelectorResult.getDataModel(selectorResult).getNumericalColumnNames();
+        return BaseSelectorResult.getDataModel(selectorResult).getNumericalColumnNames();
     }
 
     /**

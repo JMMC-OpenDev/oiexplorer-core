@@ -259,7 +259,13 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
-
+                    <xsd:element name="not" type="xsd:boolean" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                True to invert this filter (exclusive); False otherwise (inclusive).
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>

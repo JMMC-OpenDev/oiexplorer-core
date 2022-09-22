@@ -1490,8 +1490,19 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         final Map<String, StaNamesDir> usedStaNamesMap = selectorResult.getUsedStaNamesMap();
 
-        final PlotDefinition plotDef = getPlotDefinition();
-        final Axis xAxis = plotDef.getXAxis();
+        // Get distinct station indexes from OIFits subset (not filtered):
+        // TODO: use all StaNames on the selected target (no filter):
+        final List<String> distinctStaIndexNames = selectorResult.getDistinctStaNames();
+
+        // Get distinct station configuration from OIFits subset (not filtered):
+        // TODO: use all StaNames on the selected target (no filter):
+        final List<String> distinctStaConfNames = selectorResult.getDistinctStaConfs();
+
+        final Range waveLengthRange = convert(selectorResult.getWavelengthRange());
+
+        logger.debug("distinctStaIndexNames: {}", distinctStaIndexNames);
+        logger.debug("distinctStaConfNames: {}", distinctStaConfNames);
+        logger.debug("waveLengthRange: {}", waveLengthRange);
 
         // Get Global SharedSeriesAttributes:
         final SharedSeriesAttributes oixpAttrs = SharedSeriesAttributes.INSTANCE_OIXP;
@@ -1505,17 +1516,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         logger.debug("updateChart: plot {} oixpAttrs: {} IN", this.plotId, oixpAttrs);
 
-        // Get distinct station indexes from OIFits subset (not filtered):
-        final List<String> distinctStaIndexNames = OIDataListHelper.getDistinctStaNames(oiDataList, usedStaNamesMap);
-
-        // Get distinct station configuration from OIFits subset (not filtered):
-        final List<String> distinctStaConfNames = OIDataListHelper.getDistinctStaConfs(oiDataList);
-
-        final Range waveLengthRange = convert(OIDataListHelper.getWaveLengthRange(oiDataList));
-
-        logger.debug("distinctStaIndexNames: {}", distinctStaIndexNames);
-        logger.debug("distinctStaConfNames: {}", distinctStaConfNames);
-        logger.debug("waveLengthRange: {}", waveLengthRange);
+        final PlotDefinition plotDef = getPlotDefinition();
+        final Axis xAxis = plotDef.getXAxis();
 
         Range viewBounds, viewRange;
 
@@ -1658,7 +1660,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     // define base shape as valid point (fallback):
                     renderer.setDefaultShape(shapePointValid, false);
 
-// TODO: if only 1 channel: it is not possible to draw lines (nothing shown) => switch back to shapes ?
+                    // TODO: if only 1 channel: it is not possible to draw lines (nothing shown) => switch back to shapes ?
                     final boolean useDrawLines = drawLines && info.useWaveLengths;
 
                     renderer.setShapesVisible(!useDrawLines);
