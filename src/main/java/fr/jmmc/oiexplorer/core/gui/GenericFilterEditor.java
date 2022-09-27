@@ -50,7 +50,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     private static final ConverterFactory CONVERTER_FACTORY = ConverterFactory.getInstance();
 
     /** OIFitsCollectionManager singleton reference. used for reset button. */
-    private final static OIFitsCollectionManager OCM = OIFitsCollectionManager.getInstance();
+    private final static OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
 
     /** Map giving a list of predefined ranges for a column name. Some column name don't have predefined ranges and
      * receive a null value. TODO: move this to RangeEditor ?
@@ -153,7 +153,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
                     break;
                 case STRING:
                     // generating check box list possible values
-                    final List<String> initValues = OCM.getOIFitsCollection().getDistinctValues(columnName);
+                    final List<String> initValues = ocm.getOIFitsCollection().getDistinctValues(columnName);
                     if (initValues != null) {
                         checkBoxListValuesModel.addAll(initValues);
                     }
@@ -299,7 +299,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         double[] minmax = new double[2];
 
         final fr.jmmc.oitools.model.range.Range oitoolsRange
-                                                = OCM.getOIFitsCollection().getColumnRange(genericFilter.getColumnName());
+                                                = ocm.getOIFitsCollection().getColumnRange(genericFilter.getColumnName());
 
         minmax[0] = Double.isFinite(oitoolsRange.getMin()) ? oitoolsRange.getMin() : Double.NaN;
         minmax[1] = Double.isFinite(oitoolsRange.getMax()) ? oitoolsRange.getMax() : Double.NaN;
@@ -409,7 +409,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
                 case STRING:
                     // update gui widget
                     checkBoxListValuesModel.clear();
-                    final List<String> initValues = OCM.getOIFitsCollection().getDistinctValues(columnName);
+                    final List<String> initValues = ocm.getOIFitsCollection().getDistinctValues(columnName);
                     if (initValues != null) {
                         checkBoxListValuesModel.addAll(initValues);
                     }
