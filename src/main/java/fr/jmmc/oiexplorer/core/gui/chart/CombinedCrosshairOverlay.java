@@ -44,7 +44,7 @@ import org.jfree.chart.util.PublicCloneable;
  * @since 1.0.13
  */
 public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay,
-        PropertyChangeListener, PublicCloneable, Cloneable, Serializable {
+                                                                         PropertyChangeListener, PublicCloneable, Cloneable, Serializable {
 
     /** main plot index (0) */
     public final static Integer MAIN_PLOT = NumberUtils.valueOf(0);
@@ -408,7 +408,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
      * @return The anchor point.
      */
     private static Point2D calculateLabelPoint(final Line2D line, final RectangleAnchor anchor,
-            final double deltaX, final double deltaY) {
+                                               final double deltaX, final double deltaY) {
         double x, y;
         final boolean left = (anchor == RectangleAnchor.BOTTOM_LEFT
                 || anchor == RectangleAnchor.LEFT

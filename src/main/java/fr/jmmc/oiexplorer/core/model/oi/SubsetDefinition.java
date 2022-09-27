@@ -106,7 +106,6 @@ public class SubsetDefinition
     }
     
 //--simple--preserve
-
     /**
      * Return the first SubsetFilter (or create a new instance)
      * @return SubsetFilter instance
@@ -176,14 +175,13 @@ public class SubsetDefinition
                 oiFitsFile.addOiTable(oiData);
             }
             this.oiFitsSubset = oiFitsFile;
-            
+
             if (logger.isDebugEnabled()) {
                 logger.debug("getOIFitsSubset(): {}", this.oiFitsSubset);
             }
         }
         return this.oiFitsSubset;
     }
-
 
     /** SelectorResult containing the result of filters */
     @javax.xml.bind.annotation.XmlTransient
@@ -230,7 +228,7 @@ public class SubsetDefinition
         for (SubsetFilter filter : getFilters()) {
             SubsetFilter.updateOIDataFileReferences(filter.getTables(), mapIdOiDataFiles);
         }
-        
+
         if ((this.selectorResult != null) && !this.selectorResult.isEmpty()) {
             this.selectorResult.getDataModel().refresh();
         }

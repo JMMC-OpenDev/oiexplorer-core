@@ -24,7 +24,7 @@ public class XYPlotPoint {
     private final double y;
 
     public XYPlotPoint(final AxisInfo xAxisInfo, final AxisInfo yAxisInfo,
-                     final double x, final double y) {
+                       final double x, final double y) {
         this.xAxisInfo = xAxisInfo;
         this.yAxisInfo = yAxisInfo;
         this.x = x;

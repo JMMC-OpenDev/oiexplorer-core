@@ -275,7 +275,7 @@ public final class FastXYErrorRenderer extends FastXYLineAndShapeRenderer {
             final RectangleEdge yAxisLocation = state.yAxisLocation;
 
             final double adj = (this.useCap) ? 0.5d * this.getCapLength() : 0d;
-            
+
             if (drawXError) {
                 // draw the error bar for the x-interval
                 final double x0 = ixyd.getStartXValue(series, item);
@@ -333,7 +333,7 @@ public final class FastXYErrorRenderer extends FastXYLineAndShapeRenderer {
                     }
                 }
             }
-            
+
             if (drawYError) {
                 // draw the error bar for the y-interval
                 final double y0 = ixyd.getStartYValue(series, item);

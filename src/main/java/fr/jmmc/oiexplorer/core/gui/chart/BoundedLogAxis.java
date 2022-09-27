@@ -120,7 +120,7 @@ public final class BoundedLogAxis extends EnhancedLogarithmicAxis {
             // autoRange must stay disabled.
 
             // This is called by JFreeChart to reset the zoom:
-      /*
+            /*
              at fr.jmmc.aspro.gui.chart.BoundedSymbolAxis.setAutoRange(BoundedSymbolAxis.java:96)
              at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
              at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)

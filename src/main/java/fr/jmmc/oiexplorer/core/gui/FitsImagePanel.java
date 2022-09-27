@@ -1125,7 +1125,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         jFormattedTextFieldModifyImageInc.setValue(inc);
 
         boolean ok = false;
-        
+
         // Display the dialog with the form, and returns true if users confirms the form (async):
         if (MessagePane.showDialogPanel("Modify image", jPanelModifyImage)) {
             final double newFov = parseDouble(jFormattedTextFieldModifyImageFOV.getText()); // unit MAS

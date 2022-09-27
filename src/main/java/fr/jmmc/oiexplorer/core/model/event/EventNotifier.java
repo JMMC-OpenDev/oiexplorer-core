@@ -255,7 +255,7 @@ public final class EventNotifier<K extends GenericEvent<V, O>, V, O> implements 
 
         // event source(s):
         final Set<Object> sources = context.getSources();
-        
+
         // Define event's sources:
         event.setSources(sources);
 

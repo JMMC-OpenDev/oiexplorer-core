@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
  * Plot view implementation
  * @author mella
  */
-//FINAL REMOVED
-public class PlotView extends javax.swing.JPanel implements OIFitsCollectionManagerEventListener {
+public final class PlotView extends javax.swing.JPanel implements OIFitsCollectionManagerEventListener {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -48,7 +47,7 @@ public class PlotView extends javax.swing.JPanel implements OIFitsCollectionMana
      * @param plotId plot identifier
      */
     public PlotView(final String plotId) {
-        ocm.getPlotChangedEventNotifier().register(this);
+        ocm.bindPlotChanged(this);
 
         // Build GUI
         initComponents();
@@ -124,7 +123,7 @@ public class PlotView extends javax.swing.JPanel implements OIFitsCollectionMana
             if (oiFitsBrowserPanel != null) {
 
                 final SelectorResult selectorResult
-                        = (subsetDefinition == null) ? null : subsetDefinition.getSelectorResult();
+                                     = (subsetDefinition == null) ? null : subsetDefinition.getSelectorResult();
 
                 this.oiFitsBrowserPanel.setOiFitsFileRef(
                         new WeakReference<OIFitsFile>(oiFitsFile), new WeakReference<SelectorResult>(selectorResult));

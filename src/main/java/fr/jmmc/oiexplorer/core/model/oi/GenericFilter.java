@@ -209,11 +209,10 @@ public class GenericFilter
     }
     
 //--simple--preserve
-    
     public boolean isInclusive() {
         return isNot() == null || !(isNot().booleanValue());
     }
-    
+
     /**
      * Perform a deep-copy EXCEPT Identifiable attributes of the given other instance into this instance
      * 

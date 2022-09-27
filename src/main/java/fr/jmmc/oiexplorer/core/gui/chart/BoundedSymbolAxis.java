@@ -85,7 +85,7 @@ public class BoundedSymbolAxis extends MutableSymbolAxis {
             // autoRange must stay disabled.
 
             // This is called by JFreeChart to reset the zoom:
-      /*
+            /*
              at fr.jmmc.aspro.gui.chart.BoundedSymbolAxis.setAutoRange(BoundedSymbolAxis.java:96)
              at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
              at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)
@@ -96,7 +96,6 @@ public class BoundedSymbolAxis extends MutableSymbolAxis {
              at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2390)
              at org.jfree.chart.ChartPanel.mouseReleased(ChartPanel.java:2044)
              */
-
             // Use the axis bounds to redefine the ranges (reset zoom)
             setRange(this.bounds, false, notify);
 
@@ -126,7 +125,6 @@ public class BoundedSymbolAxis extends MutableSymbolAxis {
         Range newRange = range;
 
         // check if range is within bounds :
-
         if (this.bounds != null) {
             final double lower = this.bounds.getLowerBound();
             final double upper = this.bounds.getUpperBound();

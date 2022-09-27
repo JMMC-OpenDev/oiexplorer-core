@@ -84,7 +84,7 @@ public final class BoundedDateAxis extends DateAxis {
             // autoRange must stay disabled.
 
             // This is called by JFreeChart to reset the zoom:
-      /*
+            /*
              at fr.jmmc.aspro.gui.chart.BoundedDateAxis.setAutoRange(BoundedDateAxis.java:93)
              at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
              at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)
@@ -95,7 +95,6 @@ public final class BoundedDateAxis extends DateAxis {
              at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2391)
              at org.jfree.chart.ChartPanel.mouseReleased(ChartPanel.java:2044)
              */
-
             // Use the axis bounds to redefine the ranges (reset zoom)
             setRange(this.bounds, false, notify);
 
@@ -125,7 +124,6 @@ public final class BoundedDateAxis extends DateAxis {
         Range newRange = range;
 
         // check if range is within bounds :
-
         if (this.bounds != null) {
             final double lower = this.bounds.getLowerBound();
             final double upper = this.bounds.getUpperBound();

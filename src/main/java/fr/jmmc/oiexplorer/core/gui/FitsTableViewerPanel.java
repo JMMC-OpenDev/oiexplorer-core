@@ -286,7 +286,6 @@ public final class FitsTableViewerPanel extends javax.swing.JPanel {
         add(jSplitPaneVert, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPaneColumns;
     private javax.swing.JScrollPane jScrollPaneKeywords;

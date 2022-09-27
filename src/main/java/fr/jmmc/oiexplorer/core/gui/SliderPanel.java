@@ -15,17 +15,18 @@ public final class SliderPanel extends javax.swing.JPanel {
     List<FitsImage> fitsImages;
     FitsImagePanel fitsImagePanel;
     SliderEditor sliderEditor;
-    
+
     public SliderPanel() {
         initComponents();
     }
+
     /**
      * Creates new form SliderPanel
      * @param fitsImagePanel
      */
     public SliderPanel(FitsImagePanel fitsImagePanel) {
         initComponents();
-        
+
         this.fitsImagePanel = fitsImagePanel;
     }
 
@@ -71,14 +72,14 @@ public final class SliderPanel extends javax.swing.JPanel {
     private void jSliderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSliderButtonActionPerformed
         this.sliderEditor.setVisible(true);
     }//GEN-LAST:event_jSliderButtonActionPerformed
-    
+
     public void setFitsImages(List<FitsImage> fitsImages) {
         this.fitsImages = fitsImages;
         this.jFitsImageCubeSlider.setMinimum(this.fitsImages.get(0).getImageIndex());
         this.jFitsImageCubeSlider.setMaximum(this.fitsImages.get(this.fitsImages.size() - 1).getImageIndex());
         this.sliderEditor = new SliderEditor(this.fitsImages.size(), this);
     }
-    
+
     public void setRange(int min, int max) {
         this.jFitsImageCubeSlider.setMinimum(min);
         this.jFitsImageCubeSlider.setMaximum(max);

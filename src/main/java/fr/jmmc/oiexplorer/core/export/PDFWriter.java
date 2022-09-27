@@ -87,7 +87,7 @@ public final class PDFWriter extends Writer {
      * @throws IllegalStateException if a PDF document exception occurred
      */
     private static void writeChartAsPDF(final OutputStream outputStream,
-            final DocumentExportable exportable, final DocumentOptions options) throws IllegalStateException {
+                                        final DocumentExportable exportable, final DocumentOptions options) throws IllegalStateException {
 
         Graphics2D g2 = null;
 
@@ -181,7 +181,7 @@ public final class PDFWriter extends Writer {
 
         // ChartFontMapper (test) substitutes SansSerif fonts (plain and bold) by DejaVu fonts which supports both unicode and greek characters
         // However, fonts must be distributed (GPL) and many problems can happen...
-    /* return new ChartFontMapper(); */
+        /* return new ChartFontMapper(); */
         // default font mapper uses Helvetica (Cp1252) which DOES NOT SUPPORT UNICODE CHARACTERS:
         return new DefaultFontMapper();
     }

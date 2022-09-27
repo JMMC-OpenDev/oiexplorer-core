@@ -83,22 +83,23 @@ public abstract class DocumentOptions {
         }
         logger.debug("merge(DocumentOptions): this: {}", this);
     }
-    
+
     /**
      * Set default options: DocumentSize: Normal, Orientation: Landscape, 1 page
-    */
+     */
     public final void setNormalDefaults() {
         setDocumentSize(DocumentSize.NORMAL)
                 .setOrientation(Orientation.Landscape)
-                .setNumberOfPages(1);        
+                .setNumberOfPages(1);
     }
+
     /**
      * Set default options: DocumentSize: Normal, Orientation: Landscape, 1 page
-    */
+     */
     public final void setSmallDefaults() {
         setDocumentSize(DocumentSize.SMALL)
                 .setOrientation(Orientation.Landscape)
-                .setNumberOfPages(1);        
+                .setNumberOfPages(1);
     }
 
     /** Return the mime type

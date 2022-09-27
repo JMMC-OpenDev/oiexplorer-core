@@ -66,7 +66,7 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
         this.tableViewer = new FitsTableViewerPanel();
         postInit();
 
-        ocm.getSelectionChangedEventNotifier().register(this);
+        ocm.bindSelectionChanged(this);
     }
 
     /**

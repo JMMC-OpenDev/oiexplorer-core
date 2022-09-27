@@ -38,8 +38,8 @@ public final class ImageWriter extends Writer {
      */
     @Override
     public void write(final File imgBaseFile,
-            final DocumentExportable exportable,
-            final DocumentOptions options) throws IllegalStateException {
+                      final DocumentExportable exportable,
+                      final DocumentOptions options) throws IllegalStateException {
 
         final long start = System.nanoTime();
 

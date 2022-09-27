@@ -277,7 +277,7 @@ public class EnhancedChartPanel extends ChartPanel {
     @Override
     public final void mouseDragged(final MouseEvent event) {
         super.mouseDragged(event);
-        
+
         // force firing a mouse move:
         mouseMoved(event);
     }

@@ -310,7 +310,7 @@ public class FastXYPathAreaRenderer extends AbstractXYItemRenderer
 
         // update path to reflect latest point
         boolean draw = false;
-        
+
         if (!Double.isNaN(transX1) && !Double.isNaN(transY1)) {
             double x = transX1;
             double y = transY1;
@@ -334,7 +334,6 @@ public class FastXYPathAreaRenderer extends AbstractXYItemRenderer
         if (draw /* || (s.lastPointGood && (item == s.getLastItemIndex())) */) {
 
             // Note: Shape.intersects() may be slow for GeneralPath (Path2D) and bounding box may be helpful
-            
             // Shape intersect may be slow:
             final boolean visible;
             if (useShapeIntersection) {

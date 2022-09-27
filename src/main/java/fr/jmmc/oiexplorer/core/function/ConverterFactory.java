@@ -40,7 +40,7 @@ public final class ConverterFactory {
     private static volatile ConverterFactory instance = null;
 
     /* members */
-    /* TODO: load configuration from XML file ?? */
+ /* TODO: load configuration from XML file ?? */
     /** predefined converters */
     private final Map<String, Converter> converters = new LinkedHashMap<String, Converter>(4);
     /** predefined converters by column names */

@@ -164,7 +164,7 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
 
                 g2.setColor(Color.GREEN);
                 g2.drawLine((int) originCoords.getX(), (int) originCoords.getY(), (int) endCoords.getX(), (int) endCoords.getY());
-            
+
                 // TODO: show angle
                 // draw vertical at origin (north)
                 // draw arc between (north axis and vector)

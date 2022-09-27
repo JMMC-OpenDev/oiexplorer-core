@@ -42,9 +42,9 @@ public final class PlotEditor extends javax.swing.JPanel implements OIFitsCollec
      */
     public PlotEditor() {
         // always bind at the beginning of the constructor (to maintain correct ordering):
-        ocm.bindSubsetDefinitionListChangedEvent(this);
-        ocm.bindPlotDefinitionListChangedEvent(this);
-        ocm.getPlotChangedEventNotifier().register(this);
+        ocm.bindSubsetDefinitionListChanged(this);
+        ocm.bindPlotDefinitionListChanged(this);
+        ocm.bindPlotChanged(this);
 
         initComponents();
     }

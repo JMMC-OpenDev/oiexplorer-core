@@ -53,8 +53,8 @@ public abstract class Writer {
      * @throws IllegalStateException if a document exception occurred
      */
     public abstract void write(final File file,
-            final DocumentExportable exportable,
-            final DocumentOptions options) throws IOException, IllegalStateException;
+                               final DocumentExportable exportable,
+                               final DocumentOptions options) throws IOException, IllegalStateException;
 
     /**
      * Draw the given Drawable instances on the given Graphics2D
@@ -64,7 +64,7 @@ public abstract class Writer {
      * @param height of the page
      */
     public static void draw(Drawable[] drawables, Graphics2D g2,
-            final float width, final float height) {
+                            final float width, final float height) {
 
         final int nCharts = drawables.length;
         final int nbCol = (nCharts > 1) ? 2 : 1;

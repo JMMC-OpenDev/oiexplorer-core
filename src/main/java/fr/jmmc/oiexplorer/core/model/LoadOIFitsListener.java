@@ -10,6 +10,6 @@ import java.beans.PropertyChangeListener;
  * @author bourgesl
  */
 public interface LoadOIFitsListener extends PropertyChangeListener {
-    
+
     public void done(final boolean cancelled);
 }

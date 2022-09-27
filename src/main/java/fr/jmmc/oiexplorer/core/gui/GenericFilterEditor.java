@@ -137,6 +137,8 @@ public final class GenericFilterEditor extends javax.swing.JPanel
 
             // Set not:
             jCheckBoxExclusive.setSelected(!genericFilter.isInclusive());
+            jCheckBoxExclusive.setEnabled(genericFilter.isEnabled());
+            jButtonReset.setEnabled(genericFilter.isEnabled());
 
             switch (genericFilter.getDataType()) {
                 case NUMERIC:
@@ -196,11 +198,8 @@ public final class GenericFilterEditor extends javax.swing.JPanel
 
         rangeEditor.setRange(guiRange);
         rangeEditor.updateRange(guiRange, true);
-
         rangeEditor.updateRangeList(predefinedRangesByColumnName.get(columnName));
-
         rangeEditor.setEnabled(genericFilter.isEnabled());
-
         rangeEditors.add(rangeEditor);
 
         // adding to GUI with add/delete button
@@ -217,6 +216,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         button.setToolTipText((rangeIndex == 0) ? "Add another range editor" : "Delete this range editor");
         button.putClientProperty(BUTTON_PROP_INDEX, rangeIndex);
         button.addActionListener(this);
+        button.setEnabled(genericFilter.isEnabled());
 
         // use small variant:
         SwingUtils.adjustSize(button, ComponentSizeVariant.small);
@@ -282,7 +282,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         // remove range from generic filter
         genericFilter.getAcceptedRanges().remove(rangeIndex);
 
-        // updating index in all other buttons
+        // updating index in all other buttons:
         final Component[] components = jPanelRanges.getComponents();
 
         for (int i = rangeIndex; i < components.length; i++) {
@@ -343,11 +343,21 @@ public final class GenericFilterEditor extends javax.swing.JPanel
             final boolean enabled = jCheckBoxEnabled.isSelected();
             genericFilter.setEnabled(enabled);
 
+            jCheckBoxExclusive.setEnabled(enabled);
+            jButtonReset.setEnabled(enabled);
+
             for (RangeEditor rangeEditor : rangeEditors) {
                 rangeEditor.setEnabled(enabled);
             }
 
             checkBoxListValues.setEnabled(enabled);
+
+            // updating all other buttons
+            for (Component component : jPanelRanges.getComponents()) {
+                final JPanel panel = (JPanel) component;
+                final JButton button = (JButton) panel.getComponent(1);
+                button.setEnabled(enabled);
+            }
 
             fireStateChanged();
         }
@@ -632,7 +642,6 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     private void jCheckBoxExclusiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxExclusiveActionPerformed
         handleNot();
     }//GEN-LAST:event_jCheckBoxExclusiveActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.jidesoft.swing.CheckBoxList checkBoxListValues;

@@ -81,9 +81,9 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
     /** Creates new form PlotDefinitionEditor */
     public PlotDefinitionEditor() {
         // TODO maybe move it in setPlotId, setPlotId to register to event notifiers instead of both:
-        ocm.getPlotDefinitionChangedEventNotifier().register(this);
-        ocm.getPlotChangedEventNotifier().register(this);
-        ocm.getPlotViewportChangedEventNotifier().register(this);
+        ocm.bindPlotDefinitionChanged(this);
+        ocm.bindPlotChanged(this);
+        ocm.bindPlotViewportChanged(this);
 
         initComponents();
         postInit();

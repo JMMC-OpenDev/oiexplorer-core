@@ -18,6 +18,7 @@ import fr.jmmc.jmcs.util.jaxb.JAXBUtils;
 import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import fr.jmmc.oiexplorer.core.gui.OIExplorerTaskRegistry;
 import fr.jmmc.oiexplorer.core.gui.PlotInfosData;
+import fr.jmmc.oiexplorer.core.gui.chart.dataset.SharedSeriesAttributes;
 import fr.jmmc.oiexplorer.core.gui.selection.DataPointer;
 import fr.jmmc.oiexplorer.core.model.event.EventNotifier;
 import fr.jmmc.oiexplorer.core.model.oi.GenericFilter;
@@ -125,8 +126,9 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
         for (OIFitsCollectionManagerEventType eventType : OIFitsCollectionManagerEventType.values()) {
             // false argument means allow self notification:
-            final boolean skipSourceListener = (eventType != OIFitsCollectionManagerEventType.COLLECTION_CHANGED)
-                    && (eventType != OIFitsCollectionManagerEventType.SUBSET_CHANGED);
+            final boolean skipSourceListener
+                          = (eventType != OIFitsCollectionManagerEventType.COLLECTION_CHANGED) /* OIFitsCollectionManager post-process */
+                    && (eventType != OIFitsCollectionManagerEventType.SUBSET_CHANGED) /* GenericFiltersPanel handles its own reentrance */;
 
             eventNotifier = new EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object>(eventType.name(), priority, skipSourceListener);
 
@@ -514,6 +516,10 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
     public void start() {
         if (!enableEvents) {
             enableEvents = true;
+
+            // Register SharedSeriesAttributes listener:
+            SharedSeriesAttributes.INSTANCE_OIXP.register();
+
             reset();
         }
     }
@@ -989,7 +995,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Return the subset definition list (reference)
      * @return subset definition list (reference)
      */
-    List<SubsetDefinition> getSubsetDefinitionList() {
+    public List<SubsetDefinition> getSubsetDefinitionList() {
         return this.userCollection.getSubsetDefinitions();
     }
 
@@ -1073,7 +1079,11 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @return removed SubsetDefinition instance or null if the identifier was not found
      */
     private SubsetDefinition removeSubsetDefinition(final String id) {
-        return Identifiable.removeIdentifiable(id, getSubsetDefinitionList());
+        final SubsetDefinition subsetDefinition = Identifiable.removeIdentifiable(id, getSubsetDefinitionList());
+        if (subsetDefinition != null) {
+            fireSubsetDefinitionListChanged();
+        }
+        return subsetDefinition;
     }
 
     /**
@@ -1800,7 +1810,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Bind the given listener to COLLECTION_CHANGED event and fire such event to initialize the listener properly
      * @param listener listener to bind
      */
-    public void bindCollectionChangedEvent(final OIFitsCollectionManagerEventListener listener) {
+    public void bindCollectionChanged(final OIFitsCollectionManagerEventListener listener) {
         getOiFitsCollectionChangedEventNotifier().register(listener);
 
         // Note: no fire COLLECTION_CHANGED event because first call to reset() fires it (at the right time i.e. not too early):
@@ -1820,7 +1830,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Bind the given listener to SUBSET_LIST_CHANGED event and fire such event to initialize the listener properly
      * @param listener listener to bind
      */
-    public void bindSubsetDefinitionListChangedEvent(final OIFitsCollectionManagerEventListener listener) {
+    public void bindSubsetDefinitionListChanged(final OIFitsCollectionManagerEventListener listener) {
         getSubsetDefinitionListChangedEventNotifier().register(listener);
 
         // force fire SUBSET_LIST_CHANGED event to initialize the listener ASAP:
@@ -1839,7 +1849,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Bind the given listener to PLOT_DEFINITION_LIST_CHANGED event and fire such event to initialize the listener properly
      * @param listener listener to bind
      */
-    public void bindPlotDefinitionListChangedEvent(final OIFitsCollectionManagerEventListener listener) {
+    public void bindPlotDefinitionListChanged(final OIFitsCollectionManagerEventListener listener) {
         getPlotDefinitionListChangedEventNotifier().register(listener);
 
         // force fire PLOT_DEFINITION_LIST_CHANGED event to initialize the listener ASAP:
@@ -1858,7 +1868,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Bind the given listener to PLOT_LIST_CHANGED event and fire such event to initialize the listener properly
      * @param listener listener to bind
      */
-    public void bindPlotListChangedEvent(final OIFitsCollectionManagerEventListener listener) {
+    public void bindPlotListChanged(final OIFitsCollectionManagerEventListener listener) {
         getPlotListChangedEventNotifier().register(listener);
 
         // force fire PLOT_LIST_CHANGED event to initialize the listener with current OIFitsCollection ASAP:
@@ -1873,60 +1883,115 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.PLOT_LIST_CHANGED);
     }
 
-    /* TODO: use bind instead of eventNotifier directly */
+    /**
+     * Bind the given listener to SUBSET_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindSubsetDefinitionChanged(final OIFitsCollectionManagerEventListener listener) {
+        getSubsetDefinitionChangedEventNotifier().register(listener);
+    }
+
     /**
      * Return the SUBSET_CHANGED event notifier
      * @return SUBSET_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getSubsetDefinitionChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getSubsetDefinitionChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.SUBSET_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to PLOT_DEFINITION_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindPlotDefinitionChanged(final OIFitsCollectionManagerEventListener listener) {
+        getPlotDefinitionChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the PLOT_DEFINITION_CHANGED event notifier
      * @return PLOT_DEFINITION_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotDefinitionChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotDefinitionChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.PLOT_DEFINITION_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to PLOT_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindPlotChanged(final OIFitsCollectionManagerEventListener listener) {
+        getPlotChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the PLOT_CHANGED event notifier
      * @return PLOT_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.PLOT_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to ACTIVE_PLOT_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindActivePlotChanged(final OIFitsCollectionManagerEventListener listener) {
+        getSubsetDefinitionChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the ACTIVE_PLOT_CHANGED event notifier
      * @return ACTIVE_PLOT_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getActivePlotChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getActivePlotChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.ACTIVE_PLOT_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to SELECTION_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindSelectionChanged(final OIFitsCollectionManagerEventListener listener) {
+        getSelectionChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the SELECTION_CHANGED event notifier
      * @return SELECTION_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getSelectionChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getSelectionChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.SELECTION_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to PLOT_VIEWPORT_CHANGED event
+     * @param listener listener to bind
+     */
+    public void bindPlotViewportChanged(final OIFitsCollectionManagerEventListener listener) {
+        getSubsetDefinitionChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the PLOT_VIEWPORT_CHANGED event notifier
      * @return PLOT_VIEWPORT_CHANGED event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotViewportChangedEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getPlotViewportChangedEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.PLOT_VIEWPORT_CHANGED);
+    }
+
+    /**
+     * Bind the given listener to READY event
+     * @param listener listener to bind
+     */
+    public void bindReadyEvent(final OIFitsCollectionManagerEventListener listener) {
+        getSubsetDefinitionChangedEventNotifier().register(listener);
     }
 
     /**
      * Return the READY event notifier
      * @return READY event notifier
      */
-    public EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getReadyEventNotifier() {
+    private EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object> getReadyEventNotifier() {
         return this.oiFitsCollectionManagerEventNotifierMap.get(OIFitsCollectionManagerEventType.READY);
     }
 

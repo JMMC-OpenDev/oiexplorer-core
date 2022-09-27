@@ -126,7 +126,7 @@ public final class OIFitsHtmlPanel extends javax.swing.JPanel {
                 logger.error("IO exception : ", ioe);
             }
 
-            if (logger.isDebugEnabled()) {            
+            if (logger.isDebugEnabled()) {
                 logger.debug("html: {} ms.", 1e-6d * (System.nanoTime() - start));
             }
 

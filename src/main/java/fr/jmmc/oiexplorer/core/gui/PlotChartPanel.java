@@ -241,8 +241,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * Constructor
      */
     public PlotChartPanel() {
-        ocm.getPlotChangedEventNotifier().register(this);
-        ocm.getSelectionChangedEventNotifier().register(this);
+        ocm.bindPlotChanged(this);
+        ocm.bindSelectionChanged(this);
 
         initComponents();
         postInit();
@@ -1491,28 +1491,35 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         final Map<String, StaNamesDir> usedStaNamesMap = selectorResult.getUsedStaNamesMap();
 
         // Get distinct station indexes from OIFits subset (not filtered):
-        // TODO: use all StaNames on the selected target (no filter):
-        final List<String> distinctStaIndexNames = selectorResult.getDistinctStaNames();
+        final List<String> distinctStaIndexNames;
 
         // Get distinct station configuration from OIFits subset (not filtered):
-        // TODO: use all StaNames on the selected target (no filter):
-        final List<String> distinctStaConfNames = selectorResult.getDistinctStaConfs();
+        final List<String> distinctStaConfNames;
 
+        // Get wavelength range from OIFits subset (not filtered):
+        final Range waveLengthRangeFull;
+
+        if (selectorResult.hasTargetResult()) {
+            // use all values on the selected target (no filter):
+            distinctStaIndexNames = selectorResult.getTargetResult().getDistinctStaNames();
+            distinctStaConfNames = selectorResult.getTargetResult().getDistinctStaConfs();
+            waveLengthRangeFull = convert(selectorResult.getTargetResult().getWavelengthRange());
+        } else {
+            distinctStaIndexNames = selectorResult.getDistinctStaNames();
+            distinctStaConfNames = selectorResult.getDistinctStaConfs();
+            waveLengthRangeFull = convert(selectorResult.getWavelengthRange());
+        }
+
+        // Get wavelength range from selected subset:
         final Range waveLengthRange = convert(selectorResult.getWavelengthRange());
 
         logger.debug("distinctStaIndexNames: {}", distinctStaIndexNames);
-        logger.debug("distinctStaConfNames: {}", distinctStaConfNames);
-        logger.debug("waveLengthRange: {}", waveLengthRange);
+        logger.debug("distinctStaConfNames:  {}", distinctStaConfNames);
+        logger.debug("waveLengthRangeFull:   {}", waveLengthRangeFull);
+        logger.debug("waveLengthRange:       {}", waveLengthRange);
 
         // Get Global SharedSeriesAttributes:
         final SharedSeriesAttributes oixpAttrs = SharedSeriesAttributes.INSTANCE_OIXP;
-
-        if (true) {
-            // TODO: handle reset (depending on the previous view usages)
-            // use case: consistent colors accross views (muti-view with UV plane + V2/T3PHI 
-            // => same baseline should have matching colors)
-            oixpAttrs.reset();
-        }
 
         logger.debug("updateChart: plot {} oixpAttrs: {} IN", this.plotId, oixpAttrs);
 
@@ -1766,12 +1773,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             this.chart.removeSubtitle(mapLegend);
         }
 
-        // TODO: update colors once:
         if (plotDef.getColorMapping() == ColorMapping.STATION_INDEX
                 || plotDef.getColorMapping() == ColorMapping.CONFIGURATION) {
-
-            // Assign ONCE colors to labels automatically:
-            oixpAttrs.define();
 
             for (int i = 0, len = this.xyPlotList.size(); i < len; i++) {
                 final XYPlot xyPlot = this.xyPlotList.get(i);
@@ -1795,11 +1798,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                                 label = null;
                                 break;
                         }
-
                         renderer.setSeriesPaint(serie, oixpAttrs.getColorAlpha(label), false);
                     }
                 }
-
                 if (DEBUG) {
                     if (dataset != null) {
                         logger.info("seriesCount : {}", dataset.getSeriesCount());
@@ -1824,9 +1825,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     }
                 }
             } else if (ColorMapping.CONFIGURATION == plotDef.getColorMapping()) {
-
                 // merge all used staConf names:
-                final Set<String> distinctUsedStaConfNames = new LinkedHashSet<String>();
+                final Set<String> distinctUsedStaConfNames = new HashSet<String>(8);
 
                 for (PlotInfo info : getPlotInfos()) {
                     distinctUsedStaConfNames.addAll(info.usedStaConfNames);
@@ -1849,9 +1849,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
                 legendCollection = new LegendItemCollection();
             }
-        } else if (useWaveLengths && waveLengthRange.getLength() > LAMBDA_EPSILON) {
-            final double min = NumberUtils.trimTo3Digits(ConverterFactory.CONVERTER_MICRO_METER.evaluate(waveLengthRange.getLowerBound()) - 1e-3D); // microns
-            final double max = NumberUtils.trimTo3Digits(ConverterFactory.CONVERTER_MICRO_METER.evaluate(waveLengthRange.getUpperBound()) + 1e-3D); // microns
+        } else if (useWaveLengths && waveLengthRangeFull.getLength() > LAMBDA_EPSILON) {
+            final double min = NumberUtils.trimTo3Digits(ConverterFactory.CONVERTER_MICRO_METER.evaluate(waveLengthRangeFull.getLowerBound()) - 1e-3D); // microns
+            final double max = NumberUtils.trimTo3Digits(ConverterFactory.CONVERTER_MICRO_METER.evaluate(waveLengthRangeFull.getUpperBound()) + 1e-3D); // microns
 
             final NumberAxis lambdaAxis = new NumberAxis();
             // inverted color palette:
