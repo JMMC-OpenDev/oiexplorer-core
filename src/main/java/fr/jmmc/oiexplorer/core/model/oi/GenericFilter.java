@@ -13,7 +13,7 @@ import fr.jmmc.oiexplorer.core.model.plot.Range;
 
 /**
  * 
- *                 This type describes a subset filter.
+ *                 This type describes a subset filter
  *             
  * 
  * <p>Java class for GenericFilter complex type.
@@ -230,7 +230,7 @@ public class GenericFilter
         this.enabled = filter.isEnabled();
         this.not = filter.isNot();
 
-        // deep copy acceptedValues, acceptedRanges:
+        // copy acceptedValues, acceptedRanges:
         this.acceptedValues = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.acceptedValues);
         this.acceptedRanges = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(filter.acceptedRanges);
     }

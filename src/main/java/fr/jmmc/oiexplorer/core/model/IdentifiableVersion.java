@@ -18,15 +18,19 @@ public final class IdentifiableVersion implements ToStringable {
     private final String id;
     /** version to track effective changes */
     private final int version;
+    /** hash to ensure identity check */
+    private final int hash;
 
     /**
      * Public Constructor
      * @param id identifiable identifier
      * @param version version
+     * @param hash hash to ensure instance check
      */
-    public IdentifiableVersion(final String id, final int version) {
+    public IdentifiableVersion(final String id, final int version, final int hash) {
         this.id = id;
         this.version = version;
+        this.hash = hash;
     }
 
     /**
@@ -43,6 +47,10 @@ public final class IdentifiableVersion implements ToStringable {
      */
     public int getVersion() {
         return version;
+    }
+
+    public int getHash() {
+        return hash;
     }
 
     @Override
@@ -63,7 +71,9 @@ public final class IdentifiableVersion implements ToStringable {
             if (this.version != other.getVersion()) {
                 return false;
             }
-
+            if (this.hash != other.getHash()) {
+                return false;
+            }
         } else if (Identifiable.class.isAssignableFrom(obj.getClass())) {
             final Identifiable other = (Identifiable) obj;
 
@@ -73,7 +83,9 @@ public final class IdentifiableVersion implements ToStringable {
             if (this.version != other.getVersion()) {
                 return false;
             }
-
+            if (this.hash != other.getHash()) {
+                return false;
+            }
         } else {
             return false;
         }
@@ -105,6 +117,7 @@ public final class IdentifiableVersion implements ToStringable {
         ObjectUtils.getObjectInfo(sb, this);
         sb.append("{id=").append(this.id);
         sb.append(", version=").append(this.version);
+        sb.append(", hash=").append(this.hash);
         sb.append('}');
     }
 }

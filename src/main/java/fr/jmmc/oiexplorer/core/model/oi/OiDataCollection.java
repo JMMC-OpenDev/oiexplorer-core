@@ -14,7 +14,7 @@ import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 
 /**
  * 
- *                 This type describes a collection of oidata ressources.
+ *                 This type describes a collection of oidata ressources
  *             
  * 
  * <p>Java class for OIDataCollection complex type.

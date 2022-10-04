@@ -12,7 +12,7 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
 
 /**
  * 
- *                 This type describes a subset filter.
+ *                 This type describes a subset filter
  *             
  * 
  * <p>Java class for SubsetFilter complex type.
@@ -25,8 +25,8 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="targetUID" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
- *         &lt;element name="insModeUID" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
- *         &lt;element name="nightID" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/&gt;
+ *         &lt;element name="insModeUID" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="nightID" type="{http://www.w3.org/2001/XMLSchema}int" maxOccurs="unbounded" minOccurs="0"/&gt;
  *         &lt;element name="table" type="{http://www.jmmc.fr/oiexplorer-data-collection/0.1}TableUID" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -39,8 +39,8 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SubsetFilter", propOrder = {
     "targetUID",
-    "insModeUID",
-    "nightID",
+    "insModeUIDs",
+    "nightIDs",
     "tables"
 })
 public class SubsetFilter
@@ -48,8 +48,10 @@ public class SubsetFilter
 {
 
     protected String targetUID;
-    protected String insModeUID;
-    protected Integer nightID;
+    @XmlElement(name = "insModeUID")
+    protected List<String> insModeUIDs;
+    @XmlElement(name = "nightID", type = Integer.class)
+    protected List<Integer> nightIDs;
     @XmlElement(name = "table")
     protected List<TableUID> tables;
 
@@ -78,51 +80,61 @@ public class SubsetFilter
     }
 
     /**
-     * Gets the value of the insModeUID property.
+     * Gets the value of the insModeUIDs property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the insModeUIDs property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getInsModeUIDs().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
      */
-    public String getInsModeUID() {
-        return insModeUID;
+    public List<String> getInsModeUIDs() {
+        if (insModeUIDs == null) {
+            insModeUIDs = new ArrayList<String>();
+        }
+        return this.insModeUIDs;
     }
 
     /**
-     * Sets the value of the insModeUID property.
+     * Gets the value of the nightIDs property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setInsModeUID(String value) {
-        this.insModeUID = value;
-    }
-
-    /**
-     * Gets the value of the nightID property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the nightIDs property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
-     */
-    public Integer getNightID() {
-        return nightID;
-    }
-
-    /**
-     * Sets the value of the nightID property.
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNightIDs().add(newItem);
+     * </pre>
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Integer }
+     * 
+     * 
      */
-    public void setNightID(Integer value) {
-        this.nightID = value;
+    public List<Integer> getNightIDs() {
+        if (nightIDs == null) {
+            nightIDs = new ArrayList<Integer>();
+        }
+        return this.nightIDs;
     }
 
     /**
@@ -167,10 +179,10 @@ public class SubsetFilter
     public final void copy(final OIBase other) {
         final SubsetFilter filter = (SubsetFilter) other;
 
-        // copy targetUID, insModeUID, nightID:
+        // copy targetUID, insModeUIDs, nightIDs:
         this.targetUID = filter.getTargetUID();
-        this.insModeUID = filter.getInsModeUID();
-        this.nightID = filter.getNightID();
+        this.insModeUIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.getInsModeUIDs());
+        this.nightIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.getNightIDs());
 
         // deep copy tables:
         this.tables = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(filter.tables);
@@ -189,10 +201,10 @@ public class SubsetFilter
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.targetUID, other.targetUID)) {
             return false;
         }
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.insModeUID, other.insModeUID)) {
+        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.insModeUIDs, other.insModeUIDs)) {
             return false;
         }
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.nightID, other.nightID)) {
+        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.nightIDs, other.nightIDs)) {
             return false;
         }
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.tables, other.tables)) {
@@ -212,8 +224,10 @@ public class SubsetFilter
 
         if (full) {
             sb.append("{ targetUID='").append(this.targetUID).append('\'');
-            sb.append(", insModeUID='").append(this.insModeUID).append('\'');
-            sb.append(", nightID='").append(this.nightID).append('\'');
+            sb.append(", insModeUID='");
+            fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.insModeUIDs);
+            sb.append(", nightID='");
+            fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.nightIDs);
 
             sb.append(", tables=");
             fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.tables);
@@ -228,9 +242,9 @@ public class SubsetFilter
      */
     public String toShortString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("(").append(targetUID == null ? "null-target" : targetUID);
-        sb.append(",").append(insModeUID == null ? "null-insmode" : insModeUID);
-        sb.append(",").append(nightID == null ? "null-night" : nightID);
+        sb.append("(").append((targetUID == null) ? "null-target" : targetUID);
+        sb.append(",").append((insModeUIDs == null) ? "null-insmode" : insModeUIDs);
+        sb.append(",").append((nightIDs == null) ? "null-night" : nightIDs);
         if (tables == null) {
             sb.append(",null-tables)");
         } else {

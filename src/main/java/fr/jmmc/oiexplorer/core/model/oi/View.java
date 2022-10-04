@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- *                 This type describes a generic view instance of a subset.
+ *                 This type describes a generic view instance of a subset
  *             
  * 
  * <p>Java class for View complex type.

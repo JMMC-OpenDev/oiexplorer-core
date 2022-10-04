@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- *                 This type describes a subset definition.
+ *                 This type describes a subset definition
  *             
  * 
  * <p>Java class for SubsetDefinition complex type.
@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence&gt;
  *         &lt;element name="filter" type="{http://www.jmmc.fr/oiexplorer-data-collection/0.1}SubsetFilter" maxOccurs="unbounded"/&gt;
  *         &lt;element name="genericFilter" type="{http://www.jmmc.fr/oiexplorer-data-collection/0.1}GenericFilter" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="show" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/extension&gt;
  *   &lt;/complexContent&gt;
@@ -36,7 +37,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SubsetDefinition", propOrder = {
     "filters",
-    "genericFilters"
+    "genericFilters",
+    "show"
 })
 public class SubsetDefinition
     extends Identifiable
@@ -46,6 +48,7 @@ public class SubsetDefinition
     protected List<SubsetFilter> filters;
     @XmlElement(name = "genericFilter")
     protected List<GenericFilter> genericFilters;
+    protected Boolean show;
 
     /**
      * Gets the value of the filters property.
@@ -104,8 +107,36 @@ public class SubsetDefinition
         }
         return this.genericFilters;
     }
+
+    /**
+     * Gets the value of the show property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isShow() {
+        return show;
+    }
+
+    /**
+     * Sets the value of the show property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setShow(Boolean value) {
+        this.show = value;
+    }
     
 //--simple--preserve
+    public boolean isHideFilteredData() {
+        return isShow() == null || !(isShow().booleanValue());
+    }
+
     /**
      * Return the first SubsetFilter (or create a new instance)
      * @return SubsetFilter instance
@@ -132,6 +163,9 @@ public class SubsetDefinition
     public void copyValues(final fr.jmmc.oiexplorer.core.model.OIBase other) {
         final SubsetDefinition subset = (SubsetDefinition) other;
 
+        // copy show:
+        this.show = subset.show;
+
         // deep copy filters:
         this.filters = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(subset.filters);
         this.genericFilters = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(subset.genericFilters);
@@ -149,7 +183,7 @@ public class SubsetDefinition
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.genericFilters, other.genericFilters)) {
             return false;
         }
-        return true;
+        return fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.show, other.show);
     }
 
     /**
@@ -212,6 +246,7 @@ public class SubsetDefinition
         super.toString(sb, full); // Identifiable
 
         if (full) {
+            sb.append(", show=").append(this.show);
             sb.append(", filters=");
             fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.filters);
             sb.append(", genericFilters=");

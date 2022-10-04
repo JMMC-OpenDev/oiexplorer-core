@@ -158,11 +158,18 @@ public class Identifiable
     }
 
     /**
-     * Return an new identifiable version (id + version) comparable later
+     * Return an new identifiable version (id,version,hash) comparable later
      * @return new identifiable version
      */
     public final fr.jmmc.oiexplorer.core.model.IdentifiableVersion getIdentifiableVersion() {
-        return new fr.jmmc.oiexplorer.core.model.IdentifiableVersion(this.id, this.version);
+        return new fr.jmmc.oiexplorer.core.model.IdentifiableVersion(this.id, this.version, getHash());
+    }
+    
+    /**
+    * @return this object's hash code
+    */
+    public int getHash() {
+        return System.identityHashCode(this);
     }
 
     /**

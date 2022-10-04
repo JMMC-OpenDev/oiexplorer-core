@@ -12,7 +12,7 @@ import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 
 /**
  * 
- *                 This type describes a plot instance.
+ *                 This type describes a plot instance
  *             
  * 
  * <p>Java class for Plot complex type.

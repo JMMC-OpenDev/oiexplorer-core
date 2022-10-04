@@ -16,7 +16,7 @@
 
     <xsd:annotation>
         <xsd:documentation>
-            This xml schema describes a list of oidata files and user plot definitions.
+            This xml schema describes a list of oidata files and user plot definitions
         </xsd:documentation>
         <xsd:appinfo>
 
@@ -40,7 +40,7 @@
     <xsd:element name="oiDataCollection" type="OIDataCollection">
         <xsd:annotation>
             <xsd:documentation>
-                this element contains a collection of oidata ressources.
+                this element contains a collection of oidata ressources
             </xsd:documentation>
         </xsd:annotation>
     </xsd:element>
@@ -52,7 +52,7 @@
     <xsd:complexType name="OIDataCollection">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a collection of oidata ressources.
+                This type describes a collection of oidata ressources
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
@@ -66,7 +66,7 @@
             <xsd:element name="file" type="OIDataFile" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        File collection.
+                        File collection
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -74,7 +74,7 @@
             <xsd:element name="subsetDefinition" type="SubsetDefinition" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        User subset definition collection.
+                        User subset definition collection
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -82,7 +82,7 @@
             <xsd:element name="plotDefinition" type="p:PlotDefinition" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        User plot definition collection (custom).
+                        User plot definition collection (custom)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -91,7 +91,7 @@
             <xsd:element name="plot" type="Plot" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        User plot collection (instances).
+                        User plot collection (instances)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -105,7 +105,7 @@
     <xsd:complexType name="OIDataFile">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes an oidata file.
+                This type describes an oidata file
             </xsd:documentation>
         </xsd:annotation>
         <xsd:complexContent>
@@ -139,7 +139,7 @@
     <xsd:complexType name="SubsetDefinition">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a subset definition.
+                This type describes a subset definition
             </xsd:documentation>
         </xsd:annotation>
         <xsd:complexContent>
@@ -159,6 +159,13 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="show" type="xsd:boolean" minOccurs="0">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                True to show filtered data; False to hide
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
@@ -170,7 +177,7 @@
     <xsd:complexType name="SubsetFilter">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a subset filter.
+                This type describes a subset filter
             </xsd:documentation>
         </xsd:annotation>
         <xsd:sequence>
@@ -181,17 +188,17 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="insModeUID" type="xsd:string" minOccurs="0">
+            <xsd:element name="insModeUID" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        selected instrument mode (global UID)
+                        selected instrument modes (global UID)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="nightID" type="xsd:int" minOccurs="0">
+            <xsd:element name="nightID" type="xsd:int" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        selected night (rounded MJD)
+                        selected nights (rounded MJD)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -199,7 +206,7 @@
             <xsd:element name="table" type="TableUID" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
-                        selected table identifier or all if undefined
+                        selected table identifiers or all if undefined
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -213,7 +220,7 @@
     <xsd:complexType name="GenericFilter">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a subset filter.
+                This type describes a subset filter
             </xsd:documentation>
         </xsd:annotation>
         <xsd:complexContent>
@@ -237,7 +244,7 @@
                     <xsd:element name="acceptedValues" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
                         <xsd:annotation>
                             <xsd:documentation>
-                                accepted String values for the column.
+                                Accepted String values for the column.
                                 Only used when dataType is DATATYPE_STRING.
                                 When empty, it means every value is accepted
                             </xsd:documentation>
@@ -255,14 +262,14 @@
                     <xsd:element name="enabled" type="xsd:boolean">
                         <xsd:annotation>
                             <xsd:documentation>
-                                True to enable this filter; False otherwise.
+                                True to enable this filter; False otherwise
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
                     <xsd:element name="not" type="xsd:boolean" minOccurs="0">
                         <xsd:annotation>
                             <xsd:documentation>
-                                True to invert this filter (exclusive); False otherwise (inclusive).
+                                True to invert this filter (exclusive); False otherwise (inclusive)
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:element>
@@ -277,7 +284,7 @@
     <xsd:complexType name="View">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a generic view instance of a subset.
+                This type describes a generic view instance of a subset
             </xsd:documentation>
         </xsd:annotation>
         <xsd:complexContent>
@@ -316,7 +323,7 @@
     <xsd:complexType name="Plot">
         <xsd:annotation>
             <xsd:documentation>
-                This type describes a plot instance.
+                This type describes a plot instance
             </xsd:documentation>
         </xsd:annotation>
         <xsd:complexContent>

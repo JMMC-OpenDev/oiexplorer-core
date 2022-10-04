@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- *                 This type describes an oidata file.
+ *                 This type describes an oidata file
  *             
  * 
  * <p>Java class for OIDataFile complex type.
