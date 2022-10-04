@@ -9,6 +9,7 @@ import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmcs.gui.util.EDTDelayedEventHandler;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.SwingUtils.ComponentSizeVariant;
+import fr.jmmc.jmcs.util.CollectionUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -40,6 +41,7 @@ import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEvent;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventListener;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventType;
 import fr.jmmc.oiexplorer.core.model.oi.Plot;
+import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oiexplorer.core.model.plot.Axis;
 import fr.jmmc.oiexplorer.core.model.plot.AxisRangeMode;
 import fr.jmmc.oiexplorer.core.model.plot.ColorMapping;
@@ -136,6 +138,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private final static Color COLOR_LABEL_BCKG = new Color(255, 216, 0); // School bus yellow
     /** crosshair line color */
     private final static Color COLOR_XING_LINE = new Color(119, 139, 165); // Shadow Blue
+    /** color of discarded data */
+    private final static Color COLOR_DISCARDED = new Color(192, 192, 192, 48); // 81.5% transparent light gray
 
     /** double formatter for wave lengths */
     private final static NumberFormat df4 = new DecimalFormat("0.000#");
@@ -1483,10 +1487,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private void updateChart() {
         logger.debug("updateChart: plot {}", this.plotId);
 
-        final SelectorResult selectorResult = getSelectorResult(); // not null
+        final boolean hideFilteredData = getSubsetDefinition().isHideFilteredData();
 
-        // selected OIData tables matching filters
-        final List<OIData> oiDataList = selectorResult.getSortedOIDatas();
+        final SelectorResult selectorResult = getSelectorResult(); // not null
 
         final Map<String, StaNamesDir> usedStaNamesMap = selectorResult.getUsedStaNamesMap();
 
@@ -1518,18 +1521,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         logger.debug("waveLengthRangeFull:   {}", waveLengthRangeFull);
         logger.debug("waveLengthRange:       {}", waveLengthRange);
 
-        // Get Global SharedSeriesAttributes:
-        final SharedSeriesAttributes oixpAttrs = SharedSeriesAttributes.INSTANCE_OIXP;
-
-        logger.debug("updateChart: plot {} oixpAttrs: {} IN", this.plotId, oixpAttrs);
-
         final PlotDefinition plotDef = getPlotDefinition();
         final Axis xAxis = plotDef.getXAxis();
 
         Range viewBounds, viewRange;
-
-        // Global converter (symmetry)
-        Converter xConverter = null, yConverter = null;
 
         final int nYaxes = plotDef.getYAxes().size();
 
@@ -1547,6 +1542,20 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         final boolean drawLines = plotDef.isDrawLine();
         final boolean useStepLine = (OIFitsConstants.COLUMN_EFF_WAVE.equalsIgnoreCase(xAxis.getName()));
 
+        // Global converter (symmetry)
+        Converter xConverter = null, yConverter = null;
+        final boolean skipAccepted = !hideFilteredData;
+
+        /*
+        * Note: JFreechart XYPlot uses the reverse order of the series rendering (REVERSE draws the primary series
+        * last so that it appears to be on top).
+         */
+        // selected OIData tables matching filters:
+        final List<OIData> oiDatasSelected = selectorResult.getSortedOIDatas();
+        // discarded OIData tables:
+        final List<OIData> oiDatasDiscarded = (hideFilteredData || selectorResult.isOIDatasDiscardedEmpty()) ? null
+                : selectorResult.getSortedOIDatasDiscarded();
+
         int nShowPlot = 0;
 
         // Loop on Y axes:
@@ -1557,7 +1566,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             boolean showPlot = false;
             final PlotInfo info;
 
-            if (oiDataList.isEmpty()) {
+            if (oiDatasSelected.isEmpty() && CollectionUtils.isEmpty(oiDatasDiscarded)) {
                 info = null;
             } else {
                 final FastIntervalXYDataset<OITableSerieKey, OITableSerieKey> dataset = new FastIntervalXYDataset<OITableSerieKey, OITableSerieKey>();
@@ -1573,26 +1582,71 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 final boolean useSymmetryX = useSymmetry(xAxis);
                 final boolean useSymmetryY = useSymmetry(yAxis);
 
-                if (useSymmetryX && useSymmetryY) {
+                // 1. selected (over, first as reverse order):
+                if (useSymmetryX || useSymmetryY) {
                     xConverter = (useSymmetryX) ? ConverterFactory.CONVERTER_REFLECT : null;
                     yConverter = (useSymmetryY) ? ConverterFactory.CONVERTER_REFLECT : null;
 
-                    for (OIData oiData : oiDataList) {
+                    for (OIData oiData : oiDatasSelected) {
                         // process data and add data series into given dataset:
-                        updatePlot(xyPlot, info, oiData, tableIndex, usedStaNamesMap, plotDef, i, dataset, xConverter, yConverter, drawLines);
-
+                        updatePlot(xyPlot, info, oiData, false, tableIndex, usedStaNamesMap,
+                                plotDef, i, dataset, xConverter, yConverter, drawLines, true, false);
                         tableIndex++;
                     }
                     xConverter = yConverter = null;
                 }
 
-                for (OIData oiData : oiDataList) {
+                for (OIData oiData : oiDatasSelected) {
                     // process data and add data series into given dataset:
-                    updatePlot(xyPlot, info, oiData, tableIndex, usedStaNamesMap, plotDef, i, dataset, xConverter, yConverter, drawLines);
-
+                    updatePlot(xyPlot, info, oiData, false, tableIndex, usedStaNamesMap,
+                            plotDef, i, dataset, xConverter, yConverter, drawLines, true, false);
                     tableIndex++;
                 }
 
+                if (skipAccepted || (oiDatasDiscarded != null)) {
+                    // 2. discarded (under, last as reverse order):
+                    if (useSymmetryX || useSymmetryY) {
+                        xConverter = (useSymmetryX) ? ConverterFactory.CONVERTER_REFLECT : null;
+                        yConverter = (useSymmetryY) ? ConverterFactory.CONVERTER_REFLECT : null;
+
+                        if (skipAccepted) {
+                            for (OIData oiData : oiDatasSelected) {
+                                // process data and add data series into given dataset:
+                                updatePlot(xyPlot, info, oiData, false, tableIndex, usedStaNamesMap,
+                                        plotDef, i, dataset, xConverter, yConverter, drawLines, false, skipAccepted);
+                                tableIndex++;
+                            }
+                        }
+
+                        if (oiDatasDiscarded != null) {
+                            for (OIData oiData : oiDatasDiscarded) {
+                                // process data and add data series into given dataset:
+                                updatePlot(xyPlot, info, oiData, true, tableIndex, usedStaNamesMap,
+                                        plotDef, i, dataset, xConverter, yConverter, drawLines, false, false);
+                                tableIndex++;
+                            }
+                        }
+                        xConverter = yConverter = null;
+                    }
+
+                    if (skipAccepted) {
+                        for (OIData oiData : oiDatasSelected) {
+                            // process data and add data series into given dataset:
+                            updatePlot(xyPlot, info, oiData, false, tableIndex, usedStaNamesMap,
+                                    plotDef, i, dataset, xConverter, yConverter, drawLines, false, skipAccepted);
+                            tableIndex++;
+                        }
+                    }
+
+                    if (oiDatasDiscarded != null) {
+                        for (OIData oiData : oiDatasDiscarded) {
+                            // process data and add data series into given dataset:
+                            updatePlot(xyPlot, info, oiData, true, tableIndex, usedStaNamesMap,
+                                    plotDef, i, dataset, xConverter, yConverter, drawLines, false, false);
+                            tableIndex++;
+                        }
+                    }
+                }
                 if (info.hasPlotData) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("xyPlotPlot[{}]: nData = {}", i, info.nDataPoints);
@@ -1775,6 +1829,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         if (plotDef.getColorMapping() == ColorMapping.STATION_INDEX
                 || plotDef.getColorMapping() == ColorMapping.CONFIGURATION) {
+
+            // Get Global SharedSeriesAttributes:
+            final SharedSeriesAttributes oixpAttrs = SharedSeriesAttributes.INSTANCE_OIXP;
+            logger.debug("updateChart: plot {} oixpAttrs: {} IN", this.plotId, oixpAttrs);
 
             for (int i = 0, len = this.xyPlotList.size(); i < len; i++) {
                 final XYPlot xyPlot = this.xyPlotList.get(i);
@@ -2095,6 +2153,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * TODO use column names and virtual columns (spatial ...)
      * @param plot XYPlot to update (dataset, renderer, axes)
      * @param oiData OIData table to use as data source
+     * @param tableDiscarded true if the given OIData table is discarded; false if selected
      * @param tableIndex table index to ensure serie uniqueness among collection
      * @param usedStaNamesMap (shared) used StaNames map
      * @param plotDef plot definition to use
@@ -2104,14 +2163,17 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * @param initialYConverter converter to use first on Y axis
      * @param info plot information to update
      * @param drawLines flag indicating to build series for line representation (along wavelength axis)
+     * @param skipFiltered true to skip data points; false to show filtered data on the plot (light gray)
+     * @param skipAccepted true to skip valid data points; false to show accepted data on the plot
      */
     private void updatePlot(final XYPlot plot, final PlotInfo info,
-                            final OIData oiData, final int tableIndex,
+                            final OIData oiData, final boolean tableDiscarded, final int tableIndex,
                             final Map<String, StaNamesDir> usedStaNamesMap,
                             final PlotDefinition plotDef, final int yAxisIndex,
                             final FastIntervalXYDataset<OITableSerieKey, OITableSerieKey> dataset,
                             final Converter initialXConverter, final Converter initialYConverter,
-                            final boolean drawLines) {
+                            final boolean drawLines,
+                            final boolean skipFiltered, final boolean skipAccepted) {
 
         final boolean isLogDebug = logger.isDebugEnabled();
 
@@ -2406,6 +2468,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         int nSkipFlag = 0, nSkipRow = 0, nSkipWavelength = 0, nSkipCell = 0;
         boolean isFlag, isXErrValid, isYErrValid, useXErrInBounds, useYErrInBounds;
 
+        // discarded data flags:
+        boolean isDiscardedRow, isDiscarded;
+
         int nData = 0;
 
         // fast access to NaN value:
@@ -2479,22 +2544,32 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     }
                 }
 
+                isDiscardedRow = tableDiscarded;
+
                 // check optional data mask 1D:
-                if ((maskOIData1D != null) && !maskOIData1D.accept(i)) {
-                    // if bit is false for this row, we hide this row
-                    nSkipRow++;
-                    continue;
+                if ((maskOIData1D != null) && !isDiscardedRow && !maskOIData1D.accept(i)) {
+                    if (skipFiltered) {
+                        // if bit is false for this row, we hide this row
+                        nSkipRow++;
+                        continue;
+                    } else {
+                        isDiscardedRow = true;
+                    }
                 }
 
                 // check mask 2D for row None flag:
                 if (maskOIData2D != null) {
-                    if (maskOIData2D.accept(i, idxNone)) {
-                        // row flagged as None:
-                        nSkipRow++;
-                        continue;
+                    if (!isDiscardedRow && maskOIData2D.accept(i, idxNone)) {
+                        if (skipFiltered) {
+                            // row flagged as None:
+                            nSkipRow++;
+                            continue;
+                        } else {
+                            isDiscardedRow = true;
+                        }
                     }
                     // check row flagged as Full:
-                    maskOIData2DRow = (maskOIData2D.accept(i, idxFull)) ? null : maskOIData2D;
+                    maskOIData2DRow = (isDiscardedRow || maskOIData2D.accept(i, idxFull)) ? null : maskOIData2D;
                 }
 
                 // previous channel index:
@@ -2502,18 +2577,33 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
                 // Iterate on wave channels (l):
                 for (int l = 0; l < nWaveChannels; l++) {
+                    // initialize filtered flag from row:
+                    isDiscarded = isDiscardedRow;
 
                     // check optional wavelength mask:
-                    if ((maskWavelength != null) && !maskWavelength.accept(l)) {
-                        // if bit is false for this row, we hide this row
-                        nSkipWavelength++;
-                        continue;
+                    if ((maskWavelength != null) && !isDiscarded && !maskWavelength.accept(l)) {
+                        if (skipFiltered) {
+                            // if bit is false for this row, we hide this row
+                            nSkipWavelength++;
+                            continue;
+                        } else {
+                            isDiscarded = true;
+                        }
                     }
 
                     // check optional data mask 2D (and its Full flag):
-                    if ((maskOIData2DRow != null) && !maskOIData2DRow.accept(i, l)) {
-                        // if bit is false for this row, we hide this row
-                        nSkipCell++;
+                    if ((maskOIData2DRow != null) && !isDiscarded && !maskOIData2DRow.accept(i, l)) {
+                        if (skipFiltered) {
+                            // if bit is false for this row, we hide this row
+                            nSkipCell++;
+                            continue;
+                        } else {
+                            isDiscarded = true;
+                        }
+                    }
+
+                    if (skipAccepted && !isDiscarded) {
+                        // only display discarded data points:
                         continue;
                     }
 
@@ -2531,7 +2621,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     // staConf corresponds to the baseline also:
                     currentStaConf = staConfs[i];
 
-                    // TODO: filter data (baseline, configuration, time ...)
                     // TODO: support function (min, max, mean) applied to array data (2D)
                     // Idea: use custom data consumer (2D, 1D, log or not, error or not)
                     // it will reduce the number of if statements => better performance and simpler code
@@ -2715,9 +2804,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             itemShapes[idx] = getPointShape(isYErrValid && isXErrValid && !isFlag);
 
                             // TODO: adjust renderer settings per Serie (color, shape ...) per series and item at higher level using dataset fields
-                            if (mappingWaveLengthColors != null) {
-                                itemPaints[idx] = mappingWaveLengthColors[l];
-                            }
+                            itemPaints[idx] = (isDiscarded) ? COLOR_DISCARDED
+                                    : (mappingWaveLengthColors != null) ? mappingWaveLengthColors[l] : null;
 
                             // Define row / col indices:
                             iRows[idx] = i;
@@ -2810,7 +2898,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 renderer.setItemShapes(serieIdx, itemShapes);
 
                 // define paint per item in serie:
-                renderer.setItemPaints(serieIdx, itemPaints); // TODO: check is null
+                renderer.setItemPaints(serieIdx, itemPaints);
 
                 // Add staIndex into the unique used station indexes anyway:
                 info.usedStaIndexNames.add(staIndexName);
@@ -3156,6 +3244,13 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         }
     }
 
+    private SubsetDefinition getSubsetDefinition() {
+        if (getPlot() == null) {
+            return null;
+        }
+        return getPlot().getSubsetDefinition();
+    }
+
     private PlotDefinition getPlotDefinition() {
         if (getPlot() == null) {
             return null;
@@ -3167,19 +3262,19 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * @return the SelectorResult of the SubsetDefinition of the Plot, or null if one of them is null.
      */
     private SelectorResult getSelectorResult() {
-        if (getPlot() == null || getPlot().getSubsetDefinition() == null) {
+        if (getSubsetDefinition() == null) {
             return null;
         } else {
-            return getPlot().getSubsetDefinition().getSelectorResult();
+            return getSubsetDefinition().getSelectorResult();
         }
     }
 
     // reuse Selector Result instead ?
     private String getFilterTargetUID() {
-        if (getPlot() == null || getPlot().getSubsetDefinition() == null) {
+        if (getSubsetDefinition() == null) {
             return null;
         }
-        return getPlot().getSubsetDefinition().getFilter().getTargetUID();
+        return getSubsetDefinition().getFilter().getTargetUID();
     }
 
     /*
