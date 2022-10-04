@@ -12,8 +12,6 @@ import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventType;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.processing.SelectorResult;
-import java.lang.ref.WeakReference;
-import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +25,6 @@ public final class PlotView extends javax.swing.JPanel implements OIFitsCollecti
     private static final long serialVersionUID = 1;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(PlotView.class.getName());
-    /** use new OIFITS table browser instead of HTML viewer */
-    private static final boolean USE_OIFITS_BROWSER = true;
 
     /* members */
     /** OIFitsCollectionManager singleton reference */
@@ -37,8 +33,6 @@ public final class PlotView extends javax.swing.JPanel implements OIFitsCollecti
     private final String plotId;
     /** last version of the subset of the plot */
     private IdentifiableVersion lastSubsetVersion = null;
-    /** former html panel */
-    private OIFitsHtmlPanel oiFitsHtmlPanel = null;
     /** former table browser panel */
     private OIFitsTableBrowser oiFitsBrowserPanel = null;
 
@@ -78,9 +72,7 @@ public final class PlotView extends javax.swing.JPanel implements OIFitsCollecti
         if (plotDefinitionEditor != null) {
             plotDefinitionEditor.dispose();
         }
-        if (USE_OIFITS_BROWSER) {
-            oiFitsBrowserPanel.dispose();
-        }
+        oiFitsBrowserPanel.dispose();
     }
 
     /**
@@ -90,16 +82,9 @@ public final class PlotView extends javax.swing.JPanel implements OIFitsCollecti
         plotChartPanel.setPlotId(plotId);
         plotDefinitionEditor.setPlotId(plotId);
 
-        final JPanel dataPanel;
+        oiFitsBrowserPanel = new OIFitsTableBrowser();
 
-        if (USE_OIFITS_BROWSER) {
-            oiFitsBrowserPanel = new OIFitsTableBrowser();
-            dataPanel = oiFitsBrowserPanel;
-        } else {
-            oiFitsHtmlPanel = new OIFitsHtmlPanel();
-            dataPanel = oiFitsHtmlPanel;
-        }
-        jTabbedPaneViews.addTab("data", dataPanel);
+        jTabbedPaneViews.addTab("data", oiFitsBrowserPanel);
     }
 
     /**
@@ -108,29 +93,27 @@ public final class PlotView extends javax.swing.JPanel implements OIFitsCollecti
      */
     private void updateDataView(final SubsetDefinition subsetDefinition) {
         if (logger.isDebugEnabled()) {
-            logger.debug("updateHtmlView: lastSubsetVersion {} vs subsetVersion {}", this.lastSubsetVersion,
+            logger.debug("updateDataView: lastSubsetVersion {} vs subsetVersion {}", this.lastSubsetVersion,
                     (subsetDefinition != null) ? subsetDefinition.getIdentifiableVersion() : null);
         }
 
         // compare last version with the subset itself (see IdentifiableVersion.equals):
         if (!ObjectUtils.areEquals(this.lastSubsetVersion, subsetDefinition)) {
-
             this.lastSubsetVersion = (subsetDefinition != null) ? subsetDefinition.getIdentifiableVersion() : null;
             logger.debug("subsetVersion changed: {}", this.lastSubsetVersion);
 
-            final OIFitsFile oiFitsFile = (subsetDefinition != null) ? subsetDefinition.getOIFitsSubset() : null;
+            final OIFitsFile oiFitsFile;
+            final SelectorResult selectorResult;
 
-            if (oiFitsBrowserPanel != null) {
-
-                final SelectorResult selectorResult
-                                     = (subsetDefinition == null) ? null : subsetDefinition.getSelectorResult();
-
-                this.oiFitsBrowserPanel.setOiFitsFileRef(
-                        new WeakReference<OIFitsFile>(oiFitsFile), new WeakReference<SelectorResult>(selectorResult));
+            if (subsetDefinition != null) {
+                oiFitsFile = subsetDefinition.getOIFitsSubset(); // fake OIFits structure
+                selectorResult = subsetDefinition.getSelectorResult();
+            } else {
+                oiFitsFile = null;
+                selectorResult = null;
             }
-            if (oiFitsHtmlPanel != null) {
-                this.oiFitsHtmlPanel.updateOIFits(oiFitsFile);
-            }
+
+            this.oiFitsBrowserPanel.setOiFitsFile(oiFitsFile, selectorResult);
         }
     }
 

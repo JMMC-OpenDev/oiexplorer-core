@@ -22,7 +22,7 @@ public final class FastIntervalXYDataset<K extends Comparable<V>, V> extends Abs
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** initial capacity for internal collections */
-    private final static int INITIAL_CAPACITY = 256;
+    private final static int INITIAL_CAPACITY = 64;
     /* members */
     /** number of series */
     private int seriesCount = 0;

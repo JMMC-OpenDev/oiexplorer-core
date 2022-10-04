@@ -166,15 +166,13 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
         }
     }
 
-    public void setOiFitsFileRef(final WeakReference<OIFitsFile> oiFitsFileRef) {
-        setOiFitsFileRef(oiFitsFileRef, null); // no selector result: no masks given for OIDatas
+    public void setOiFitsFile(final OIFitsFile oiFitsFile) {
+        setOiFitsFile(oiFitsFile, null); // no selector result: no masks given for OIDatas
     }
 
-    public void setOiFitsFileRef(
-            final WeakReference<OIFitsFile> oiFitsFileRef, final WeakReference<SelectorResult> selectorResultRef) {
+    public void setOiFitsFile(final OIFitsFile oiFitsFile, final SelectorResult selectorResult) {
 
-        final OIFitsFile oiFitsFile = (oiFitsFileRef != null) ? oiFitsFileRef.get() : null;
-        this.selectorResultRef = selectorResultRef;
+        this.selectorResultRef = (selectorResult != null) ? new WeakReference<SelectorResult>(selectorResult) : null;
 
         if (this.getOIFitsFile() != oiFitsFile) {
             reset();
@@ -448,14 +446,13 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
     }
 
     public static void showFitsBrowser(final OIFitsFile oiFitsFile) {
-        final WeakReference<OIFitsFile> oiFitsFileRef = new WeakReference<OIFitsFile>(oiFitsFile);
         final String oiFitsFileName = oiFitsFile.getFileName();
 
         SwingUtils.invokeEDT(new Runnable() {
             @Override
             public void run() {
                 final OIFitsTableBrowser fb = new OIFitsTableBrowser();
-                fb.setOiFitsFileRef(oiFitsFileRef);
+                fb.setOiFitsFile(oiFitsFile);
 
                 final JFrame frame = new JFrame("File: " + oiFitsFileName) {
                     @Override
