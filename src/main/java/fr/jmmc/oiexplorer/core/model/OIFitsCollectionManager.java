@@ -1260,16 +1260,16 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         for (SubsetFilter filter : subsetDefinition.getFilters()) {
             selector.reset();
 
-            // Target
+            // Target:
             selector.setTargetUID(filter.getTargetUID());
 
-            // InstrumentMode
-            selector.setInsModeUID(filter.getInsModeUID());
+            // InstrumentModes:
+            selector.setInsModeUIDs(filter.getInsModeUIDs());
 
-            // NightId
-            selector.setNightID(filter.getNightID());
+            // NightIds:
+            selector.setNightIDs(filter.getNightIDs());
 
-            // Table
+            // Tables:
             if (!filter.getTables().isEmpty()) {
                 for (TableUID tableUID : filter.getTables()) {
                     selector.addTable(tableUID.getFile().getFile(), tableUID.getExtNb());
