@@ -1912,8 +1912,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             final double max = NumberUtils.trimTo3Digits(ConverterFactory.CONVERTER_MICRO_METER.evaluate(waveLengthRangeFull.getUpperBound()) + 1e-3D); // microns
 
             final NumberAxis lambdaAxis = new NumberAxis();
-            // inverted color palette:
-            mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, ColorScale.LINEAR, true), lambdaAxis);
+
+            mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, ColorScale.LINEAR, false), lambdaAxis);
 
             lambdaAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
             lambdaAxis.setAxisLinePaint(Color.BLACK);
@@ -2397,8 +2397,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 final int alphaMask = Math.round(255 * alpha) << 24;
 
                 for (int i = 0; i < nWaves; i++) {
-                    // invert palette to have (VIOLET - BLUE - GREEN - RED) ie color spectrum:
-                    value = (float) (iMaxColor * (1.0 - ((effWaves[i] - lower) / wlRange)));
+                    value = (float) (iMaxColor * (effWaves[i] - lower) / wlRange);
 
                     mappingWaveLengthColors[i] = new Color(ImageUtils.getRGB(colorModel, iMaxColor, value, alphaMask), true);
                 }
