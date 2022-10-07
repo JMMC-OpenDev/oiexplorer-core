@@ -3,7 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui.chart;
 
+import static fr.jmmc.jmal.image.ColorModels.MAX_COLORS;
 import fr.jmmc.jmal.util.MathUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.util.ColorUtils;
@@ -356,9 +358,13 @@ public class ColorPalette {
     }
 
     public BufferedImage createImage() {
-        final int maxWidth = 256;
-        final int w = Math.round(maxWidth / colors.length);
-        return createImage(maxWidth, w, 16, false);
+        final int scaleInt = Math.max(1, SwingUtils.adjustUISizeCeil(1));
+
+        final int width = scaleInt * MAX_COLORS; // always 256px to be consistent among color models
+        final int height = scaleInt * 32;
+        
+        final int w = Math.round(width / colors.length);
+        return createImage(width, w, height, false);
     }
 
     public BufferedImage createImage(final int maxWidth,

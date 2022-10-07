@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui;
 
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -26,7 +27,7 @@ public abstract class IconComboBoxRenderer extends DefaultListCellRenderer {
 
     public IconComboBoxRenderer() {
         super();
-        final Dimension dim = new Dimension(380, 32);
+        final Dimension dim = new Dimension(SwingUtils.adjustUISizeCeil(320), SwingUtils.adjustUISizeCeil(36));
         setMinimumSize(dim);
         setPreferredSize(dim);
     }
