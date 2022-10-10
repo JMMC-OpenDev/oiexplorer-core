@@ -695,9 +695,10 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @param expression expression of the column
      */
     public void updateExprColumnInOIFitsCollection(final String name, final String expression) {
-        modifyExprColumnInOIFitsCollection(name, expression, false);
+        updateExprColumnInOIFitsCollection(name, expression, false);
 
         // fire Collection changed to force updating subset's result data model:
+        // it will clear oifits collection cache too:
         fireOIFitsCollectionChanged();
     }
 
@@ -706,7 +707,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @param name name of the column
      */
     public void removeExprColumnInOIFitsCollection(final String name) {
-        modifyExprColumnInOIFitsCollection(name, null, true);
+        updateExprColumnInOIFitsCollection(name, null, true);
 
         // fire Collection changed to force updating subset's result data model:
         fireOIFitsCollectionChanged();
@@ -716,16 +717,15 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Update or remove the column given its name.
      * Note: for updates, it will verify the expression
      * and perform computation on all tables present in all OIFitsCollections
-     * @param userName name of the column
+     * @param name name of the column
      * @param expression expression of the column
      * @param remove true to remove the column; false to update the column
      */
-    private void modifyExprColumnInOIFitsCollection(final String userName, final String expression,
+    private void updateExprColumnInOIFitsCollection(final String name, final String expression,
                                                     final boolean remove) {
 
-        final String name = "[" + userName + "]";
-
-        logger.debug("modifyExprColumnInOIFitsCollection: {}", name);
+        final String realName = "[" + name + "]";
+        logger.debug("updateExprColumnInOIFitsCollection: name = {} remove = {}", realName, remove);
 
         final int nTableTypes = 4;
 
@@ -734,8 +734,8 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         if (!remove) {
             // Check expression:
             int n = 0;
-            int nBad = 0;
             int nOk = 0;
+            int nKo = 0;
 
             OIVis vis = null;
             OIVis2 vis2 = null;
@@ -747,101 +747,89 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
             for (OIFitsFile oiFitsFile : oiFitsCollection.getOIFitsFiles()) {
                 logger.debug("oiFitsFile: {}", oiFitsFile);
 
-                if (vis == null) {
-                    // cherche une table OI_VIS
-                    if (oiFitsFile.hasOiVis()) {
-                        vis = oiFitsFile.getOiVis()[0];
-                        n++;
-
-                        try {
-                            vis.checkExpression(name, expression);
-                            working[0] = true;
-                            nOk++;
-                        } catch (IllegalStateException ise) {
-                            // fatal error:
-                            throw ise;
-                        } catch (RuntimeException re) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("exception OI_VIS: {}", re.getMessage(), re);
-                            }
-                            messages[0] = re.getMessage();
-                            nBad++;
+                // try OI_VIS:
+                if ((vis == null) && (oiFitsFile.hasOiVis())) {
+                    vis = oiFitsFile.getOiVis()[0];
+                    n++;
+                    try {
+                        vis.checkExpression(realName, expression);
+                        working[0] = true;
+                        nOk++;
+                    } catch (IllegalStateException ise) {
+                        // fatal error:
+                        throw ise;
+                    } catch (RuntimeException re) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("exception OI_VIS: {}", re.getMessage(), re);
                         }
+                        messages[0] = re.getMessage();
+                        nKo++;
                     }
                 }
-                if (vis2 == null) {
-                    // cherche une table OI_VIS2
-                    if (oiFitsFile.hasOiVis2()) {
-                        vis2 = oiFitsFile.getOiVis2()[0];
-                        n++;
-
-                        try {
-                            vis2.checkExpression(name, expression);
-                            working[1] = true;
-                            nOk++;
-                        } catch (IllegalStateException ise) {
-                            // fatal error:
-                            throw ise;
-                        } catch (RuntimeException re) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("exception OI_VIS2: {}", re.getMessage(), re);
-                            }
-                            messages[1] = re.getMessage();
-                            nBad++;
+                // try OI_VIS2:
+                if ((vis2 == null) && (oiFitsFile.hasOiVis2())) {
+                    vis2 = oiFitsFile.getOiVis2()[0];
+                    n++;
+                    try {
+                        vis2.checkExpression(realName, expression);
+                        working[1] = true;
+                        nOk++;
+                    } catch (IllegalStateException ise) {
+                        // fatal error:
+                        throw ise;
+                    } catch (RuntimeException re) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("exception OI_VIS2: {}", re.getMessage(), re);
                         }
+                        messages[1] = re.getMessage();
+                        nKo++;
                     }
                 }
-                if (t3 == null) {
-                    // cherche une table OI_T3
-                    if (oiFitsFile.hasOiT3()) {
-                        t3 = oiFitsFile.getOiT3()[0];
-                        n++;
-
-                        try {
-                            t3.checkExpression(name, expression);
-                            working[2] = true;
-                            nOk++;
-                        } catch (IllegalStateException ise) {
-                            // fatal error:
-                            throw ise;
-                        } catch (RuntimeException re) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("exception OI_T3: {}", re.getMessage(), re);
-                            }
-                            messages[2] = re.getMessage();
-                            nBad++;
+                // try OI_T3:
+                if ((t3 == null) && (oiFitsFile.hasOiT3())) {
+                    t3 = oiFitsFile.getOiT3()[0];
+                    n++;
+                    try {
+                        t3.checkExpression(realName, expression);
+                        working[2] = true;
+                        nOk++;
+                    } catch (IllegalStateException ise) {
+                        // fatal error:
+                        throw ise;
+                    } catch (RuntimeException re) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("exception OI_T3: {}", re.getMessage(), re);
                         }
+                        messages[2] = re.getMessage();
+                        nKo++;
                     }
                 }
-                if (flux == null) {
-                    // cherche une table OI_FLUX
-                    if (oiFitsFile.hasOiFlux()) {
-                        flux = oiFitsFile.getOiFlux()[0];
-                        n++;
-
-                        try {
-                            flux.checkExpression(name, expression);
-                            working[3] = true;
-                            nOk++;
-                        } catch (IllegalStateException ise) {
-                            // fatal error:
-                            throw ise;
-                        } catch (RuntimeException re) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("exception OI_T3: {}", re.getMessage(), re);
-                            }
-                            messages[3] = re.getMessage();
-                            nBad++;
+                // try OI_FLUX:
+                if ((flux == null) && (oiFitsFile.hasOiFlux())) {
+                    flux = oiFitsFile.getOiFlux()[0];
+                    n++;
+                    try {
+                        flux.checkExpression(realName, expression);
+                        working[3] = true;
+                        nOk++;
+                    } catch (IllegalStateException ise) {
+                        // fatal error:
+                        throw ise;
+                    } catch (RuntimeException re) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("exception OI_T3: {}", re.getMessage(), re);
                         }
+                        messages[3] = re.getMessage();
+                        nKo++;
                     }
                 }
-                if (n == 4) {
+                if (n == nTableTypes) {
                     break;
                 }
             }
 
             // Bilan des courses:
-            if (nBad != 0 && nOk == 0) {
+            if (nKo != 0 && nOk == 0) {
 
                 final Map<String, List<Integer>> mapError = new HashMap< String, List<Integer>>(8);
 
@@ -894,7 +882,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 MessagePane.showErrorMessage(sb.toString());
                 return;
             }
-        }
+        } // test expression
 
         final long startTime = System.nanoTime();
 
@@ -904,16 +892,19 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
             for (OIData oiData : oiFitsFile.getOiDataList()) {
                 logger.debug("oiData: {}", oiData);
+
                 if (oiData != null) {
                     if (remove) {
-                        oiData.removeExpressionColumn(name);
+                        oiData.removeExpressionColumn(realName);
                     } else {
                         // only compute expression on working tables:
-                        if ((working[0] && oiData instanceof OIVis)
-                                || (working[1] && oiData instanceof OIVis2)
-                                || (working[2] && oiData instanceof OIT3)
-                                || (working[3] && oiData instanceof OIFlux)) {
-                            oiData.updateExpressionColumn(name, expression);
+                        if ((working[0] && (oiData instanceof OIVis))
+                                || (working[1] && (oiData instanceof OIVis2))
+                                || (working[2] && (oiData instanceof OIT3))
+                                || (working[3] && (oiData instanceof OIFlux))) {
+                            oiData.updateExpressionColumn(realName, expression);
+                        } else {
+                            oiData.removeExpressionColumn(realName);
                         }
                     }
                 }
@@ -921,10 +912,10 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         }
 
         if (!remove) {
-            logger.info("modifyExprColumnInOIFitsCollection[{}] computation time = {} ms.",
+            logger.info("updateExprColumnInOIFitsCollection[{}] computation time = {} ms.",
                     expression, 1e-6d * (System.nanoTime() - startTime));
         }
-        logger.debug("modifyExprColumnInOIFitsCollection: done.");
+        logger.debug("updateExprColumnInOIFitsCollection: done.");
     }
 
     /* --- file handling ------------------------------------- */
