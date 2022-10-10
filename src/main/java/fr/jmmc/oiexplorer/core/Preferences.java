@@ -8,6 +8,7 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.ImageUtils.ImageInterpolation;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oitools.model.Target;
@@ -112,11 +113,24 @@ public abstract class Preferences extends fr.jmmc.jmcs.data.preference.Preferenc
         public void update(Observable o, Object arg) {
             logger.debug("PreferenceObserver notified");
 
-            ColorPalette.setColorPalettes(getPreference(CHART_PALETTE));
+            boolean changed = false;
 
-            ImageUtils.setImageInterpolation(getImageInterpolation());
+            if (!ObjectUtils.areEquals(ColorPalette.getColorPaletteName(), getPreference(CHART_PALETTE))) {
+                changed = true;
+                ColorPalette.setColorPalettes(getPreference(CHART_PALETTE));
+            }
+
+            if (ImageUtils.getImageInterpolation() != getImageInterpolation()) {
+                changed = true;
+                ImageUtils.setImageInterpolation(getImageInterpolation());
+            }
 
             if (Target.MATCHER_LIKE.setSeparationInArcsec(getPreferenceAsDouble(Preferences.TARGET_MATCHER_SEPARATION))) {
+                changed = true;
+            }
+
+            if (changed) {
+                // force overall refresh:
                 OIFitsCollectionManager.getInstance().fireOIFitsCollectionChanged();
             }
         }
