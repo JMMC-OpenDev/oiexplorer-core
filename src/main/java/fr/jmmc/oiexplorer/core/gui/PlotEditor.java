@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * ! Unused class !
  * @author mella
  */
 public final class PlotEditor extends javax.swing.JPanel implements OIFitsCollectionManagerEventListener {
@@ -206,18 +206,18 @@ public final class PlotEditor extends javax.swing.JPanel implements OIFitsCollec
         logger.debug("refreshSubsetNames: {}", plotId);
 
         // Put all subset references:
-        final List<String> subsetNames = new ArrayList<String>();
+        final List<String> subsetIds = new ArrayList<String>();
         for (SubsetDefinition subset : subsetDefinitionList) {
-            subsetNames.add(subset.getId());
+            subsetIds.add(subset.getId());
         }
 
         final Object oldValue = subsetComboBox.getSelectedItem();
 
-        subsetComboBox.setModel(new GenericListModel<String>(subsetNames, true));
+        subsetComboBox.setModel(new GenericListModel<String>(subsetIds, true));
 
         // restore previous selection: TODO: handle case where it becomes invalid.
         if (oldValue != null) {
-            if (subsetNames.contains(oldValue.toString())) {
+            if (subsetIds.contains(oldValue.toString())) {
                 subsetComboBox.setSelectedItem(oldValue);
             } else {
                 // TODO: handle case where it becomes invalid.
@@ -235,21 +235,21 @@ public final class PlotEditor extends javax.swing.JPanel implements OIFitsCollec
         logger.debug("refreshPlotDefinitionNames: {}", plotId);
 
         // use identifiers to keep unique values:
-        final Set<String> plotDefNames = new LinkedHashSet<String>();
+        final Set<String> plotDefIds = new LinkedHashSet<String>();
         for (PlotDefinition plotDef : plotDefinitionList) {
-            plotDefNames.add(plotDef.getId());
+            plotDefIds.add(plotDef.getId());
         }
         for (PlotDefinition plotDef : PlotDefinitionFactory.getInstance().getDefaults()) {
-            plotDefNames.add(plotDef.getId());
+            plotDefIds.add(plotDef.getId());
         }
 
         final Object oldValue = plotDefinitionComboBox.getSelectedItem();
 
-        plotDefinitionComboBox.setModel(new GenericListModel<String>(new ArrayList<String>(plotDefNames), true));
+        plotDefinitionComboBox.setModel(new GenericListModel<String>(new ArrayList<String>(plotDefIds), true));
 
         // restore previous selection: TODO: handle case where it becomes invalid.
         if (oldValue != null) {
-            if (plotDefNames.contains(oldValue.toString())) {
+            if (plotDefIds.contains(oldValue.toString())) {
                 plotDefinitionComboBox.setSelectedItem(oldValue);
             } else {
                 // TODO: handle case where it becomes invalid.

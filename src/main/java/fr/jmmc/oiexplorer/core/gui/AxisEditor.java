@@ -49,8 +49,8 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
      */
     public AxisEditor(final PlotDefinitionEditor parent) {
         initComponents();
-
         parentToNotify = parent;
+
         nameComboBoxModel = new GenericListModel<String>(new ArrayList<String>(25), true);
         nameComboBox.setModel(nameComboBoxModel);
 
@@ -112,7 +112,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             notify = false;
             final String axisName = axis.getName();
 
-            nameComboBoxModel.add(axisChoices);
+            nameComboBoxModel.addAll(axisChoices);
             nameComboBox.setSelectedItem(axisName);
 
             includeZeroCheckBox.setSelected(axis.isIncludeZero());

@@ -70,8 +70,8 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     /* associated Range editors */
     private final transient List<RangeEditor> rangeEditors = new ArrayList<>();
 
-    /* for DataType.STRING list of checkboxes for accepted values */
-    private final transient List<String> checkBoxListValuesModel = new ArrayList<>(16);
+    /* for DataType.STRING: list of checkboxes for accepted values */
+    private final transient GenericListModel<String> checkBoxListValuesModel;
 
     /** converter associated to the column name of the generic filter. It allows us to make the range editor use a
      * different unit more user friendly. */
@@ -85,6 +85,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
     /** Creates new form GenericFilterEditor */
     public GenericFilterEditor() {
         initComponents();
+        this.checkBoxListValuesModel = new GenericListModel<String>(new ArrayList<>(16));
         postInit();
     }
 
@@ -92,7 +93,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
      * This method is useful to set the models and specific features of initialized swing components :
      */
     private void postInit() {
-        checkBoxListValues.setModel(new GenericListModel<String>(checkBoxListValuesModel));
+        checkBoxListValues.setModel(checkBoxListValuesModel);
         checkBoxListValues.getCheckBoxListSelectionModel().addListSelectionListener(this);
 
         updatingGUI = false;
@@ -386,7 +387,6 @@ public final class GenericFilterEditor extends javax.swing.JPanel
 
             switch (genericFilter.getDataType()) {
                 case NUMERIC:
-
                     // removing all but first range (if any)
                     for (int i = 1, s = genericFilter.getAcceptedRanges().size(); i < s; i++) {
                         removeRange(1); // always the number 1, because indexes change after every remove

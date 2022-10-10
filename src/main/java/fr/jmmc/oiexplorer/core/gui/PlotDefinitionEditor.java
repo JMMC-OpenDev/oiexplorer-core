@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.SwingUtilities;
@@ -68,7 +67,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
     private String plotDefId = null;
     /* Swing components */
     /** Store all axis choices available given the plot's subset if any */
-    private final List<String> axisChoices = new LinkedList<String>();
+    private final List<String> axisChoices = new ArrayList<String>();
     /** xAxisEditor */
     private AxisEditor xAxisEditor;
     /** List of y axes with their editors (identity hashcode) */
