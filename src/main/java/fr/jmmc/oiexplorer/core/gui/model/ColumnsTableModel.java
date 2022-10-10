@@ -25,10 +25,10 @@ public final class ColumnsTableModel extends AbstractTableModel {
     private static final Logger logger = LoggerFactory.getLogger(ColumnsTableModel.class.getName());
 
     /** ROW_INDEX derived column as int[] */
-    public final static String COLUMN_ROW_INDEX = "ROW_INDEX";
+    public final static String COLUMN_ROW_INDEX = "ROW";
 
     /** COL_INDEX derived column as int[][] */
-    public final static String COLUMN_COL_INDEX = "COL_INDEX";
+    public final static String COLUMN_COL_INDEX = "COL";
 
     /** Derived ROW_INDEX column definition */
     private final static ColumnMeta COLUMN_META_ROW_INDEX = new ColumnMeta(COLUMN_ROW_INDEX, "row index", Types.TYPE_INT, 1);
