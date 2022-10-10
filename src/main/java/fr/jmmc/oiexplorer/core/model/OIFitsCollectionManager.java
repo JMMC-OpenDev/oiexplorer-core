@@ -1936,7 +1936,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @param listener listener to bind
      */
     public void bindActivePlotChanged(final OIFitsCollectionManagerEventListener listener) {
-        getSubsetDefinitionChangedEventNotifier().register(listener);
+        getActivePlotChangedEventNotifier().register(listener);
     }
 
     /**
@@ -1968,7 +1968,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @param listener listener to bind
      */
     public void bindPlotViewportChanged(final OIFitsCollectionManagerEventListener listener) {
-        getSubsetDefinitionChangedEventNotifier().register(listener);
+        getPlotViewportChangedEventNotifier().register(listener);
     }
 
     /**
@@ -1984,7 +1984,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * @param listener listener to bind
      */
     public void bindReadyEvent(final OIFitsCollectionManagerEventListener listener) {
-        getSubsetDefinitionChangedEventNotifier().register(listener);
+        getReadyEventNotifier().register(listener);
     }
 
     /**
