@@ -29,6 +29,7 @@ public abstract class Preferences extends fr.jmmc.jmcs.data.preference.Preferenc
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(Preferences.class.getName());
+
     /* Preferences */
     /** Preference : LUT table to use for the any image */
     public final static String MODEL_IMAGE_LUT = "model.image.lut";
@@ -40,6 +41,8 @@ public abstract class Preferences extends fr.jmmc.jmcs.data.preference.Preferenc
     public final static String CHART_PALETTE = "chart.palette";
     /** Preference : target matcher distance (as) */
     public final static String TARGET_MATCHER_SEPARATION = "target.matcher.sep";
+    /** Preference : optional flag to hide oifits validator report */
+    public final static String VALIDATOR_DONT_SHOW_REPORT = "oifits.validator.dontShow";
 
     /**
      * Creates a new Preferences object.
