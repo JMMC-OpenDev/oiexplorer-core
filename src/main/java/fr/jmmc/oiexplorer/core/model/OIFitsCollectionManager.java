@@ -198,8 +198,6 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
     private void postLoadOIFitsCollection(final File file, final OiDataCollection oiDataCollection, final OIFitsChecker checker) {
         // refreshUI called addOIFitsFile(files)
-        
-        System.out.println("oiDataCollection:\n" + oiDataCollection);
 
         // add all SubsetDefinitions:
         for (SubsetDefinition subsetDefinition : oiDataCollection.getSubsetDefinitions()) {
@@ -229,8 +227,6 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         // check and update references in current OiDataCollection:
         // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
         checkReferences();
-        
-        System.out.println("userCollection:\n" + userCollection);
 
         // Fire the Ready event to any listener:
         fireReady(this, null);
@@ -589,7 +585,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
     public boolean isUserCollectionChanged() {
         // check and update references (removes null and empty collections):
         this.userCollection.checkReferences();
-        
+
         // perform the complete graph comparison (but version):
         return ((userCollectionInitial != null) && !userCollectionInitial.equals(this.userCollection, false));
     }
@@ -2325,7 +2321,6 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 // Note: no explicit firePlotChanged event fired as done in updateSubsetDefinitionRef and updatePlotDefinitionRef
                 break;
             case READY:
-                System.out.println("userCollectionInitial");
                 defineInitialUserCollection();
                 break;
             default:
@@ -2342,8 +2337,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         // finally: set the initial state of the user collection (after GUI updates => potentially modified) 
         this.defineInitialUserCollection();
     
-    */
-    
+     */
     /**
      * Check bad references
      */
