@@ -142,6 +142,9 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         SwingUtils.adjustSize(this.jToggleButtonAuto, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonDefault, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonFixed, ComponentSizeVariant.small);
+        
+        SwingUtils.adjustSize(this.flaggedDataCheckBox, ComponentSizeVariant.small);
+        SwingUtils.adjustSize(this.drawLinesCheckBox, ComponentSizeVariant.small);
 
         SwingUtils.adjustSize(this.jToggleButtonExprEditor, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonDetailled, ComponentSizeVariant.small);
@@ -398,17 +401,18 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         jToggleButtonDetailled = new javax.swing.JToggleButton();
         jToggleButtonExprEditor = new javax.swing.JToggleButton();
         extendedPanel = new javax.swing.JPanel();
-        yLabel = new javax.swing.JLabel();
         xLabel = new javax.swing.JLabel();
-        addYAxisButton = new javax.swing.JButton();
-        delYAxisButton = new javax.swing.JButton();
         xAxisPanel = new javax.swing.JPanel();
+        addYAxisButton = new javax.swing.JButton();
+        jSeparatorHz = new javax.swing.JSeparator();
+        yLabel = new javax.swing.JLabel();
         yAxesPanel = new javax.swing.JPanel();
+        delYAxisButton = new javax.swing.JButton();
         jPanelOtherEditors = new javax.swing.JPanel();
 
         setLayout(new java.awt.GridBagLayout());
 
-        refreshButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/image/refresh.png"))); // NOI18N
+        refreshButton.setIcon(fr.jmmc.jmcs.gui.util.ResourceImage.REFRESH_ICON.icon());
         refreshButton.setToolTipText("refresh zoom / remove plot selection");
         refreshButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
         refreshButton.addActionListener(new java.awt.event.ActionListener() {
@@ -569,15 +573,6 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
 
         extendedPanel.setLayout(new java.awt.GridBagLayout());
 
-        yLabel.setText("Y axes");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        extendedPanel.add(yLabel, gridBagConstraints);
-
         xLabel.setText("X axis");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -586,6 +581,14 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         extendedPanel.add(xLabel, gridBagConstraints);
+
+        xAxisPanel.setLayout(new java.awt.BorderLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        extendedPanel.add(xAxisPanel, gridBagConstraints);
 
         addYAxisButton.setIcon(fr.jmmc.jmcs.gui.util.ResourceImage.LIST_ADD.icon());
         addYAxisButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -600,6 +603,31 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         extendedPanel.add(addYAxisButton, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        extendedPanel.add(jSeparatorHz, gridBagConstraints);
+
+        yLabel.setText("Y axes");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        extendedPanel.add(yLabel, gridBagConstraints);
+
+        yAxesPanel.setLayout(new javax.swing.BoxLayout(yAxesPanel, javax.swing.BoxLayout.Y_AXIS));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        extendedPanel.add(yAxesPanel, gridBagConstraints);
 
         delYAxisButton.setIcon(fr.jmmc.jmcs.gui.util.ResourceImage.LIST_DEL.icon());
         delYAxisButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -611,27 +639,10 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         extendedPanel.add(delYAxisButton, gridBagConstraints);
-
-        xAxisPanel.setLayout(new java.awt.BorderLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        extendedPanel.add(xAxisPanel, gridBagConstraints);
-
-        yAxesPanel.setLayout(new javax.swing.BoxLayout(yAxesPanel, javax.swing.BoxLayout.Y_AXIS));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        extendedPanel.add(yAxesPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -892,6 +903,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
     private javax.swing.JPanel extendedPanel;
     private javax.swing.JCheckBox flaggedDataCheckBox;
     private javax.swing.JPanel jPanelOtherEditors;
+    private javax.swing.JSeparator jSeparatorHz;
     private javax.swing.JToggleButton jToggleButtonAuto;
     private javax.swing.JToggleButton jToggleButtonDefault;
     private javax.swing.JToggleButton jToggleButtonDetailled;
