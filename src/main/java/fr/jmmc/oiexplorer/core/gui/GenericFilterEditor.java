@@ -99,7 +99,6 @@ public final class GenericFilterEditor extends javax.swing.JPanel
         updatingGUI = false;
 
         // use small variant:
-        SwingUtils.adjustSize(this.jCheckBoxEnabled, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jCheckBoxExclusive, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jButtonReset, ComponentSizeVariant.small);
 
@@ -132,7 +131,7 @@ public final class GenericFilterEditor extends javax.swing.JPanel
 
             final String columnName = genericFilter.getColumnName();
 
-            // Set column name:
+            // Set column name as checkbox's label:
             jCheckBoxEnabled.setSelected(genericFilter.isEnabled());
             jCheckBoxEnabled.setText(columnName);
 
