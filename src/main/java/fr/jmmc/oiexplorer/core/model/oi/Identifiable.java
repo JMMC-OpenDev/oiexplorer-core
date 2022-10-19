@@ -207,7 +207,11 @@ public class Identifiable
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public final boolean equals(final Object obj) {
+        return equals(obj, true);
+    }
+
+    public boolean equals(final Object obj, final boolean useVersion) {
         if (obj == null) {
             return false;
         }
@@ -228,10 +232,7 @@ public class Identifiable
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.description, other.getDescription())) {
             return false;
         }
-        if (this.version != other.getVersion()) {
-            return false;
-        }
-        return true;
+        return !(useVersion && (this.version != other.getVersion()));
     }
 
     /**
@@ -334,7 +335,7 @@ public class Identifiable
      * @return true if the given identifiable instance was added; false otherwise
      */
     public static <K extends Identifiable> boolean addIdentifiable(final K identifiable, final java.util.List<K> list) {
-        if (identifiable != null && identifiable.getId() != null && getIdentifiable(identifiable.getId(), list) == null) {
+        if ((identifiable != null) && (identifiable.getId() != null) && getIdentifiable(identifiable.getId(), list) == null) {
             // replace previous ??
             list.add(identifiable);
             return true;
@@ -375,6 +376,46 @@ public class Identifiable
         }
         return null;
     }
+
+    /**
+     * Utility method for <code>equals()</code> methods.
+     *
+     * @param o1 one object
+     * @param o2 another object
+     * @param useVersion true to compare version; false otherwise
+     * @param <K> identifiable class type
+     *
+     * @return <code>true</code> if they're both <code>null</code> or both equal
+     */
+    public static <K extends Identifiable> boolean areEquals(final K o1, final K o2, final boolean useVersion) {
+        return (o1 == o2) || ((o1 != null) && o1.equals(o2, useVersion));
+    }
+
+    public static <K extends Identifiable> boolean areEquals(final java.util.List<K> list1, final java.util.List<K> list2,
+                                                             final boolean useVersion) {
+        if (list1 != null) {
+            if (list2 == null) {
+                return false;
+            }
+            final int s = list1.size();
+            boolean equal;
+            if (equal = (s == list2.size())) {
+                for (int i = 0; i < s; i++) {
+                    if (!areEquals(list1.get(i), list2.get(i), useVersion)) {
+                        equal = false;
+                        break;
+                    }
+                }
+            }
+            return equal;
+        }
+        return (list2 == null);
+    }
+
+    public static <K extends Identifiable> boolean areIdEquals(final K o1, final K o2) {
+        return (o1 == o2) || ((o1 != null) && o1.getId().equals((o2 != null) ? o2.getId() : null));
+    }
+    
 //--simple--preserve
 
 }

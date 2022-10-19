@@ -192,8 +192,8 @@ public class PlotDefinition
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!super.equals(obj)) { // Identifiable
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (!super.equals(obj, useVersion)) { // Identifiable
             return false;
         }
         final PlotDefinition other = (PlotDefinition) obj;

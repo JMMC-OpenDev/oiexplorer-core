@@ -195,6 +195,65 @@ public class OiDataCollection
     }
     
 //--simple--preserve
+
+
+    /**
+     * Perform a deep-copy of the given other instance into this instance
+     * 
+     * @see OIBase#clone() 
+     * 
+     * @param other other instance
+     */
+    @Override
+    public final void copy(final OIBase other) {
+        final OiDataCollection userCollection = (OiDataCollection) other;
+
+        // copy schemaVersion:
+        this.schemaVersion = userCollection.schemaVersion;
+
+        // deep copy files, subsetDefinitions, plotDefinitions & plots:
+        this.files = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(userCollection.files);
+        this.subsetDefinitions = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(userCollection.subsetDefinitions);
+        this.plotDefinitions = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(userCollection.plotDefinitions);
+        this.plots = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(userCollection.plots);
+    }
+
+
+    @Override
+    public final boolean equals(final Object obj) {
+        return equals(obj, true);
+    }
+
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (obj == null) {
+            return false;
+        }
+        // identity check:
+        if (this == obj) {
+            return true;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final OiDataCollection other = (OiDataCollection) obj;
+        if (this.schemaVersion != other.schemaVersion) {
+            return false;
+        }
+        if (!Identifiable.areEquals(this.files, other.files, useVersion)) {
+            return false;
+        }
+        if (!Identifiable.areEquals(this.subsetDefinitions, other.subsetDefinitions, useVersion)) {
+            return false;
+        }
+        if (!Identifiable.areEquals(this.plotDefinitions, other.plotDefinitions, useVersion)) {
+            return false;
+        }
+        if (!Identifiable.areEquals(this.plots, other.plots, useVersion)) {
+            return false;
+        }
+        return true;        
+    }
+
     /**
      * toString() implementation using string builder
      * @param sb string builder to append to
@@ -224,33 +283,35 @@ public class OiDataCollection
      * Check bad references
      */
     public void checkReferences() {
+        if (subsetDefinitions != null) {
+            // create the Map<ID, OIDataFile> index for files:
+            final java.util.Map<String, OIDataFile> mapIdOiDataFiles
+                                                    = (java.util.Map<String, OIDataFile>) createIndex(files);
 
-        // create the Map<ID, OIDataFile> index for files:
-        final java.util.Map<String, OIDataFile> mapIdOiDataFiles
-                                                = (java.util.Map<String, OIDataFile>) createIndex(getFiles());
+            logger.debug("checkReferences: mapIdOiDataFiles = {}", mapIdOiDataFiles);
 
-        logger.debug("checkReferences: mapIdOiDataFiles = {}", mapIdOiDataFiles);
-
-        // update reference in subset filter's tables:
-        for (SubsetDefinition subsetDefinition : getSubsetDefinitions()) {
-            subsetDefinition.checkReferences(mapIdOiDataFiles);
+            // update reference in subset filter's tables:
+            for (SubsetDefinition subsetDefinition : subsetDefinitions) {
+                subsetDefinition.checkReferences(mapIdOiDataFiles);
+            }
         }
+        if (plots != null) {
+            // create the Map<ID, SubsetDefinition> index for subsetDefinitions:
+            final java.util.Map<String, SubsetDefinition> mapIdSubsetDefs
+                                                          = (java.util.Map<String, SubsetDefinition>) createIndex(subsetDefinitions);
 
-        // create the Map<ID, SubsetDefinition> index for subsetDefinitions:
-        final java.util.Map<String, SubsetDefinition> mapIdSubsetDefs
-                                                      = (java.util.Map<String, SubsetDefinition>) createIndex(getSubsetDefinitions());
+            logger.debug("checkReferences: mapIdSubsetDefs = {}", mapIdSubsetDefs);
 
-        logger.debug("checkReferences: mapIdSubsetDefs = {}", mapIdSubsetDefs);
+            // create the Map<ID, PlotDefinition> index for plotDefinitions:
+            final java.util.Map<String, PlotDefinition> mapIdPlotDefs
+                                                        = (java.util.Map<String, PlotDefinition>) createIndex(plotDefinitions);
 
-        // create the Map<ID, PlotDefinition> index for plotDefinitions:
-        final java.util.Map<String, PlotDefinition> mapIdPlotDefs
-                                                    = (java.util.Map<String, PlotDefinition>) createIndex(getPlotDefinitions());
+            logger.debug("checkReferences: mapIdPlotDefs = {}", mapIdPlotDefs);
 
-        logger.debug("checkReferences: mapIdPlotDefs = {}", mapIdPlotDefs);
-
-        // update references in plot's subset and plot defs:
-        for (Plot plot : getPlots()) {
-            plot.checkReferences(mapIdSubsetDefs, mapIdPlotDefs);
+            // update references in plot's subset and plot defs:
+            for (Plot plot : plots) {
+                plot.checkReferences(mapIdSubsetDefs, mapIdPlotDefs);
+            }
         }
         logger.debug("checkReferences: done");
     }

@@ -134,7 +134,11 @@ public class SubsetDefinition
     
 //--simple--preserve
     public boolean isHideFilteredData() {
-        return isShow() == null || !(isShow().booleanValue());
+        return ((isShow() != null) && !(isShow().booleanValue()));
+    }
+
+    public void setHideFilteredData(final boolean value) {
+        setShow(value ? Boolean.FALSE : null);
     }
 
     /**
@@ -169,21 +173,25 @@ public class SubsetDefinition
         // deep copy filters:
         this.filters = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(subset.filters);
         this.genericFilters = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(subset.genericFilters);
+        
+        // ensure temporary data is null:
+        this.oiFitsSubset = null;
+        this.selectorResult = null;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (!super.equals(obj)) { // Identifiable
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (!super.equals(obj, useVersion)) { // Identifiable
             return false;
         }
         final SubsetDefinition other = (SubsetDefinition) obj;
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.filters, other.filters)) {
             return false;
         }
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.genericFilters, other.genericFilters)) {
+        if (!Identifiable.areEquals(this.genericFilters, other.genericFilters, useVersion)) {
             return false;
         }
-        return fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.show, other.show);
+        return this.isHideFilteredData() == other.isHideFilteredData();
     }
 
     /**
@@ -260,10 +268,11 @@ public class SubsetDefinition
      * @param mapIdOiDataFiles Map<ID, OIDataFile> index
      */
     protected void checkReferences(final java.util.Map<String, OIDataFile> mapIdOiDataFiles) {
-        for (SubsetFilter filter : getFilters()) {
-            SubsetFilter.updateOIDataFileReferences(filter.getTables(), mapIdOiDataFiles);
+        if (filters != null) {
+            for (SubsetFilter filter : filters) {
+                SubsetFilter.updateOIDataFileReferences(filter.tables, mapIdOiDataFiles);
+            }
         }
-
         if ((this.selectorResult != null) && !this.selectorResult.isEmpty()) {
             this.selectorResult.getDataModel().refresh();
         }

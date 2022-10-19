@@ -77,10 +77,10 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
     public final static String CURRENT_PLOT_DEFINITION = "PLOT_DEF_0";
     /** Current key for View */
     public final static String CURRENT_VIEW = "VIEW_0";
-    /** Singleton pattern */
-    private final static OIFitsCollectionManager INSTANCE = new OIFitsCollectionManager();
     /** Plot Definition factory singleton */
     private final static PlotDefinitionFactory plotDefFactory = PlotDefinitionFactory.getInstance();
+    /** Singleton pattern (after plotDefFactory) */
+    private final static OIFitsCollectionManager INSTANCE = new OIFitsCollectionManager();
     /* members */
     /** internal JAXB Factory */
     private final JAXBFactory jf;
@@ -88,6 +88,8 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
     private boolean enableEvents = false;
     /** OIFits explorer collection structure (session) */
     private OiDataCollection userCollection = null;
+    /** initial OIFits explorer collection structure (session) (loaded or saved state) */
+    private OiDataCollection userCollectionInitial = null;
     /** associated file to the OIFits explorer collection */
     private File oiFitsCollectionFile = null;
     /** OIFits collection */
@@ -128,6 +130,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
             // false argument means allow self notification:
             final boolean skipSourceListener
                           = (eventType != OIFitsCollectionManagerEventType.COLLECTION_CHANGED) /* OIFitsCollectionManager post-process */
+                    && (eventType != OIFitsCollectionManagerEventType.READY) /* OIFitsCollectionManager post-process */
                     && (eventType != OIFitsCollectionManagerEventType.SUBSET_CHANGED) /* GenericFiltersPanel handles its own reentrance */;
 
             eventNotifier = new EventNotifier<OIFitsCollectionManagerEvent, OIFitsCollectionManagerEventType, Object>(eventType.name(), priority, skipSourceListener);
@@ -138,6 +141,8 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
         // listen for COLLECTION_CHANGED event to analyze collection and fire initial events:
         getOiFitsCollectionChangedEventNotifier().register(this);
+        // listen for READY event to handle initial collection state:
+        getReadyEventNotifier().register(this);
 
         // reset anyway:
         reset();
@@ -192,31 +197,43 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
     }
 
     private void postLoadOIFitsCollection(final File file, final OiDataCollection oiDataCollection, final OIFitsChecker checker) {
+        // refreshUI called addOIFitsFile(files)
+        
+        System.out.println("oiDataCollection:\n" + oiDataCollection);
 
-        // TODO: check missing files !
-        // add them but should be check for consistency related to loaded files (errors can occur while loading):
-        // check and update references in OiDataCollection:
-        oiDataCollection.checkReferences();
-
-        // then add SubsetDefinition:
+        // add all SubsetDefinitions:
         for (SubsetDefinition subsetDefinition : oiDataCollection.getSubsetDefinitions()) {
             addSubsetDefinitionRef(subsetDefinition);
         }
 
-        // then add PlotDefinition:
+        // add all PlotDefinitions:
         for (PlotDefinition plotDefinition : oiDataCollection.getPlotDefinitions()) {
             addPlotDefinitionRef(plotDefinition);
         }
 
-        // TODO: check subset and plot definition references in Plot ?
-        // then add Plot:
+        // add all Plots:
         for (Plot plot : oiDataCollection.getPlots()) {
             this.addPlotRef(plot);
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("subsetDefinitions {}", getSubsetDefinitionList());
+            logger.debug("subsetDefinitions: {}", getSubsetDefinitionList());
+            logger.debug("plotDefinitions:   {}", getPlotDefinitionList());
+            logger.debug("plots:             {}", getPlotList());
         }
+
+        logger.info("subsetDefinitions: {}", getSubsetDefinitionList());
+        logger.info("plotDefinitions:   {}", getPlotDefinitionList());
+        logger.info("plots:             {}", getPlotList());
+
+        // check and update references in current OiDataCollection:
+        // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
+        checkReferences();
+        
+        System.out.println("userCollection:\n" + userCollection);
+
+        // Fire the Ready event to any listener:
+        fireReady(this, null);
 
         // after loadOIDataCollection as it calls reset():
         setOiFitsCollectionFile(file);
@@ -240,6 +257,9 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
         // TODO: may also save OIFits file copies into zip archive (xml + OIFits files) ??
         JAXBUtils.saveObject(file, savedUserCollection, this.jf);
+
+        // finally: set the initial state of the main observation (as saved) 
+        this.defineInitialUserCollection();
 
         setOiFitsCollectionFile(file);
 
@@ -520,7 +540,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
             // Register SharedSeriesAttributes listener:
             SharedSeriesAttributes.INSTANCE_OIXP.register();
 
-            reset();
+            reset(true);
         }
     }
 
@@ -528,14 +548,50 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
      * Reset the OIFits file collection
      */
     public void reset() {
+        reset(false);
+    }
+
+    /**
+     * Reset the OIFits file collection 
+     * @param doFireReady true to fire Ready event; false otherwise
+     */
+    public void reset(final boolean doFireReady) {
         cancelTaskLoadOIFits();
 
         userCollection = new OiDataCollection();
+        userCollectionInitial = null;
         oiFitsCollection = new OIFitsCollection();
         oiFitsCollectionFile = null;
         selectedDataPointer = null;
 
-        fireOIFitsCollectionChanged();
+        if (enableEvents) {
+            fireOIFitsCollectionChanged();
+
+            if (doFireReady) {
+                // Fire the Ready event to any listener:
+                fireReady(this, null);
+            }
+        }
+    }
+
+    /**
+     * Private : define the initial user collection as the current one (deep clone)
+     */
+    private void defineInitialUserCollection() {
+        this.userCollectionInitial = (OiDataCollection) this.userCollection.clone();
+        // check and update references :
+        this.userCollectionInitial.checkReferences();
+    }
+
+    /**
+     * @return true if the user collection was modified since its initial state 
+     */
+    public boolean isUserCollectionChanged() {
+        // check and update references (removes null and empty collections):
+        this.userCollection.checkReferences();
+        
+        // perform the complete graph comparison (but version):
+        return ((userCollectionInitial != null) && !userCollectionInitial.equals(this.userCollection, false));
     }
 
     /**
@@ -1646,7 +1702,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 }
             }
 
-            // check and update references in OiDataCollection:
+            // check and update references in current OiDataCollection:
             // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
             checkReferences();
 
@@ -2249,7 +2305,7 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 // update collection analysis:
                 oiFitsCollection.analyzeCollection();
 
-                // check and update references in OiDataCollection:
+                // check and update references in current OiDataCollection:
                 // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
                 checkReferences();
 
@@ -2268,11 +2324,26 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
 
                 // Note: no explicit firePlotChanged event fired as done in updateSubsetDefinitionRef and updatePlotDefinitionRef
                 break;
+            case READY:
+                System.out.println("userCollectionInitial");
+                defineInitialUserCollection();
+                break;
             default:
         }
         logger.debug("onProcess {} - done", event);
     }
 
+    /*
+
+        // check and update references in current OiDataCollection:
+        // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
+        checkReferences();
+
+        // finally: set the initial state of the user collection (after GUI updates => potentially modified) 
+        this.defineInitialUserCollection();
+    
+    */
+    
     /**
      * Check bad references
      */

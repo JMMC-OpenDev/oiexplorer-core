@@ -85,6 +85,37 @@ public class OIDataFile
     }
     
 //--simple--preserve
+    /**
+     * Perform a deep-copy EXCEPT Identifiable attributes of the given other instance into this instance
+     * 
+     * Note: to be overriden in child class to perform deep-copy of class fields
+     * 
+     * @param other other instance
+     */
+    @Override
+    public void copyValues(final fr.jmmc.oiexplorer.core.model.OIBase other) {
+        final OIDataFile dataFile = (OIDataFile) other;
+
+        // copy file & chesksum:
+        this.file = dataFile.file;
+        this.checksum = dataFile.checksum;
+        
+        // ensure temporary data is null:
+        this.oiFitsFile = null;
+    }
+
+    @Override
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (!super.equals(obj, useVersion)) { // Identifiable
+            return false;
+        }
+        final OIDataFile other = (OIDataFile) obj;
+        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.file, other.file)) {
+            return false;
+        }
+        return (this.checksum == other.checksum);
+    }
+
     /** loaded oiFitsFile structure (read only) */
     @javax.xml.bind.annotation.XmlTransient
     private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;

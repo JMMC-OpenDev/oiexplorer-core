@@ -119,18 +119,15 @@ public class View
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!super.equals(obj)) { // Identifiable
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (!super.equals(obj, useVersion)) { // Identifiable
             return false;
         }
         final View other = (View) obj;
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.type, other.getType())) {
             return false;
         }
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.subsetDefinition, other.getSubsetDefinition())) {
-            return false;
-        }
-        return true;
+        return Identifiable.areIdEquals(this.subsetDefinition, other.getSubsetDefinition());
     }
 
     /**

@@ -89,15 +89,12 @@ public class Plot
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (!super.equals(obj)) { // View
+    public boolean equals(final Object obj, final boolean useVersion) {
+        if (!super.equals(obj, useVersion)) { // Identifiable
             return false;
         }
         final Plot other = (Plot) obj;
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.plotDefinition, other.getPlotDefinition())) {
-            return false;
-        }
-        return true;
+        return Identifiable.areIdEquals(this.plotDefinition, other.getPlotDefinition());
     }
 
     /**

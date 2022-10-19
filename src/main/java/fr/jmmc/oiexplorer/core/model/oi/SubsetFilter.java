@@ -181,8 +181,8 @@ public class SubsetFilter
 
         // copy targetUID, insModeUIDs, nightIDs:
         this.targetUID = filter.getTargetUID();
-        this.insModeUIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.getInsModeUIDs());
-        this.nightIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.getNightIDs());
+        this.insModeUIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.insModeUIDs);
+        this.nightIDs = fr.jmmc.jmcs.util.ObjectUtils.copyList(filter.nightIDs);
 
         // deep copy tables:
         this.tables = fr.jmmc.jmcs.util.ObjectUtils.deepCopyList(filter.tables);
@@ -224,9 +224,9 @@ public class SubsetFilter
 
         if (full) {
             sb.append("{ targetUID='").append(this.targetUID).append('\'');
-            sb.append(", insModeUID='");
+            sb.append(", insModeUID=");
             fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.insModeUIDs);
-            sb.append(", nightID='");
+            sb.append(", nightID=");
             fr.jmmc.jmcs.util.ObjectUtils.toString(sb, full, this.nightIDs);
 
             sb.append(", tables=");

@@ -182,16 +182,13 @@ public class TableUID
             return false;
         }
         final TableUID other = (TableUID) obj;
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.file, other.file)) {
+        if (!Identifiable.areIdEquals(this.file, other.file)) {
             return false;
         }
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.extName, other.extName)) {
             return false;
         }
-        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.extNb, other.extNb)) {
-            return false;
-        }
-        return true;
+        return fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.extNb, other.extNb);
     }
 
     /**
