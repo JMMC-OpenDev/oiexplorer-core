@@ -142,12 +142,15 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         SwingUtils.adjustSize(this.jToggleButtonAuto, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonDefault, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonFixed, ComponentSizeVariant.small);
+
+        SwingUtils.adjustSize(this.colorMappingLabel, ComponentSizeVariant.small);
+        SwingUtils.adjustSize(this.colorMappingComboBox, ComponentSizeVariant.small);
         
         SwingUtils.adjustSize(this.flaggedDataCheckBox, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.drawLinesCheckBox, ComponentSizeVariant.small);
 
-        SwingUtils.adjustSize(this.jToggleButtonExprEditor, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.jToggleButtonDetailled, ComponentSizeVariant.small);
+        SwingUtils.adjustSize(this.jToggleButtonExprEditor, ComponentSizeVariant.small);
 
         SwingUtils.adjustSize(this.addYAxisButton, ComponentSizeVariant.small);
         SwingUtils.adjustSize(this.delYAxisButton, ComponentSizeVariant.small);
@@ -470,13 +473,13 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         add(jToggleButtonFixed, gridBagConstraints);
 
         plotDefLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        plotDefLabel.setText("Show");
+        plotDefLabel.setText("Show:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 2);
         add(plotDefLabel, gridBagConstraints);
 
         plotDefinitionComboBox.setName("plotDefinitionComboBox"); // NOI18N
@@ -495,13 +498,13 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         add(plotDefinitionComboBox, gridBagConstraints);
 
         colorMappingLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        colorMappingLabel.setText("Color by");
+        colorMappingLabel.setText("Color by:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 2);
         add(colorMappingLabel, gridBagConstraints);
 
         colorMappingComboBox.setPrototypeDisplayValue("XXXX");
@@ -529,6 +532,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         add(flaggedDataCheckBox, gridBagConstraints);
 
         drawLinesCheckBox.setText("Draw lines");
@@ -541,6 +545,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         gridBagConstraints.gridx = 9;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         add(drawLinesCheckBox, gridBagConstraints);
 
         jToggleButtonDetailled.setText("...");
@@ -568,7 +573,7 @@ public final class PlotDefinitionEditor extends javax.swing.JPanel implements OI
         gridBagConstraints.gridx = 11;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         add(jToggleButtonExprEditor, gridBagConstraints);
 
         extendedPanel.setLayout(new java.awt.GridBagLayout());
