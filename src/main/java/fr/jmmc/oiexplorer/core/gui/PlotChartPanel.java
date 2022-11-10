@@ -250,6 +250,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         initComponents();
         postInit();
+
+        // update button UI:
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /**
@@ -307,16 +310,15 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         jPanelCrosshair.setLayout(new java.awt.GridBagLayout());
 
-        jButtonHideCrossHair.setText("hide");
+        jButtonHideCrossHair.setText("Hide");
         jButtonHideCrossHair.setToolTipText("Hide the crosshair and its contextual information");
-        jButtonHideCrossHair.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonHideCrossHair.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonHideCrossHairActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
         jPanelCrosshair.add(jButtonHideCrossHair, gridBagConstraints);
 
         jPanelCrosshairInfos.setLayout(new javax.swing.BoxLayout(jPanelCrosshairInfos, javax.swing.BoxLayout.LINE_AXIS));
@@ -328,7 +330,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         jPanelCrosshairInfos.add(fillerRigid);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         jPanelCrosshair.add(jPanelCrosshairInfos, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -351,8 +353,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
         jPanelMouseInfos.add(jLabelInfos, gridBagConstraints);
 
         jLabelPoints.setText("points");
@@ -363,7 +366,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelMouseInfos.add(jLabelPoints, gridBagConstraints);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -372,7 +374,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelMouseInfos.add(jSeparator1, gridBagConstraints);
 
         jLabelDataRange.setText("data");
@@ -383,7 +385,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.3;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelMouseInfos.add(jLabelDataRange, gridBagConstraints);
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -392,7 +393,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelMouseInfos.add(jSeparator2, gridBagConstraints);
 
         jLabelDataErrRange.setText("data+error");
@@ -403,7 +404,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.3;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelMouseInfos.add(jLabelDataErrRange, gridBagConstraints);
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -412,7 +412,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         jPanelMouseInfos.add(jSeparator3, gridBagConstraints);
 
         jLabelMouse.setText("[mouse]");
@@ -423,7 +423,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelMouseInfos.add(jLabelMouse, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -569,7 +568,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * This method is useful to set the models and specific features of initialized swing components :
      */
     private void postInit() {
-
         this.jPanelCrosshair.setVisible(false);
 
         // create chart and add listener :
@@ -624,9 +622,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // use small variant:
         SwingUtils.adjustSize(this.jButtonHideCrossHair, ComponentSizeVariant.small);
-
-        // update button UI:
-        SwingUtilities.updateComponentTreeUI(this);
     }
 
     private void addXYPlot() {
@@ -1501,20 +1496,21 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // Get wavelength range from OIFits subset (not filtered):
         final Range waveLengthRangeFull;
+        // Get wavelength range from selected subset:
+        final Range waveLengthRange;
 
         if (selectorResult.hasTargetResult()) {
             // use all values on the selected target (no filter):
             distinctStaIndexNames = selectorResult.getTargetResult().getDistinctStaNames();
             distinctStaConfNames = selectorResult.getTargetResult().getDistinctStaConfs();
             waveLengthRangeFull = convert(selectorResult.getTargetResult().getWavelengthRange());
+            waveLengthRange = convert(selectorResult.getWavelengthRange());
         } else {
             distinctStaIndexNames = selectorResult.getDistinctStaNames();
             distinctStaConfNames = selectorResult.getDistinctStaConfs();
             waveLengthRangeFull = convert(selectorResult.getWavelengthRange());
+            waveLengthRange = waveLengthRangeFull;
         }
-
-        // Get wavelength range from selected subset:
-        final Range waveLengthRange = convert(selectorResult.getWavelengthRange());
 
         logger.debug("distinctStaIndexNames: {}", distinctStaIndexNames);
         logger.debug("distinctStaConfNames:  {}", distinctStaConfNames);
@@ -1574,6 +1570,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 info = new PlotInfo();
                 info.distinctStaIndexNames = distinctStaIndexNames;
                 info.distinctStaConfNames = distinctStaConfNames;
+                info.waveLengthRangeFull = waveLengthRangeFull;
                 info.waveLengthRange = waveLengthRange;
 
                 int tableIndex = 0;
@@ -2371,7 +2368,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // try to fill dataset:
         // avoid loop on wavelength if no 2D data:
-        final boolean useWaveLengths = (isXData2D || isYData2D) && (nWaves > 1);
+        final boolean useWaveLengths = (isXData2D || isYData2D);
         final int nWaveChannels = (useWaveLengths) ? nWaves : 1;
 
         // TODO: use an XYZ dataset to have a color axis (z) and then use linear or custom z conversion to colors.
@@ -2380,10 +2377,11 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         if (colorMapping == ColorMapping.WAVELENGTH_RANGE) {
             mappingWaveLengthColors = new Color[nWaveChannels];
 
-            final Range waveLengthRange = info.waveLengthRange;
+            // use the (un-filtered) wavelength range:
+            final Range waveLengthRange = info.waveLengthRangeFull;
             final double wlRange = (waveLengthRange != null) ? waveLengthRange.getLength() : 0.0;
 
-            if (!useWaveLengths || (wlRange <= LAMBDA_EPSILON) || (nWaves <= 1)) {
+            if (!useWaveLengths || (wlRange <= LAMBDA_EPSILON)) {
                 // single channel or Undefined range: use black:
                 Arrays.fill(mappingWaveLengthColors, Color.BLACK);
             } else {

@@ -38,6 +38,8 @@ public final class PlotInfo {
     /** used distinct station configuration in the plot (filtered) */
     final Set<String> usedStaConfNames;
     /** largest wave length range (not filtered) */
+    Range waveLengthRangeFull = null;
+    /** used wave length range (filtered) */
     Range waveLengthRange = null;
     /** x axis information */
     final AxisInfo xAxisInfo;
