@@ -1800,7 +1800,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             axis.setRange(viewRange);
         }
 
-        // update Y axis Label:
+        // update X axis Label:
         String label = (xUseLog) ? "log " : "";
         if (xMeta != null) {
             label += xMeta.getName();
@@ -2648,172 +2648,186 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             y = yConverter.evaluate(y);
                         }
 
-                        // Process X value:
-                        if (isXData2D) {
-                            x = xData2D[i][l];
-                        } else {
-                            x = xData1D[i];
-                        }
-
-                        if (isXDataOrDep && isOtherOrientation) {
-                            x = -x;
-                        }
-
-                        if (xUseLog && (x <= 0.0)) {
+                        if (yUseLog && (y <= 0.0)) {
                             // keep only strictly positive data:
-                            x = NaN;
+                            y = NaN;
                         }
 
-                        if (NumberUtils.isFinite(x)) {
-                            // insert cut-off for data lines of non contiguous items (NaN)
-                            if (drawLines) {
-                                if ((prevL != -1) && (l - prevL > 1)) {
-                                    // add cut-off point
-                                    yValues[idx++] = NaN;
-                                    nCut++;
-                                }
-                            }
-
-                            // convert x value:
-                            if (doConvertX) {
-                                x = initialXConverter.evaluate(x);
-                            }
-                            if (doScaleX) {
-                                x = xConverter.evaluate(x);
-                            }
-
-                            // Process X / Y Errors:
-                            yErr = (hasErrY) ? ((isYData2D) ? yData2DErr[i][l] : yData1DErr[i]) : NaN;
-                            xErr = (hasErrX) ? ((isXData2D) ? xData2DErr[i][l] : xData1DErr[i]) : NaN;
-
-                            // Define Y data:
-                            isYErrValid = true;
-                            useYErrInBounds = false;
-
-                            if (!NumberUtils.isFinite(yErr)) {
-                                yValues[idx] = y;
-                                yLowers[idx] = NaN;
-                                yUppers[idx] = NaN;
+                        if (NumberUtils.isFinite(y)) {
+                            // Process X value:
+                            if (isXData2D) {
+                                x = xData2D[i][l];
                             } else {
-                                hasDataErrorY = true;
+                                x = xData1D[i];
+                            }
 
-                                // ensure error is valid ie positive:
-                                if (yErr >= 0.0) {
-                                    // convert yErr value:
-                                    if (doConvertY) {
-                                        yErr = initialYConverter.evaluate(yErr);
-                                    }
-                                    if (doScaleY) {
-                                        yErr = yConverter.evaluate(yErr);
-                                    }
-                                    useYErrInBounds = true;
-                                } else {
-                                    yErr = Double.POSITIVE_INFINITY;
-                                    isYErrValid = false;
+                            if (isXDataOrDep && isOtherOrientation) {
+                                x = -x;
+                            }
+
+                            if (xUseLog && (x <= 0.0)) {
+                                // keep only strictly positive data:
+                                x = NaN;
+                            }
+
+                            if (NumberUtils.isFinite(x)) {
+                                // convert x value:
+                                if (doConvertX) {
+                                    x = initialXConverter.evaluate(x);
+                                }
+                                if (doScaleX) {
+                                    x = xConverter.evaluate(x);
                                 }
 
-                                yValues[idx] = y;
-                                yLowers[idx] = y - yErr;
-                                yUppers[idx] = y + yErr;
+                                if (xUseLog && (x <= 0.0)) {
+                                    // keep only strictly positive data:
+                                    x = NaN;
+                                }
 
-                                // useLog: check if (y - err) <= 0:
-                                if (yUseLog && (yLowers[idx] <= 0.0)) {
-                                    yLowers[idx] = Double.MIN_VALUE;
+                                if (NumberUtils.isFinite(x)) {
+                                    // insert cut-off for data lines of non contiguous items (NaN)
+                                    if (drawLines) {
+                                        if ((prevL != -1) && (l - prevL > 1)) {
+                                            // add cut-off point
+                                            yValues[idx++] = NaN;
+                                            nCut++;
+                                        }
+                                    }
+                                    
+                                    // Process X / Y Errors:
+                                    yErr = (hasErrY) ? ((isYData2D) ? yData2DErr[i][l] : yData1DErr[i]) : NaN;
+                                    xErr = (hasErrX) ? ((isXData2D) ? xData2DErr[i][l] : xData1DErr[i]) : NaN;
+
+                                    // Define Y data:
+                                    isYErrValid = true;
                                     useYErrInBounds = false;
-                                }
-                            }
 
-                            // update Y boundaries:
-                            if (useYErrInBounds) {
-                                // update Y boundaries including error:
-                                if (yLowers[idx] < minYe) {
-                                    minYe = yLowers[idx];
-                                }
-                                if (yUppers[idx] > maxYe) {
-                                    maxYe = yUppers[idx];
-                                }
-                            }
-                            if (y < minY) {
-                                minY = y;
-                            }
-                            if (y > maxY) {
-                                maxY = y;
-                            }
+                                    if (!NumberUtils.isFinite(yErr)) {
+                                        yValues[idx] = y;
+                                        yLowers[idx] = NaN;
+                                        yUppers[idx] = NaN;
+                                    } else {
+                                        hasDataErrorY = true;
 
-                            // Define X data:
-                            isXErrValid = true;
-                            useXErrInBounds = false;
+                                        // ensure error is valid ie positive:
+                                        if (yErr >= 0.0) {
+                                            // convert yErr value:
+                                            if (doConvertY) {
+                                                yErr = initialYConverter.evaluate(yErr);
+                                            }
+                                            if (doScaleY) {
+                                                yErr = yConverter.evaluate(yErr);
+                                            }
+                                            useYErrInBounds = true;
+                                        } else {
+                                            yErr = Double.POSITIVE_INFINITY;
+                                            isYErrValid = false;
+                                        }
 
-                            if (!NumberUtils.isFinite(xErr)) {
-                                xValues[idx] = x;
-                                xLowers[idx] = NaN;
-                                xUppers[idx] = NaN;
-                            } else {
-                                hasDataErrorX = true;
+                                        yValues[idx] = y;
+                                        yLowers[idx] = y - yErr;
+                                        yUppers[idx] = y + yErr;
 
-                                // ensure error is valid ie positive:
-                                if (xErr >= 0.0) {
-                                    // convert xErr value:
-                                    if (doConvertX) {
-                                        xErr = initialXConverter.evaluate(xErr);
+                                        // useLog: check if (y - err) <= 0:
+                                        if (yUseLog && (yLowers[idx] <= 0.0)) {
+                                            yLowers[idx] = Double.MIN_VALUE;
+                                            useYErrInBounds = false;
+                                        }
                                     }
-                                    if (doScaleX) {
-                                        xErr = xConverter.evaluate(xErr);
+
+                                    // update Y boundaries:
+                                    if (useYErrInBounds) {
+                                        // update Y boundaries including error:
+                                        if (yLowers[idx] < minYe) {
+                                            minYe = yLowers[idx];
+                                        }
+                                        if (yUppers[idx] > maxYe) {
+                                            maxYe = yUppers[idx];
+                                        }
                                     }
-                                    useXErrInBounds = true;
-                                } else {
-                                    xErr = Double.POSITIVE_INFINITY;
-                                    isXErrValid = false;
-                                }
+                                    if (y < minY) {
+                                        minY = y;
+                                    }
+                                    if (y > maxY) {
+                                        maxY = y;
+                                    }
 
-                                xValues[idx] = x;
-                                xLowers[idx] = x - xErr;
-                                xUppers[idx] = x + xErr;
-
-                                // useLog: check if (x - err) <= 0:
-                                if (xUseLog && (xLowers[idx] <= 0.0)) {
-                                    xLowers[idx] = Double.MIN_VALUE;
+                                    // Define X data:
+                                    isXErrValid = true;
                                     useXErrInBounds = false;
-                                }
-                            }
 
-                            // update X boundaries:
-                            if (useXErrInBounds) {
-                                // update X boundaries including error:
-                                if (xLowers[idx] < minXe) {
-                                    minXe = xLowers[idx];
-                                }
-                                if (xUppers[idx] > maxXe) {
-                                    maxXe = xUppers[idx];
-                                }
-                            }
-                            if (x < minX) {
-                                minX = x;
-                            }
-                            if (x > maxX) {
-                                maxX = x;
-                            }
+                                    if (!NumberUtils.isFinite(xErr)) {
+                                        xValues[idx] = x;
+                                        xLowers[idx] = NaN;
+                                        xUppers[idx] = NaN;
+                                    } else {
+                                        hasDataErrorX = true;
 
-                            // TODO: adjust renderer settings per Serie (color, shape, shape size, outline ....) !
-                            // ~ new custom axis (color, size, shape)
-                            // Define item shape:
-                            // invalid shape if flagged or invalid error value
-                            itemShapes[idx] = getPointShape(isYErrValid && isXErrValid && !isFlag);
+                                        // ensure error is valid ie positive:
+                                        if (xErr >= 0.0) {
+                                            // convert xErr value:
+                                            if (doConvertX) {
+                                                xErr = initialXConverter.evaluate(xErr);
+                                            }
+                                            if (doScaleX) {
+                                                xErr = xConverter.evaluate(xErr);
+                                            }
+                                            useXErrInBounds = true;
+                                        } else {
+                                            xErr = Double.POSITIVE_INFINITY;
+                                            isXErrValid = false;
+                                        }
 
-                            // TODO: adjust renderer settings per Serie (color, shape ...) per series and item at higher level using dataset fields
-                            itemPaints[idx] = (isDiscarded) ? COLOR_DISCARDED
-                                    : (mappingWaveLengthColors != null) ? mappingWaveLengthColors[l] : null;
+                                        xValues[idx] = x;
+                                        xLowers[idx] = x - xErr;
+                                        xUppers[idx] = x + xErr;
 
-                            // Define row / col indices:
-                            iRows[idx] = i;
-                            iCols[idx] = l;
-                            prevL = l;
+                                        // useLog: check if (x - err) <= 0:
+                                        if (xUseLog && (xLowers[idx] <= 0.0)) {
+                                            xLowers[idx] = Double.MIN_VALUE;
+                                            useXErrInBounds = false;
+                                        }
+                                    }
 
-                            // increment number of valid data in serie arrays:
-                            idx++;
+                                    // update X boundaries:
+                                    if (useXErrInBounds) {
+                                        // update X boundaries including error:
+                                        if (xLowers[idx] < minXe) {
+                                            minXe = xLowers[idx];
+                                        }
+                                        if (xUppers[idx] > maxXe) {
+                                            maxXe = xUppers[idx];
+                                        }
+                                    }
+                                    if (x < minX) {
+                                        minX = x;
+                                    }
+                                    if (x > maxX) {
+                                        maxX = x;
+                                    }
 
-                        } // x defined
+                                    // TODO: adjust renderer settings per Serie (color, shape, shape size, outline ....) !
+                                    // ~ new custom axis (color, size, shape)
+                                    // Define item shape:
+                                    // invalid shape if flagged or invalid error value
+                                    itemShapes[idx] = getPointShape(isYErrValid && isXErrValid && !isFlag);
 
+                                    // TODO: adjust renderer settings per Serie (color, shape ...) per series and item at higher level using dataset fields
+                                    itemPaints[idx] = (isDiscarded) ? COLOR_DISCARDED
+                                            : (mappingWaveLengthColors != null) ? mappingWaveLengthColors[l] : null;
+
+                                    // Define row / col indices:
+                                    iRows[idx] = i;
+                                    iCols[idx] = l;
+                                    prevL = l;
+
+                                    // increment number of valid data in serie arrays:
+                                    idx++;
+
+                                } // converted x defined
+                            } // x defined
+                            
+                        } // converted y defined
                     } // y defined
 
                 } // iterate on wave channels
@@ -2944,6 +2958,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             maxX = Math.max(maxX, axisInfo.dataRange.getUpperBound());
         }
         axisInfo.dataRange = new Range(minX, maxX);
+        
+        System.out.println("X axisInfo.dataRange: "+axisInfo.dataRange);
+        
+        
         // Ensure Xe range is at least X range:
         minXe = Math.min(minXe, minX);
         maxXe = Math.max(maxXe, maxX);
@@ -2965,6 +2983,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             maxY = Math.max(maxY, axisInfo.dataRange.getUpperBound());
         }
         axisInfo.dataRange = new Range(minY, maxY);
+        
+        System.out.println("Y axisInfo.dataRange: "+axisInfo.dataRange);
+        
         // Ensure Ye range is at least Y range:
         minYe = Math.min(minYe, minY);
         maxYe = Math.max(maxYe, maxY);
