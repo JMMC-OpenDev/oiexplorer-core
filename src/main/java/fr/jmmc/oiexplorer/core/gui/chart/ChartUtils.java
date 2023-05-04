@@ -66,6 +66,8 @@ public class ChartUtils {
     private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>(32);
     /** The default font for titles. */
     public static final Font DEFAULT_TITLE_FONT = getFont(14, Font.BOLD);
+    /** The default font for axis labels & subtitles. */
+    public static final Font DEFAULT_SUBTITLE_FONT = getFont(13, Font.BOLD);
     /** The default font for axis tick labels, legend items. */
     public static final Font DEFAULT_FONT = getFont(12);
     /** The default font for medium texxts. */
@@ -74,10 +76,12 @@ public class ChartUtils {
     public static final Font DEFAULT_TEXT_SMALL_FONT = getFont(9);
     /** The default small font for annotation texts */
     public static final Font SMALL_TEXT_ANNOTATION_FONT = getFont(8);
-    /** default draw stroke */
-    public static final BasicStroke DEFAULT_STROKE = createStroke(1.0f);
     /** thin draw stroke */
     public static final BasicStroke THIN_STROKE = createStroke(0.5f);
+    /** default draw stroke */
+    public static final BasicStroke DEFAULT_STROKE = createStroke(1.0f);
+    /** medium draw stroke */
+    public static final BasicStroke MEDIUM_STROKE = createStroke(1.25f);
     /** larger draw stroke */
     public static final BasicStroke LARGE_STROKE = createStroke(2.0f);
     /** larger draw stroke */
@@ -86,10 +90,20 @@ public class ChartUtils {
     public static final BasicStroke DOTTED_STROKE = createStroke(0.75f, new float[]{4.0f});
     /** zero insets */
     public final static RectangleInsets ZERO_INSETS = RectangleInsets.ZERO_INSETS;
+    /** small inset = 2px (scaled) */
+    public final static double INSET_SMALL = scaleUI(2.0);
+    /** medium inset = 8px (scaled) */
+    public final static double INSET_MEDIUM = scaleUI(8.0);
+    /** large inset = 15px (scaled) */
+    public final static double INSET_LARGE = scaleUI(15.0);
     /** default tick label rectangle insets */
-    public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(scaleUI(2.0), scaleUI(2.0), scaleUI(2.0), scaleUI(2.0));
-    /** normal plot insets (10px on left, 20px on right side) to have last displayed value */
-    public static final RectangleInsets NORMAL_PLOT_INSETS = new RectangleInsets(scaleUI(2.0), scaleUI(10.0), scaleUI(2.0), scaleUI(20.0));
+    public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(INSET_SMALL, INSET_SMALL, INSET_SMALL, INSET_SMALL);
+    /** normal plot insets (8px on left, 15px on right side) to see first & last displayed value */
+    public static final RectangleInsets NORMAL_PLOT_INSETS = new RectangleInsets(INSET_SMALL, INSET_MEDIUM, INSET_SMALL, INSET_LARGE);
+    /** The default tick mark inside length ({@code 0.0f}). */
+    public static final float DEFAULT_TICK_MARK_INSIDE_LENGTH = 0.0f;
+    /** The default tick mark outside length ({@code 2.0f}). */
+    public static final float DEFAULT_TICK_MARK_OUTSIDE_LENGTH = (float) scaleUI(2.0f);
     /** custom chart theme */
     public final static StandardChartTheme CHART_THEME;
     /** The default panel width. */
@@ -160,32 +174,32 @@ public class ChartUtils {
             throw new IllegalStateException("Unsupported chart theme : " + ChartFactory.getChartTheme());
         }
 
-        int t = -scaleUI(45);
+        int o = -scaleUI(40);
         final int s = scaleUI(5);
         Polygon p;
         p = new Polygon();
-        p.addPoint(t + 0, 0);
-        p.addPoint(t + -s, s);
-        p.addPoint(t + s, s);
+        p.addPoint(o + 0, 0);
+        p.addPoint(o + -s, s);
+        p.addPoint(o + s, s);
         ARROW_UP = p;
 
         p = new Polygon();
-        p.addPoint(t + 0, 0);
-        p.addPoint(t + -s, -s);
-        p.addPoint(t + s, -s);
+        p.addPoint(o + 0, 0);
+        p.addPoint(o + -s, -s);
+        p.addPoint(o + s, -s);
         ARROW_DOWN = p;
 
-        t = scaleUI(30);
+        o = scaleUI(30);
         p = new Polygon();
-        p.addPoint(0, t + 0);
-        p.addPoint(-s, t + -s);
-        p.addPoint(-s, t + s);
+        p.addPoint(0, o + 0);
+        p.addPoint(-s, o + -s);
+        p.addPoint(-s, o + s);
         ARROW_RIGHT = p;
 
         p = new Polygon();
-        p.addPoint(0, t + 0);
-        p.addPoint(s, t + -s);
-        p.addPoint(s, t + s);
+        p.addPoint(0, o + 0);
+        p.addPoint(s, o + -s);
+        p.addPoint(s, o + s);
         ARROW_LEFT = p;
 
         LEGEND_SHAPE = new Rectangle2D.Double(scaleUI(-3.0), scaleUI(-5.0), scaleUI(6.0), scaleUI(10.0));
@@ -194,8 +208,8 @@ public class ChartUtils {
     private static void adjustChartThemeFonts() {
         logger.debug("adjustChartThemeFonts");
         // use 'SansSerif' fonts:
-        CHART_THEME.setExtraLargeFont(getFont(20, Font.BOLD));
-        CHART_THEME.setLargeFont(DEFAULT_TITLE_FONT);
+        CHART_THEME.setExtraLargeFont(DEFAULT_TITLE_FONT);
+        CHART_THEME.setLargeFont(DEFAULT_SUBTITLE_FONT);
         CHART_THEME.setRegularFont(DEFAULT_FONT);
         CHART_THEME.setSmallFont(DEFAULT_TEXT_SMALL_FONT);
     }
@@ -411,12 +425,11 @@ public class ChartUtils {
         xyPlot.setRangeCrosshairVisible(false);
         xyPlot.setRangeCrosshairLockedOnData(false);
 
-        // tick color :
-        xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-        xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+        // set axis colors :
+        ChartUtils.defineAxisDefaults(xyPlot);
 
         // Adjust outline :
-        xyPlot.setOutlineStroke(DEFAULT_STROKE);
+        xyPlot.setOutlineStroke(MEDIUM_STROKE);
 
         final XYLineAndShapeRenderer lineAndShapeRenderer = (XYLineAndShapeRenderer) xyPlot.getRenderer();
 
@@ -567,17 +580,23 @@ public class ChartUtils {
         }
 
         // customized XYPlot to have a square data area :
-        final XYPlot plot = createSquareScatterPlot(title, xAxisLabel, yAxisLabel, dataset, orientation, tooltips, urls);
+        final XYPlot xyPlot = createSquareScatterPlot(title, xAxisLabel, yAxisLabel, dataset, orientation, tooltips, urls);
 
-        final JFreeChart chart = createChart(title, plot, legend);
+        final JFreeChart chart = createChart(title, xyPlot, legend);
 
         if (legend) {
             chart.getLegend().setPosition(RectangleEdge.RIGHT);
         }
 
         // display axes at [0,0] :
-        plot.setDomainZeroBaselineVisible(true);
-        plot.setRangeZeroBaselineVisible(true);
+        xyPlot.setDomainZeroBaselineVisible(true);
+        xyPlot.setRangeZeroBaselineVisible(true);
+
+        // set axis colors :
+        ChartUtils.defineAxisDefaults(xyPlot);
+
+        // Adjust outline :
+        xyPlot.setOutlineStroke(MEDIUM_STROKE);
 
         // update theme at end :
         org.jfree.chart.ChartUtils.applyCurrentTheme(chart);
@@ -649,6 +668,25 @@ public class ChartUtils {
         return axis;
     }
 
+    public static void defineAxisDefaults(final XYPlot xyPlot) {
+        defineAxisDefaults(xyPlot.getDomainAxis());
+        defineAxisDefaults(xyPlot.getRangeAxis());
+    }
+
+    public static void defineAxisDefaults(final ValueAxis axis) {
+        axis.setTickLabelInsets(TICK_LABEL_INSETS);
+
+        axis.setAxisLineStroke(MEDIUM_STROKE); // scaled
+        axis.setAxisLinePaint(Color.BLACK);
+
+        axis.setTickMarkPaint(Color.BLACK);
+        axis.setTickMarkStroke(MEDIUM_STROKE); // scaled
+
+        axis.setTickMarkInsideLength(DEFAULT_TICK_MARK_INSIDE_LENGTH);
+        axis.setTickMarkOutsideLength(DEFAULT_TICK_MARK_OUTSIDE_LENGTH);
+        axis.setMinorTickMarksVisible(false);
+    }
+
     public static void defineAxisArrows(final ValueAxis axis) {
         if (axis.getUpArrow() != ChartUtils.ARROW_UP) {
             axis.setUpArrow(ChartUtils.ARROW_UP);
@@ -694,7 +732,7 @@ public class ChartUtils {
      * @return The chart.
      */
     public static JFreeChart createChart(final String title, final Plot plot, boolean createLegend) {
-        final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, createLegend);
+        final JFreeChart chart = new JFreeChart(title, DEFAULT_TITLE_FONT, plot, createLegend);
 
         if (createLegend) {
             // Set the legend border:
@@ -707,12 +745,21 @@ public class ChartUtils {
     }
 
     /**
+     * Add a title to the given chart
+     * @param chart chart to use
+     * @param text sub title content
+     */
+    public static void addTitle(final JFreeChart chart, final String text) {
+        chart.setTitle(new TextTitle(text, DEFAULT_TITLE_FONT));
+    }
+
+    /**
      * Add a sub title to the given chart
      * @param chart chart to use
      * @param text sub title content
      */
     public static void addSubtitle(final JFreeChart chart, final String text) {
-        chart.addSubtitle(new TextTitle(text, DEFAULT_TITLE_FONT));
+        chart.addSubtitle(new TextTitle(text, DEFAULT_SUBTITLE_FONT));
     }
 
     /**
@@ -954,13 +1001,10 @@ public class ChartUtils {
     }
 
     public static BasicStroke createStroke(final float size) {
-        // TODO: LBO
         return new BasicStroke((float) scalePen(size));
-        // return new BasicStroke(size);
     }
 
     public static BasicStroke createStroke(final float width, final float dashes[]) {
-        // TODO: LBO
         // scale dashes:
         if (dashes != null) {
             for (int i = 0; i < dashes.length; i++) {

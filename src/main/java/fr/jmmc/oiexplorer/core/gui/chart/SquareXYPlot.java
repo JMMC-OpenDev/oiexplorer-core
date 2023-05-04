@@ -4,12 +4,15 @@
 package fr.jmmc.oiexplorer.core.gui.chart;
 
 import fr.jmmc.jmal.image.ImageUtils;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.PlotState;
 import org.jfree.chart.plot.XYPlot;
@@ -32,6 +35,9 @@ public final class SquareXYPlot extends XYPlot {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
+
+    /** flag to debug paint operations */
+    public static final boolean DEBUG_PAINT = false;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(SquareXYPlot.class.getName());
 
@@ -85,10 +91,10 @@ public final class SquareXYPlot extends XYPlot {
         vSpace += space.getTop() + space.getBottom();
 
         // range (Y) / domain (X) ratio:
-        final double ratio = getAspectRatio();
+        final double ratio = (getOrientation() == PlotOrientation.HORIZONTAL) ? getAspectRatio() : 1.0 / getAspectRatio();
 
         // compute the square data area size :
-        final double size = Math.min(area.getWidth() - hSpace, area.getHeight() - vSpace);
+        final double maxSize = Math.max(0.0, Math.min(area.getWidth() - hSpace, area.getHeight() - vSpace));
 
         // adjusted dimensions to get a square data area :
         final double adjustedWidth;
@@ -96,12 +102,12 @@ public final class SquareXYPlot extends XYPlot {
 
         if (ratio > 1d) {
             // taller (Y > X):
-            adjustedWidth = size / ratio + hSpace;
-            adjustedHeight = size + vSpace;
+            adjustedWidth = maxSize / ratio + hSpace;
+            adjustedHeight = maxSize + vSpace;
         } else {
             // larger (X > Y):
-            adjustedWidth = size + hSpace;
-            adjustedHeight = size / ratio + vSpace;
+            adjustedWidth = maxSize + hSpace;
+            adjustedHeight = maxSize / ratio + vSpace;
         }
 
         // margins to center the plot into the rectangle area :
@@ -114,6 +120,16 @@ public final class SquareXYPlot extends XYPlot {
         // - rounding is required to have the background image fitted (int coordinates) in the plot area (double rectangle) :
         // - there can be some rounding issue that adjust lightly the square shape :
         adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
+
+        if (DEBUG_PAINT) {
+            g2d.setStroke(new BasicStroke(4));
+            g2d.setPaint(Color.RED);
+            g2d.draw(area);
+
+            g2d.setStroke(new BasicStroke(4));
+            g2d.setPaint(Color.GREEN);
+            g2d.draw(adjustedArea);
+        }
 
         // Force rendering hints :
         // set quality flags:

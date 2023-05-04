@@ -17,6 +17,8 @@ public final class AxisInfo {
     ColumnMeta columnMeta = null;
     /** converter unit */
     String unit = null;
+    /** is symetric axis */
+    boolean useSymmetry = false;
     /** is log axis */
     boolean useLog = false;
     /** data range */
@@ -38,6 +40,7 @@ public final class AxisInfo {
     AxisInfo(final AxisInfo src) {
         this.columnMeta = src.columnMeta;
         this.unit = src.unit;
+        this.useSymmetry = src.useSymmetry;
         this.useLog = src.useLog;
         this.dataRange = src.dataRange;
         this.dataErrRange = src.dataErrRange;
@@ -56,6 +59,11 @@ public final class AxisInfo {
         return columnMeta.getName().equals(other.columnMeta.getName())
                 && useLog == other.useLog
                 && ObjectUtils.areEquals(unit, other.unit);
+    }
+
+    @Override
+    public String toString() {
+        return "AxisInfo{" + "columnMeta=" + columnMeta + ", unit=" + unit + ", useSymmetry=" + useSymmetry + ", useLog=" + useLog + ", dataRange=" + dataRange + ", dataErrRange=" + dataErrRange + ", hasDataError=" + hasDataError + ", viewBounds=" + viewBounds + ", viewRange=" + viewRange + ", plotRange=" + plotRange + '}';
     }
 
 }

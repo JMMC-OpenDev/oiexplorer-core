@@ -1951,7 +1951,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
      * @param imageData computed image data or null
      */
     private void updateImage(final ImageChartData imageData) {
-
         if (mapLegend != null) {
             this.chart.removeSubtitle(mapLegend);
         }
@@ -1975,9 +1974,7 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
                 mapLegend = new PaintLogScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
             }
 
-            uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
-            uvMapAxis.setAxisLinePaint(Color.BLACK);
-            uvMapAxis.setTickMarkPaint(Color.BLACK);
+            ChartUtils.defineAxisDefaults(uvMapAxis);
 
             mapLegend.setPosition(RectangleEdge.LEFT);
             mapLegend.setStripWidth(15d);
