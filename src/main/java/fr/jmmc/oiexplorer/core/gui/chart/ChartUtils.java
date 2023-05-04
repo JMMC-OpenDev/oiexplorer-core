@@ -91,7 +91,7 @@ public class ChartUtils {
     /** zero insets */
     public final static RectangleInsets ZERO_INSETS = RectangleInsets.ZERO_INSETS;
     /** small inset = 2px (scaled) */
-    public final static double INSET_SMALL = scaleUI(2.0);
+    public final static double INSET_SMALL = scaleUI(3.0);
     /** medium inset = 8px (scaled) */
     public final static double INSET_MEDIUM = scaleUI(8.0);
     /** large inset = 15px (scaled) */
