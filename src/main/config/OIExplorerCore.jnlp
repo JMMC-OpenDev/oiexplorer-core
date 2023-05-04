@@ -23,7 +23,7 @@
         <jar href="@SHARED@/JEL-2.1.2.jar" />
 
         <!-- JFreeChart -->
-        <jar href="@SHARED@/jfreechart-1.5.2.jar" />
+        <jar href="@SHARED@/jfreechart-1.5.4.jar" />
         <jar href="@SHARED@/jfreesvg-3.4.jar" />
 
         <!-- PDF -->
