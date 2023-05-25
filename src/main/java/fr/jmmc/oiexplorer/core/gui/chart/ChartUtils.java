@@ -27,12 +27,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItem;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.DateTickUnit;
 import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.axis.TickUnits;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.block.LineBorder;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.Plot;
@@ -44,6 +46,7 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.text.TextUtils;
 import org.jfree.chart.title.LegendTitle;
+import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 import org.jfree.chart.ui.RectangleEdge;
@@ -104,6 +107,8 @@ public class ChartUtils {
     public static final float DEFAULT_TICK_MARK_INSIDE_LENGTH = 0.0f;
     /** The default tick mark outside length ({@code 2.0f}). */
     public static final float DEFAULT_TICK_MARK_OUTSIDE_LENGTH = (float) scaleUI(2.0f);
+    /** color scale width = 15px (scaled) */
+    public final static double COLOR_SCALE_WIDTH = scaleUI(15.0);
     /** custom chart theme */
     public final static StandardChartTheme CHART_THEME;
     /** The default panel width. */
@@ -779,6 +784,22 @@ public class ChartUtils {
         chart.clearSubtitles();
         if (legend != null) {
             chart.addSubtitle(legend);
+        }
+    }
+    
+    public static void adjustLegend(final PaintScaleLegend mapLegend, final int count, final RectangleEdge edge) {
+        mapLegend.setPosition(edge);
+        mapLegend.setSubdivisionCount(count);
+        mapLegend.setStripWidth(COLOR_SCALE_WIDTH);
+        mapLegend.setStripOutlinePaint(Color.BLACK);
+        mapLegend.setStripOutlineVisible(true);
+        mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
+        mapLegend.setFrame(new BlockBorder(Color.BLACK));
+
+        if ((edge == RectangleEdge.LEFT) || (edge == RectangleEdge.LEFT)) {
+            mapLegend.setPadding(INSET_MEDIUM, INSET_SMALL, INSET_MEDIUM, INSET_SMALL);
+        } else {
+            mapLegend.setPadding(INSET_SMALL, INSET_MEDIUM, INSET_SMALL, INSET_MEDIUM);
         }
     }
 

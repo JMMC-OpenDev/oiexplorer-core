@@ -19,6 +19,8 @@ public final class AxisInfo {
     String unit = null;
     /** is symetric axis */
     boolean useSymmetry = false;
+    /** inverted */
+    boolean inverted = false;
     /** is log axis */
     boolean useLog = false;
     /** data range */
@@ -41,6 +43,7 @@ public final class AxisInfo {
         this.columnMeta = src.columnMeta;
         this.unit = src.unit;
         this.useSymmetry = src.useSymmetry;
+        this.inverted = src.inverted;
         this.useLog = src.useLog;
         this.dataRange = src.dataRange;
         this.dataErrRange = src.dataErrRange;
@@ -57,13 +60,24 @@ public final class AxisInfo {
 
     public boolean isCompatible(final AxisInfo other) {
         return columnMeta.getName().equals(other.columnMeta.getName())
+                && inverted == other.inverted
                 && useLog == other.useLog
                 && ObjectUtils.areEquals(unit, other.unit);
     }
 
     @Override
     public String toString() {
-        return "AxisInfo{" + "columnMeta=" + columnMeta + ", unit=" + unit + ", useSymmetry=" + useSymmetry + ", useLog=" + useLog + ", dataRange=" + dataRange + ", dataErrRange=" + dataErrRange + ", hasDataError=" + hasDataError + ", viewBounds=" + viewBounds + ", viewRange=" + viewRange + ", plotRange=" + plotRange + '}';
+        return "AxisInfo{" + "columnMeta=" + columnMeta
+                + ", unit=" + unit
+                + ", useSymmetry=" + useSymmetry
+                + ", inverted=" + inverted
+                + ", useLog=" + useLog
+                + ", dataRange=" + dataRange
+                + ", dataErrRange=" + dataErrRange
+                + ", hasDataError=" + hasDataError
+                + ", viewBounds=" + viewBounds
+                + ", viewRange=" + viewRange
+                + ", plotRange=" + plotRange + '}';
     }
 
 }

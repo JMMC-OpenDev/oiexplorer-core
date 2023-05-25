@@ -20,25 +20,60 @@
 
     <!-- plot spatial(UCOORD VCOORD) -->
     <plotDefinition>
-        <id>VCOORD_SPATIAL/UCOORD_SPATIAL</id>
-        <name>UV coverage</name>
+        <id>V/U</id>
+        <name>U-V coverage</name>
         <skipFlaggedData>true</skipFlaggedData>
         <drawLine>false</drawLine>
         <xAxis>
-            <name>UCOORD_SPATIAL</name>
+            <name>U</name>
             <logScale>false</logScale>
             <includeZero>true</includeZero>
             <converter>MEGA_LAMBDA</converter>
         </xAxis>
         <yAxes>
-            <name>VCOORD_SPATIAL</name>
+            <name>V</name>
             <logScale>false</logScale>
             <includeZero>true</includeZero>
             <converter>MEGA_LAMBDA</converter>
         </yAxes>
     </plotDefinition>
 
+    <plotDefinition>
+        <id>V/U_inv</id>
+        <name>U-V coverage (U inverted)</name>
+        <skipFlaggedData>true</skipFlaggedData>
+        <drawLine>false</drawLine>
+        <xAxis>
+            <name>U</name>
+            <inverted>true</inverted>
+            <logScale>false</logScale>
+            <includeZero>true</includeZero>
+            <converter>MEGA_LAMBDA</converter>
+        </xAxis>
+        <yAxes>
+            <name>V</name>
+            <logScale>false</logScale>
+            <includeZero>true</includeZero>
+            <converter>MEGA_LAMBDA</converter>
+        </yAxes>
+    </plotDefinition>
 
+    <plotDefinition>
+        <id>VCOORD/UCOORD</id>
+        <name>U-V points</name>
+        <skipFlaggedData>true</skipFlaggedData>
+        <drawLine>false</drawLine>
+        <xAxis>
+            <name>UCOORD</name>
+            <logScale>false</logScale>
+            <includeZero>true</includeZero>
+        </xAxis>
+        <yAxes>
+            <name>VCOORD</name>
+            <logScale>false</logScale>
+            <includeZero>true</includeZero>
+        </yAxes>
+    </plotDefinition>
 
 
     <!-- plot (Vis2 / T3phi) vs spatial freq -->

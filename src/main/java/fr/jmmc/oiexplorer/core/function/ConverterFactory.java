@@ -79,8 +79,15 @@ public final class ConverterFactory {
         converterByColumns.put(OIFitsConstants.COLUMN_EFF_BAND, KEY_MICRO_METER);
         
         converterByColumns.put(OIFitsConstants.COLUMN_SPATIAL_FREQ, KEY_MEGA_LAMBDA);
+        converterByColumns.put(OIFitsConstants.COLUMN_U, KEY_MEGA_LAMBDA);
+        converterByColumns.put(OIFitsConstants.COLUMN_V, KEY_MEGA_LAMBDA);
         converterByColumns.put(OIFitsConstants.COLUMN_UCOORD_SPATIAL, KEY_MEGA_LAMBDA);
         converterByColumns.put(OIFitsConstants.COLUMN_VCOORD_SPATIAL, KEY_MEGA_LAMBDA);
+        // T3:
+        converterByColumns.put(OIFitsConstants.COLUMN_U1, KEY_MEGA_LAMBDA);
+        converterByColumns.put(OIFitsConstants.COLUMN_V1, KEY_MEGA_LAMBDA);
+        converterByColumns.put(OIFitsConstants.COLUMN_U2, KEY_MEGA_LAMBDA);
+        converterByColumns.put(OIFitsConstants.COLUMN_V2, KEY_MEGA_LAMBDA);
         converterByColumns.put(OIFitsConstants.COLUMN_U1COORD_SPATIAL, KEY_MEGA_LAMBDA);
         converterByColumns.put(OIFitsConstants.COLUMN_V1COORD_SPATIAL, KEY_MEGA_LAMBDA);
         converterByColumns.put(OIFitsConstants.COLUMN_U2COORD_SPATIAL, KEY_MEGA_LAMBDA);

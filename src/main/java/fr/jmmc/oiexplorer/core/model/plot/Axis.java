@@ -24,6 +24,7 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="inverted" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
  *         &lt;element name="logScale" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
  *         &lt;element name="includeZero" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
  *         &lt;element name="includeDataRange" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/&gt;
@@ -41,6 +42,7 @@ import fr.jmmc.oiexplorer.core.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Axis", propOrder = {
     "name",
+    "inverted",
     "logScale",
     "includeZero",
     "includeDataRange",
@@ -54,6 +56,7 @@ public class Axis
 
     @XmlElement(required = true)
     protected String name;
+    protected Boolean inverted;
     protected boolean logScale;
     protected boolean includeZero;
     protected Boolean includeDataRange;
@@ -85,6 +88,30 @@ public class Axis
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the inverted property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isInverted() {
+        return inverted;
+    }
+
+    /**
+     * Sets the value of the inverted property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setInverted(Boolean value) {
+        this.inverted = value;
     }
 
     /**
@@ -228,6 +255,17 @@ public class Axis
     }
 
     /**
+     * Return the inverted flag or false (default)
+     * @return inverted flag or false (default)
+     */
+    public boolean isInvertedOrDefault() {
+        if (this.inverted == null) {
+            return false;
+        }
+        return inverted.booleanValue();
+    }
+
+    /**
      * Return the axis range mode or AxisRangeMode.DEFAULT
      * @return axis range mode or AxisRangeMode.DEFAULT
      */
@@ -250,8 +288,9 @@ public class Axis
     public void copy(final fr.jmmc.oiexplorer.core.model.OIBase other) {
         final Axis axis = (Axis) other;
 
-        // copy name, logScale, includeZero, plotError, converter:
+        // copy simple fields:
         this.name = axis.getName();
+        this.inverted = axis.isInverted();
         this.logScale = axis.isLogScale();
         this.includeZero = axis.isIncludeZero();
         this.includeDataRange = axis.isIncludeDataRange();
@@ -276,6 +315,9 @@ public class Axis
         }
         final Axis other = (Axis) obj;
         if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.name, other.getName())) {
+            return false;
+        }
+        if (!fr.jmmc.jmcs.util.ObjectUtils.areEquals(this.inverted, other.isInverted())) {
             return false;
         }
         if (this.logScale != other.logScale) {
@@ -309,6 +351,7 @@ public class Axis
         super.toString(sb, full); // OIBase
         sb.append("{name=").append(this.name);
         if (full) {
+            sb.append(", inverted=").append(this.inverted);
             sb.append(", logScale=").append(this.logScale);
             sb.append(", includeZero=").append(this.includeZero);
             sb.append(", rangeMode=").append(this.rangeMode);

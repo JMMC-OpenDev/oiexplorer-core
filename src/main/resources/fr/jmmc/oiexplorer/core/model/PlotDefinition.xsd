@@ -126,6 +126,14 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="inverted" type="xsd:boolean" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Invert the axis orientation
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="logScale" type="xsd:boolean">
                 <xsd:annotation>
                     <xsd:documentation>

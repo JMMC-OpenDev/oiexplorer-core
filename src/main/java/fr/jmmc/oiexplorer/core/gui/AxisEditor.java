@@ -115,8 +115,10 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             nameComboBoxModel.addAll(axisChoices);
             nameComboBox.setSelectedItem(axisName);
 
-            includeZeroCheckBox.setSelected(axis.isIncludeZero());
+            invertedCheckBox.setSelected(axis.isInvertedOrDefault());
             logScaleCheckBox.setSelected(axis.isLogScale());
+
+            includeZeroCheckBox.setSelected(axis.isIncludeZero());
             includeDataRangeCheckBox.setSelected(axis.isIncludeDataRangeOrDefault());
 
             rangeEditor.setAlias(axisName);
@@ -223,6 +225,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
         buttonGroupRangeModes = new javax.swing.ButtonGroup();
         nameComboBox = new javax.swing.JComboBox();
         logScaleCheckBox = new javax.swing.JCheckBox();
+        invertedCheckBox = new javax.swing.JCheckBox();
         includeZeroCheckBox = new javax.swing.JCheckBox();
         includeDataRangeCheckBox = new javax.swing.JCheckBox();
         jPanelBounds = new javax.swing.JPanel();
@@ -254,9 +257,21 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         add(logScaleCheckBox, gridBagConstraints);
+
+        invertedCheckBox.setText("inv.");
+        invertedCheckBox.setToolTipText("Inverse axis orientation ?");
+        invertedCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AxisEditor.this.actionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        add(invertedCheckBox, gridBagConstraints);
 
         includeZeroCheckBox.setText("inc. 0");
         includeZeroCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -265,7 +280,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         add(includeZeroCheckBox, gridBagConstraints);
 
@@ -277,7 +292,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         add(includeDataRangeCheckBox, gridBagConstraints);
 
@@ -321,13 +336,13 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
         jPanelBounds.add(jRadioModeFixed, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         add(jPanelBounds, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.2;
@@ -346,6 +361,8 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
             axisToEdit.setIncludeZero(includeZeroCheckBox.isSelected());
         } else if (evt.getSource() == includeDataRangeCheckBox) {
             axisToEdit.setIncludeDataRange(includeDataRangeCheckBox.isSelected());
+        } else if (evt.getSource() == invertedCheckBox) {
+            axisToEdit.setInverted(invertedCheckBox.isSelected());
         } else if (evt.getSource() == logScaleCheckBox) {
             axisToEdit.setLogScale(logScaleCheckBox.isSelected());
         } else if (evt.getSource() == nameComboBox) {
@@ -381,6 +398,7 @@ public class AxisEditor extends javax.swing.JPanel implements Disposable, Change
     private javax.swing.ButtonGroup buttonGroupRangeModes;
     private javax.swing.JCheckBox includeDataRangeCheckBox;
     private javax.swing.JCheckBox includeZeroCheckBox;
+    private javax.swing.JCheckBox invertedCheckBox;
     private javax.swing.JPanel jPanelBounds;
     private javax.swing.JRadioButton jRadioModeAuto;
     private javax.swing.JRadioButton jRadioModeDefault;

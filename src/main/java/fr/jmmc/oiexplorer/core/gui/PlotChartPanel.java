@@ -89,10 +89,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.Crosshair;
@@ -695,7 +693,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // force to use the base stroke :
         renderer.setAutoPopulateSeriesStroke(false);
-        renderer.setDefaultStroke(ChartUtils.DEFAULT_STROKE);
+        renderer.setDefaultStroke(ChartUtils.MEDIUM_STROKE);
 
         // set renderer options for ALL series (performance):
         renderer.setShapesVisible(true);
@@ -1656,12 +1654,14 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
                     showPlot = true;
 
+                    boolean inverted = false;
                     boolean yUseLog = false;
                     ColumnMeta yMeta = null;
                     String yUnit = null;
 
                     // update Y axis information:
                     if (info.yAxisInfo.columnMeta != null) {
+                        inverted = info.yAxisInfo.inverted;
                         yUseLog = info.yAxisInfo.useLog;
                         yMeta = info.yAxisInfo.columnMeta;
                         yUnit = info.yAxisInfo.unit;
@@ -1683,6 +1683,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             xyPlot.setRangeAxis(new BoundedLogAxis(""));
                         }
                         final BoundedLogAxis axis = (BoundedLogAxis) xyPlot.getRangeAxis();
+                        axis.setInverted(inverted);
                         axis.setBounds(viewBounds);
                         axis.setInitial(viewRange);
                         axis.setRange(viewRange);
@@ -1691,6 +1692,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                             xyPlot.setRangeAxis(ChartUtils.createAxis(""));
                         }
                         final BoundedNumberAxis axis = (BoundedNumberAxis) xyPlot.getRangeAxis();
+                        axis.setInverted(inverted);
                         axis.setBounds(viewBounds);
                         axis.setInitial(viewRange);
                         axis.setRange(viewRange);
@@ -1759,6 +1761,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         logger.debug("updateChart: plot {} usedStaNamesMap: {} OUT", this.plotId, usedStaNamesMap);
 
         boolean useWaveLengths = false;
+        boolean xInverted = false;
         boolean xUseLog = false;
         ColumnMeta xMeta = null;
         String xUnit = null;
@@ -1772,6 +1775,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 // create combined X axis information once:
                 xCombinedAxisInfo = new AxisInfo(info.xAxisInfo);
                 xMeta = xCombinedAxisInfo.columnMeta;
+                xInverted = xCombinedAxisInfo.inverted;
                 xUseLog = xCombinedAxisInfo.useLog;
                 xUnit = xCombinedAxisInfo.unit;
 
@@ -1826,6 +1830,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 this.combinedXYPlot.setDomainAxis(new BoundedLogAxis(""));
             }
             final BoundedLogAxis axis = (BoundedLogAxis) this.combinedXYPlot.getDomainAxis();
+            axis.setInverted(xInverted);
             axis.setBounds(viewBounds);
             axis.setInitial(viewRange);
             axis.setRange(viewRange);
@@ -1834,6 +1839,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 this.combinedXYPlot.setDomainAxis(ChartUtils.createAxis(""));
             }
             final BoundedNumberAxis axis = (BoundedNumberAxis) this.combinedXYPlot.getDomainAxis();
+            axis.setInverted(xInverted);
             axis.setBounds(viewBounds);
             axis.setInitial(viewRange);
             axis.setRange(viewRange);
@@ -1951,17 +1957,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, ColorScale.LINEAR, false), lambdaAxis);
 
             ChartUtils.defineAxisDefaults(lambdaAxis);
+            lambdaAxis.setLabel(OIFitsConstants.COLUMN_EFF_WAVE + " (" + ConverterFactory.CONVERTER_MICRO_METER.getUnit() + ")");
 
-            mapLegend.setPosition(RectangleEdge.BOTTOM);
-            mapLegend.setStripWidth(15d);
-            mapLegend.setStripOutlinePaint(Color.BLACK);
-            mapLegend.setStripOutlineVisible(true);
-            mapLegend.setSubdivisionCount(colorModel.getMapSize());
-            mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
-            mapLegend.setFrame(new BlockBorder(Color.BLACK));
-            mapLegend.setMargin(10d, 10d, 10d, 10d);
-            mapLegend.setPadding(10d, 25d, 10d, 25d);
-
+            ChartUtils.adjustLegend(mapLegend, colorModel.getMapSize(), RectangleEdge.BOTTOM);
             this.chart.addSubtitle(mapLegend);
         } else {
             // other cases:
@@ -1970,7 +1968,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             // not implemented still
              */
         }
-
         this.combinedXYPlot.setFixedLegendItems(legendCollection);
     }
 
@@ -2224,20 +2221,26 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // Get yAxis data:
         final Axis yAxis = plotDef.getYAxes().get(yAxisIndex);
-        final String yAxisName = yAxis.getName();
-
-        final ColumnMeta yMeta = oiData.getColumnMeta(yAxisName);
+        ColumnMeta yMeta = oiData.getColumnMeta(yAxis.getName());
 
         if (yMeta == null) {
-            if (isLogDebug) {
-                logger.debug("unsupported yAxis : {} on {}", yAxis.getName(), oiData);
+            // try using alias:
+            final String altName = oiData.getColumnNameByAlias(yAxis.getName());
+            if (altName != null) {
+                yMeta = oiData.getColumnMeta(altName);
             }
-            return;
+            if (yMeta == null) {
+                if (isLogDebug) {
+                    logger.debug("unsupported yAxis : {} on {}", yAxis.getName(), oiData);
+                }
+                return;
+            }
         }
         if (isLogDebug) {
             logger.debug("yMeta:{}", yMeta);
         }
 
+        final boolean yInverted = yAxis.isInvertedOrDefault();
         final boolean yUseLog = yAxis.isLogScale();
         final boolean doConvertY = (initialYConverter != null);
 
@@ -2254,7 +2257,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         if (isYData2D) {
             yData1D = null;
             yData1DErr = null;
-            yData2D = oiData.getColumnAsDoubles(yAxisName);
+            yData2D = oiData.getColumnAsDoubles(yMeta.getName());
             if (yData2D == null || yData2D.length < nRows || yData2D[0].length < nWaves) {
                 if (isLogDebug) {
                     logger.debug("unsupported yAxis : {} on {}", yAxis.getName(), oiData);
@@ -2263,7 +2266,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             }
             yData2DErr = oiData.getColumnAsDoubles(yMeta.getErrorColumnName());
         } else {
-            yData1D = oiData.getColumnAsDouble(yAxisName);
+            yData1D = oiData.getColumnAsDouble(yMeta.getName());
             if (yData1D == null || yData1D.length < nRows) {
                 if (isLogDebug) {
                     logger.debug("unsupported yAxis : {} on {}", yAxis.getName(), oiData);
@@ -2279,20 +2282,26 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // Get xAxis data:
         final Axis xAxis = plotDef.getXAxis();
-        final String xAxisName = xAxis.getName();
-
-        final ColumnMeta xMeta = oiData.getColumnMeta(xAxisName);
+        ColumnMeta xMeta = oiData.getColumnMeta(xAxis.getName());
 
         if (xMeta == null) {
-            if (isLogDebug) {
-                logger.debug("unsupported xAxis : {} on {}", xAxis.getName(), oiData);
+            // try using alias:
+            final String altName = oiData.getColumnNameByAlias(xAxis.getName());
+            if (altName != null) {
+                xMeta = oiData.getColumnMeta(altName);
             }
-            return;
+            if (xMeta == null) {
+                if (isLogDebug) {
+                    logger.debug("unsupported xAxis : {} on {}", xAxis.getName(), oiData);
+                }
+                return;
+            }
         }
         if (isLogDebug) {
-            logger.debug("yMeta:{}", yMeta);
+            logger.debug("xMeta:{}", xMeta);
         }
 
+        final boolean xInverted = xAxis.isInvertedOrDefault();
         final boolean xUseLog = xAxis.isLogScale();
         final boolean doConvertX = (initialXConverter != null);
 
@@ -2309,7 +2318,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         if (isXData2D) {
             xData1D = null;
             xData1DErr = null;
-            xData2D = oiData.getColumnAsDoubles(xAxisName);
+            xData2D = oiData.getColumnAsDoubles(xMeta.getName());
             if (xData2D == null || xData2D.length < nRows || xData2D[0].length < nWaves) {
                 if (isLogDebug) {
                     logger.debug("unsupported xAxis : {} on {}", xAxis.getName(), oiData);
@@ -2318,7 +2327,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             }
             xData2DErr = oiData.getColumnAsDoubles(xMeta.getErrorColumnName());
         } else {
-            xData1D = oiData.getColumnAsDouble(xAxisName);
+            xData1D = oiData.getColumnAsDouble(xMeta.getName());
             if (xData1D == null || xData1D.length < nRows) {
                 if (isLogDebug) {
                     logger.debug("unsupported xAxis : {} on {}", xAxis.getName(), oiData);
@@ -2722,12 +2731,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
                                 if (NumberUtils.isFinite(x)) {
                                     // insert cut-off for data lines of non contiguous items (NaN)
-                                    if (drawLines) {
-                                        if ((prevL != -1) && (l - prevL > 1)) {
-                                            // add cut-off point
-                                            yValues[idx++] = NaN;
-                                            nCut++;
-                                        }
+                                    if (drawLines && (prevL != -1) && (l - prevL > 1)) {
+                                        // add cut-off point
+                                        yValues[idx++] = NaN;
+                                        nCut++;
                                     }
 
                                     // Process X / Y Errors:
@@ -2987,6 +2994,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         AxisInfo axisInfo = info.xAxisInfo;
         axisInfo.columnMeta = xMeta;
         axisInfo.unit = (doScaleX) ? xConverter.getUnit() : null;
+        axisInfo.inverted = xInverted;
         axisInfo.useLog = xUseLog;
         if (axisInfo.dataRange != null) {
             // combine X range:
@@ -3009,6 +3017,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         axisInfo = info.yAxisInfo;
         axisInfo.columnMeta = yMeta;
         axisInfo.unit = (doScaleY) ? yConverter.getUnit() : null;
+        axisInfo.inverted = yInverted;
         axisInfo.useLog = yUseLog;
         if (axisInfo.dataRange != null) {
             // combine Y range:
@@ -3382,12 +3391,18 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private final static List<String> COLUMNS_SYMETRY = Arrays.asList(new String[]{
         OIFitsConstants.COLUMN_UCOORD,
         OIFitsConstants.COLUMN_VCOORD,
+        OIFitsConstants.COLUMN_U,
+        OIFitsConstants.COLUMN_V,
         OIFitsConstants.COLUMN_UCOORD_SPATIAL,
         OIFitsConstants.COLUMN_VCOORD_SPATIAL,
         OIFitsConstants.COLUMN_U1COORD,
         OIFitsConstants.COLUMN_V1COORD,
         OIFitsConstants.COLUMN_U2COORD,
         OIFitsConstants.COLUMN_V2COORD,
+        OIFitsConstants.COLUMN_U1,
+        OIFitsConstants.COLUMN_V1,
+        OIFitsConstants.COLUMN_U2,
+        OIFitsConstants.COLUMN_V2,
         OIFitsConstants.COLUMN_U1COORD_SPATIAL,
         OIFitsConstants.COLUMN_V1COORD_SPATIAL,
         OIFitsConstants.COLUMN_U2COORD_SPATIAL,

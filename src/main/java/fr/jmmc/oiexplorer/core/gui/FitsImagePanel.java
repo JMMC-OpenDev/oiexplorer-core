@@ -23,6 +23,7 @@ import fr.jmmc.oiexplorer.core.export.DocumentOptions;
 import fr.jmmc.oiexplorer.core.function.ConverterFactory;
 import fr.jmmc.oiexplorer.core.gui.action.ExportDocumentAction;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import static fr.jmmc.oiexplorer.core.gui.chart.ChartUtils.INSET_MEDIUM;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorModelPaintScale;
 import fr.jmmc.oiexplorer.core.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.oiexplorer.core.gui.chart.RulerOverlay;
@@ -89,8 +90,8 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private static final long serialVersionUID = 1L;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(FitsImagePanel.class.getName());
-    /** chart padding (right = 10px) */
-    private final static RectangleInsets CHART_PADDING = new RectangleInsets(0d, 0d, 0d, 10d);
+    /** chart padding (bottom = 10px) */
+    private final static RectangleInsets CHART_PADDING = new RectangleInsets(0d, 0d, INSET_MEDIUM, 0d);
     /** image task prefix 'convertFitsImage-' */
     private static final String PREFIX_IMAGE_TASK = "convertFitsImage-";
     /** global thread counter */
@@ -1749,7 +1750,6 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
             infoTitle = new CompositeTitle(infoBlock);
             infoTitle.setFrame(new BlockBorder(Color.BLACK));
-            infoTitle.setMargin(1d, 1d, 1d, 1d);
             infoTitle.setPadding(5d, 5d, 5d, 5d);
             infoTitle.setPosition(RectangleEdge.RIGHT);
         }
@@ -1975,21 +1975,12 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             }
 
             ChartUtils.defineAxisDefaults(uvMapAxis);
+            uvMapAxis.setLabel("Flux"); // unit ?
 
-            mapLegend.setPosition(RectangleEdge.LEFT);
-            mapLegend.setStripWidth(15d);
-            mapLegend.setStripOutlinePaint(Color.BLACK);
-            mapLegend.setStripOutlineVisible(true);
-            mapLegend.setSubdivisionCount(colorModel.getMapSize());
-            mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
-            mapLegend.setFrame(new BlockBorder(Color.BLACK));
-            mapLegend.setMargin(1d, 1d, 1d, 1d);
-            mapLegend.setPadding(10d, 10d, 10d, 10d);
-
+            ChartUtils.adjustLegend(mapLegend, colorModel.getMapSize(), RectangleEdge.LEFT);
             this.chart.addSubtitle(mapLegend);
 
             updatePlotImage(imageData.getImage());
-
         } else {
             updatePlotImage(null);
         }
