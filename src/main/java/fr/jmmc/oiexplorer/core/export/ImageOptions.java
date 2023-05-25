@@ -4,6 +4,7 @@
 package fr.jmmc.oiexplorer.core.export;
 
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -40,18 +41,26 @@ public final class ImageOptions extends DocumentOptions {
                 w = shortEdge;
                 h = longEdge;
             }
+
+            float scale;
             switch (getDocumentSize()) {
-                case LARGE:
-                    documentPage = new Rectangle2D.Float(0f, 0f, 4f * w, 4f * h);
-                    break;
-                case NORMAL:
-                    documentPage = new Rectangle2D.Float(0f, 0f, 2f * w, 2f * h);
-                    break;
                 default:
                 case SMALL:
-                    documentPage = new Rectangle2D.Float(0f, 0f, w, h);
+                    scale = 1;
+                    break;
+                case NORMAL:
+                    scale = 2;
+                    break;
+                case LARGE:
+                    scale = 4;
                     break;
             }
+
+            // Adjust Hi-dpi screens => enlarge document size:
+            final float scaleUI = SwingUtils.adjustUISize(1.0f);
+            scale = Math.max(scale, scaleUI);
+
+            documentPage = new Rectangle2D.Float(0f, 0f, w * scale, h * scale);
         }
         return documentPage;
     }

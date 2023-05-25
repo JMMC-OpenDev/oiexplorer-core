@@ -11,8 +11,13 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 import org.jfree.chart.ui.Drawable;
 
 /**
@@ -76,14 +81,13 @@ public final class ImageWriter extends Writer {
 
                 logger.info("writing image: {}", imgFinalFile.getAbsolutePath());
 
-                // TODO later: compression options ...
                 // Supported Formats: [jpg, bmp, gif, png]
-                ImageIO.write(image, mimeType.getExtension(), imgFinalFile);
+                saveImage(image, mimeType.getExtension(), imgFinalFile);
 
                 // free graphics:
                 g2.dispose();
                 g2 = null;
-            }
+            } // loop
         } catch (IOException ioe) {
             throw new IllegalStateException("IO exception : ", ioe);
         } finally {
@@ -131,6 +135,27 @@ public final class ImageWriter extends Writer {
         }
         return new File(imgBaseFile.getParentFile(),
                 fileNamePart + '.' + mimeType.getExtension());
+    }
+
+    public static void saveImage(final BufferedImage image, final String formatName, final File imgFile) throws IOException {
+        final Iterator<javax.imageio.ImageWriter> itWriters = ImageIO.getImageWritersByFormatName("PNG");
+        if (itWriters.hasNext()) {
+            final javax.imageio.ImageWriter writer = itWriters.next();
+
+            final ImageWriteParam writerParams = writer.getDefaultWriteParam();
+            writerParams.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+            writerParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            writerParams.setCompressionQuality(0.75f); // low compression (faster)
+
+            // PNG uses already buffering:
+            final ImageOutputStream imgOutStream = ImageIO.createImageOutputStream(new FileOutputStream(imgFile));
+            try {
+                writer.setOutput(imgOutStream);
+                writer.write(null, new IIOImage(image, null, null), writerParams);
+            } finally {
+                imgOutStream.close();
+            }
+        }
     }
 
 }

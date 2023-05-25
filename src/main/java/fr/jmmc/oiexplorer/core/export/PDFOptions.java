@@ -4,6 +4,7 @@
 package fr.jmmc.oiexplorer.core.export;
 
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -19,18 +20,37 @@ public final class PDFOptions extends DocumentOptions {
     @Override
     public Rectangle2D.Float adjustDocumentSize() {
         // adjust document size (SMALL, A3, A2) and orientation according to the options :
-        com.lowagie.text.Rectangle documentPage;
+        int scale;
         switch (getDocumentSize()) {
             default:
             case SMALL:
-                documentPage = com.lowagie.text.PageSize.A4;
+                scale = 1;
                 break;
             case NORMAL:
-                documentPage = com.lowagie.text.PageSize.A3;
+                scale = 2;
                 break;
             case LARGE:
-                documentPage = com.lowagie.text.PageSize.A2;
+                scale = 4;
                 break;
+        }
+
+        // Adjust Hi-dpi screens => enlarge document size:
+        final int scaleUI = (int) Math.ceil(SwingUtils.adjustUISize(1.0));
+
+        if (scaleUI > 1) {
+            scale *= scaleUI;
+        }
+
+        com.lowagie.text.Rectangle documentPage;
+
+        if (scale <= 1) {
+            documentPage = com.lowagie.text.PageSize.A4;
+        } else if (scale <= 2) {
+            documentPage = com.lowagie.text.PageSize.A3;
+        } else if (scale <= 4) {
+            documentPage = com.lowagie.text.PageSize.A2;
+        } else {
+            documentPage = com.lowagie.text.PageSize.A1;
         }
 
         if (Orientation.Landscape == getOrientation()) {
