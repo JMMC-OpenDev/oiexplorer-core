@@ -220,10 +220,6 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
             logger.debug("plots:             {}", getPlotList());
         }
 
-        logger.info("subsetDefinitions: {}", getSubsetDefinitionList());
-        logger.info("plotDefinitions:   {}", getPlotDefinitionList());
-        logger.info("plots:             {}", getPlotList());
-
         // check and update references in current OiDataCollection:
         // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
         checkReferences();

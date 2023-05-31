@@ -82,7 +82,7 @@ public final class BoundedLogAxis extends EnhancedLogarithmicAxis {
 
             this.bounds = (min < max) ? new Range(min, max) : new Range(min, min * 10.);
 
-            logger.info("BoundedLogAxis: fix extrema for bounds {} : {}", bounds, this.bounds);
+            logger.debug("BoundedLogAxis: fix extrema for bounds {} : {}", bounds, this.bounds);
         }
         setInitial(bounds);
     }
