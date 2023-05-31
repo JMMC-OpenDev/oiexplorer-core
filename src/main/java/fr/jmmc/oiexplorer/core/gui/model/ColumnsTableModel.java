@@ -298,15 +298,7 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         if (columnIndex >= 0) {
                             return Short.valueOf(rowValues[columnIndex]);
                         } else {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
-                                }
-                                sb.append(rowValues[i]);
-                            }
-                            return sb.toString();
+                            return null;
                         }
                     }
                     break;
@@ -325,15 +317,7 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         if (columnIndex >= 0) {
                             return NumberUtils.valueOf(rowValues[columnIndex]);
                         } else {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
-                                }
-                                sb.append(rowValues[i]);
-                            }
-                            return sb.toString();
+                            return null;
                         }
                     }
                     break;
@@ -352,15 +336,7 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         if (columnIndex >= 0) {
                             return Double.valueOf(rowValues[columnIndex]);
                         } else {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
-                                }
-                                sb.append(NumberUtils.format(rowValues[i]));
-                            }
-                            return sb.toString();
+                            return null;
                         }
                     }
                     break;
@@ -524,10 +500,8 @@ public final class ColumnsTableModel extends AbstractTableModel {
             for (int i = 0; i < nRows; i++) {
                 rowIndex[i] = i;
             }
-
             table.setColumnDerivedValue(COLUMN_ROW_INDEX, rowIndex);
         }
-
         return rowIndex;
     }
 
@@ -551,10 +525,8 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     colIndex[i][j] = j;
                 }
             }
-
             table.setColumnDerivedValue(COLUMN_COL_INDEX, colIndex);
         }
-
         return colIndex;
     }
 
