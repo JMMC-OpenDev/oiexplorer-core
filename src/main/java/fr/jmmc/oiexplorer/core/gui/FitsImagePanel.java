@@ -1718,15 +1718,20 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
             final BlockContainer infoBlock = new BlockContainer(new ColumnArrangement());
 
             if (lFitsImage.isIncRowDefined() && lFitsImage.isIncColDefined()) {
-                infoBlock.add(createText("Coordinates:"));
-                infoBlock.add(createText("RA: " + ALX.toHMS(Math.toDegrees(lFitsImage.getValRefCol()))));
-                infoBlock.add(createText("DE: " + ALX.toDMS(Math.toDegrees(lFitsImage.getValRefRow()))));
-
-                infoBlock.add(createText("\nIncrements:"));
+                // skip coords at (0.0, 0.0):
+                if (!NumberUtils.equals(Math.toDegrees(lFitsImage.getValRefCol()), 0.0)
+                        || !NumberUtils.equals(Math.toDegrees(lFitsImage.getValRefRow()), 0.0)) {
+                    infoBlock.add(createText("Coordinates:"));
+                    infoBlock.add(createText("RA: " + ALX.toHMS(Math.toDegrees(lFitsImage.getValRefCol()))));
+                    infoBlock.add(createText("DE: " + ALX.toDMS(Math.toDegrees(lFitsImage.getValRefRow()))));
+                    infoBlock.add(createText("\nPixel size:"));
+                } else {
+                    infoBlock.add(createText("Pixel size:"));
+                }
                 infoBlock.add(createText("RA: " + FitsImage.getAngleAsString(lFitsImage.getIncCol(), df)));
                 infoBlock.add(createText("DE: " + FitsImage.getAngleAsString(lFitsImage.getIncRow(), df)));
 
-                infoBlock.add(createText("\nImage FOV:"));
+                infoBlock.add(createText("\nAngular extent:"));
                 if (lFitsImage.isRotAngleDefined()) {
                     // FOV depends on the rotation angle
                     final BufferedImage image = imageData.getImage();
