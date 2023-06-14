@@ -3409,8 +3409,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         OIFitsConstants.COLUMN_V2COORD_SPATIAL
     });
 
+    private final static Range EMPTY_RANGE = new Range(0.0, 0.0);
+
     private static Range convert(final fr.jmmc.oitools.model.range.Range r) {
-        return new Range(r.getMin(), r.getMax());
+        return (r.isFinite()) ? new Range(r.getMin(), r.getMax()) : EMPTY_RANGE;
     }
 
     private static boolean isBoundValid(final boolean useLog, final double value) {
