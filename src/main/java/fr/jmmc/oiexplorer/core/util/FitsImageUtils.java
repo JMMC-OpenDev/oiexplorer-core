@@ -193,13 +193,11 @@ public final class FitsImageUtils {
     /** 
      * Call prepareImage for each FitsImage of the given FitsImageHDU. 
      * @param fitsImageHDU (can be null but then the function do nothing)
-     * @throws IllegalArgumentException 
      */
-    public static void prepareImages(final FitsImageHDU fitsImageHDU) throws IllegalArgumentException {
+    public static void prepareImages(final FitsImageHDU fitsImageHDU) {
         if (fitsImageHDU != null) {
             for (FitsImage fitsImage : fitsImageHDU.getFitsImages()) {
                 // note: fits image instance can be modified by image preparation:
-                // can throw IllegalArgumentException if image has invalid keyword(s) / data:
                 FitsImageUtils.prepareImage(fitsImage);
             }
             // update min/max range to be consistent accross the cube:
@@ -210,9 +208,8 @@ public final class FitsImageUtils {
     /**
      * Prepare the given image and Update the given FitsImage by the prepared FitsImage ready for display
      * @param fitsImage FitsImage to process
-     * @throws IllegalArgumentException if image has invalid keyword(s) / data
      */
-    public static void prepareImage(final FitsImage fitsImage) throws IllegalArgumentException {
+    public static void prepareImage(final FitsImage fitsImage) {
         if (fitsImage != null) {
             if (!fitsImage.isDataRangeDefined()) {
                 // update boundaries excluding zero values:
@@ -227,10 +224,6 @@ public final class FitsImageUtils {
             logger.info("Image size: {} x {}", nbRows, nbCols);
 
             // 1 - Ignore negative values:
-            // TODO: fix special case: image is [0] !
-            if (fitsImage.getDataMax() <= 0.0) {
-                throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier() + "] has only negative data !");
-            }
             if (fitsImage.getDataMin() < 0.0) {
                 final float threshold = 0f;
 
@@ -337,8 +330,13 @@ public final class FitsImageUtils {
             fitsImage.setSum(minMaxJob.getSum());
 
             // update dataMin/dataMax:
-            fitsImage.setDataMin(minMaxJob.getMin());
-            fitsImage.setDataMax(minMaxJob.getMax());
+            if (Double.isFinite(minMaxJob.getMin()) && Double.isFinite(minMaxJob.getMax())) {
+                fitsImage.setDataMin(minMaxJob.getMin());
+                fitsImage.setDataMax(minMaxJob.getMax());
+            } else {
+                fitsImage.setDataMin(0.0);
+                fitsImage.setDataMax(0.0);
+            }
         }
     }
 

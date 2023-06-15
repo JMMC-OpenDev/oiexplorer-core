@@ -1513,12 +1513,12 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
                 FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
                 min = (float) this.fitsImage.getDataMin();
                 max = (float) this.fitsImage.getDataMax();
-
-                if (min >= max) {
-                    max = min + 1f;
-                }
             } else {
                 usedColorScale = colorScale;
+            }
+            // anyway: ensure min < max:
+            if (min >= max) {
+                max = min + 1f;
             }
 
             logger.debug("computeInBackground: image range [{} - {}]", min, max);
@@ -1962,7 +1962,13 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
 
         if (imageData != null) {
             final double min = imageData.getMin();
-            final double max = imageData.getMax();
+            double max = imageData.getMax();
+
+            // ensure max > min:
+            if (min >= max) {
+                max = min + 1.0;
+            }
+
             final IndexColorModel colorModel = imageData.getColorModel();
             final ColorScale colorScale = imageData.getColorScale();
 
