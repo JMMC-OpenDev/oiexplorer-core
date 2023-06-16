@@ -40,8 +40,6 @@ public final class ColumnsTableModel extends AbstractTableModel {
     private boolean includeDerivedColumns = true;
     /** flag to expand or not arrays (2D only) as columns */
     private boolean expandRows = true;
-    /** flag to expand or not arrays (2D only) as columns  (deprecated ?) */
-    private boolean expandArrays = false;
     /** column mapping */
     private final ArrayList<ColumnMapping> columnMap = new ArrayList<ColumnMapping>(16);
     /** column dimensions */
@@ -82,14 +80,6 @@ public final class ColumnsTableModel extends AbstractTableModel {
 
     public void setExpandRows(boolean expandRows) {
         this.expandRows = expandRows;
-    }
-
-    public boolean isExpandArrays() {
-        return expandArrays;
-    }
-
-    public void setExpandArrays(boolean expandArrays) {
-        this.expandArrays = expandArrays;
     }
 
     public void reset() {
@@ -150,24 +140,21 @@ public final class ColumnsTableModel extends AbstractTableModel {
     }
 
     private void addColumns(final ColumnMeta meta, final boolean isDerived, final int index) {
-        ColumnMapping col = null;
+        final ColumnMapping col;
 
         final String name = meta.getName();
         if (meta.is3D()) {
-            // TODO: fix with expandRows
-            // use String representation:
+            // use String representation only for VISREFMAP (Logical):
             col = new ColumnMapping(meta, isDerived, name, String.class);
         } else {
             final Class<?> type = getType(meta.getDataType());
             if (meta.isArray()) {
-                if (meta.getDataType() != Types.TYPE_SHORT) {
+                if (meta.getDataType() == Types.TYPE_SHORT) {
+                    col = new ColumnMapping(meta, isDerived, name, String.class);
+                } else {
                     final int repeat = meta.getRepeat();
 
-                    if (expandArrays) {
-                        for (int i = 0; i < repeat; i++) {
-                            col = new ColumnMapping(meta, isDerived, name + "_" + i, type, i);
-                        }
-                    } else if (expandRows) {
+                    if (expandRows) {
                         // 2d
                         if (columnDims2d[1] == -1) {
                             columnDims2d[1] = repeat;
@@ -179,14 +166,13 @@ public final class ColumnsTableModel extends AbstractTableModel {
                             }
                         }
                         col = new ColumnMapping(meta, isDerived, name, type, 1); // index == 1 means 2D
+                    } else {
+                        col = new ColumnMapping(meta, isDerived, name, String.class);
                     }
                 }
             } else {
                 col = new ColumnMapping(meta, isDerived, name, type);
             }
-        }
-        if (col == null) {
-            col = new ColumnMapping(meta, isDerived, name, String.class);
         }
         if (index != -1) {
             columnMap.add(index, col);
@@ -297,8 +283,16 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         final short[] rowValues = sValues[rowIndex];
                         if (columnIndex >= 0) {
                             return Short.valueOf(rowValues[columnIndex]);
-                        } else {
-                            return null;
+                        } else if (mapping.type == String.class) {
+                            // append values :
+                            sb.setLength(0);
+                            for (int i = 0, len = rowValues.length; i < len; i++) {
+                                if (i > 0) {
+                                    sb.append(' ');
+                                }
+                                sb.append(rowValues[i]);
+                            }
+                            return sb.toString();
                         }
                     }
                     break;
@@ -316,8 +310,16 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         final int[] rowValues = iValues[rowIndex];
                         if (columnIndex >= 0) {
                             return NumberUtils.valueOf(rowValues[columnIndex]);
-                        } else {
-                            return null;
+                        } else if (mapping.type == String.class) {
+                            // append values :
+                            sb.setLength(0);
+                            for (int i = 0, len = rowValues.length; i < len; i++) {
+                                if (i > 0) {
+                                    sb.append(' ');
+                                }
+                                sb.append(rowValues[i]);
+                            }
+                            return sb.toString();
                         }
                     }
                     break;
@@ -335,8 +337,16 @@ public final class ColumnsTableModel extends AbstractTableModel {
                         final double[] rowValues = dValues[rowIndex];
                         if (columnIndex >= 0) {
                             return Double.valueOf(rowValues[columnIndex]);
-                        } else {
-                            return null;
+                        } else if (mapping.type == String.class) {
+                            // append values :
+                            sb.setLength(0);
+                            for (int i = 0, len = rowValues.length; i < len; i++) {
+                                if (i > 0) {
+                                    sb.append(' ');
+                                }
+                                sb.append(NumberUtils.format(rowValues[i]));
+                            }
+                            return sb.toString();
                         }
                     }
                     break;
