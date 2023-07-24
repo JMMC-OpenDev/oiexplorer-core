@@ -18,6 +18,7 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
+import org.apache.commons.lang.SystemUtils;
 import org.jfree.chart.ui.Drawable;
 
 /**
@@ -138,21 +139,32 @@ public final class ImageWriter extends Writer {
     }
 
     public static void saveImage(final BufferedImage image, final String formatName, final File imgFile) throws IOException {
-        final Iterator<javax.imageio.ImageWriter> itWriters = ImageIO.getImageWritersByFormatName("PNG");
+        final Iterator<javax.imageio.ImageWriter> itWriters = ImageIO.getImageWritersBySuffix(formatName);
         if (itWriters.hasNext()) {
             final javax.imageio.ImageWriter writer = itWriters.next();
 
             final ImageWriteParam writerParams = writer.getDefaultWriteParam();
-            writerParams.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
-            writerParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-            writerParams.setCompressionQuality(0.75f); // low compression (faster)
 
+            if (writerParams.canWriteProgressive()) {
+                writerParams.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+            }
+            if ("png".equalsIgnoreCase(formatName) && writerParams.canWriteCompressed()
+                    && (SystemUtils.JAVA_VERSION_FLOAT >= 9.0f)) {
+                try {
+                    // not supported on JDK8:
+                    writerParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                    writerParams.setCompressionQuality(0.75f); // low compression (faster)
+                } catch (UnsupportedOperationException uoe) {
+                    logger.info("setCompression failed:", uoe);
+                }
+            }
             // PNG uses already buffering:
             final ImageOutputStream imgOutStream = ImageIO.createImageOutputStream(new FileOutputStream(imgFile));
             try {
                 writer.setOutput(imgOutStream);
                 writer.write(null, new IIOImage(image, null, null), writerParams);
             } finally {
+                writer.dispose();
                 imgOutStream.close();
             }
         }
