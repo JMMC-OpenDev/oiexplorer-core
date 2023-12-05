@@ -1031,7 +1031,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                                         logger.debug("matching point: serie={} item={}", serie, item);
 
                                         if (++nMatchs > 2) {
-                                            logger.info("Too much matching items for ptr: {}", selPtr);
+                                            logger.debug("Too much matching items for ptr: {}", selPtr);
                                             break;
                                         }
 
