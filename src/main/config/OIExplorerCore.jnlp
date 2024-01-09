@@ -24,7 +24,7 @@
 
         <!-- JFreeChart -->
         <jar href="@SHARED@/jfreechart-1.5.4.jar" />
-        <jar href="@SHARED@/jfreesvg-3.4.jar" />
+        <jar href="@SHARED@/jfreesvg-3.4.3.jar" />
 
         <!-- PDF -->
         <jar href="@SHARED@/itext-2.1.5.jar" />
