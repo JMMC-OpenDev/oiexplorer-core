@@ -210,7 +210,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private final List<PlotInfo> plotInfos = new ArrayList<PlotInfo>();
     /* plot data */
     /** defered event handler (50ms delay) */
-    private final EDTDelayedEventHandler deferedHandler = new EDTDelayedEventHandler(50);
+    private final EDTDelayedEventHandler deferedHandler = new EDTDelayedEventHandler(Constants.ENABLE_DEFERED_COMPUTE ? 50 : 5);
     /** jFreeChart instance */
     private JFreeChart chart;
     /** combined xy plot sharing domain axis */

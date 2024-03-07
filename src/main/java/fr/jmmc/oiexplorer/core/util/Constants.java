@@ -28,4 +28,7 @@ public interface Constants {
     /* plots */
     /** JMMC legal notice on plots */
     public static final String JMMC_ANNOTATION = "Made by OIFitsExplorer/JMMC ";
+    
+    /** flag to disable defered computations (fest) */
+    public static final boolean ENABLE_DEFERED_COMPUTE = "false".equalsIgnoreCase(System.getProperty("DISABLE_DEFERED_COMPUTE", "false"));
 }
