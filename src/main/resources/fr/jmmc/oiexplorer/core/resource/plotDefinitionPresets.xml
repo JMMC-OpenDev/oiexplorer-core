@@ -585,6 +585,11 @@
             <name>VIS2DATA</name>
             <logScale>false</logScale>
             <includeZero>false</includeZero>
+            <rangeMode>Range</rangeMode>
+            <range>
+                <min>0.0</min>
+                <max>1.1</max>
+            </range>
         </yAxes>
         <yAxes>
             <name>SNR_VIS2</name>
@@ -631,12 +636,22 @@
             <name>VIS2ERR</name>
             <logScale>false</logScale>
             <includeZero>true</includeZero>
+            <rangeMode>Range</rangeMode>
+            <range>
+                <min>0.0</min>
+                <max>0.3</max>
+            </range>
         </yAxes>
 
         <yAxes>
             <name>VISAMPERR</name>
             <logScale>false</logScale>
             <includeZero>true</includeZero>
+            <rangeMode>Range</rangeMode>
+            <range>
+                <min>0.0</min>
+                <max>0.3</max>
+            </range>
         </yAxes>
         <yAxes>
             <name>VISPHIERR</name>
