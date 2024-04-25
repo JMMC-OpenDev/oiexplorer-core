@@ -68,6 +68,7 @@ import org.jfree.chart.block.BlockContainer;
 import org.jfree.chart.block.ColumnArrangement;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.title.CompositeTitle;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.title.TextTitle;
@@ -775,11 +776,10 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     private void jToggleButtonRulerItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jToggleButtonRulerItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             this.rulerOverlay = new RulerOverlay(this, chartPanel);
+            addChartOverlay(rulerOverlay);
             setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-            chartPanel.addOverlay(rulerOverlay);
-        } else {
-            chartPanel.removeOverlay(rulerOverlay);
-            rulerOverlay.dispose();
+        } else if (rulerOverlay != null) {
+            removeChartOverlay(rulerOverlay);
             this.rulerOverlay = null;
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
@@ -958,6 +958,17 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
     public void removeOptionPanel(final JPanel optionPanel) {
         if (this.showOptions && optionPanel != null) {
             this.jPanelOptions.remove(optionPanel);
+        }
+    }
+
+    public void addChartOverlay(final Overlay overlay) {
+        chartPanel.addOverlay(overlay);
+    }
+
+    public void removeChartOverlay(final Overlay overlay) {
+        chartPanel.removeOverlay(overlay);
+        if (overlay instanceof Disposable) {
+            ((Disposable) overlay).dispose();
         }
     }
 
