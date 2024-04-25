@@ -281,18 +281,20 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final short[][] sValues = table.getColumnAsShorts(column.getName());
                     if (sValues != null) {
                         final short[] rowValues = sValues[rowIndex];
-                        if (columnIndex >= 0) {
-                            return Short.valueOf(rowValues[columnIndex]);
-                        } else if (mapping.type == String.class) {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
+                        if (rowValues != null) {
+                            if (columnIndex >= 0) {
+                                return Short.valueOf(rowValues[columnIndex]);
+                            } else if (mapping.type == String.class) {
+                                // append values :
+                                sb.setLength(0);
+                                for (int i = 0, len = rowValues.length; i < len; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    sb.append(rowValues[i]);
                                 }
-                                sb.append(rowValues[i]);
+                                return sb.toString();
                             }
-                            return sb.toString();
                         }
                     }
                     break;
@@ -308,18 +310,20 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final int[][] iValues = table.getColumnAsInts(column.getName());
                     if (iValues != null) {
                         final int[] rowValues = iValues[rowIndex];
-                        if (columnIndex >= 0) {
-                            return NumberUtils.valueOf(rowValues[columnIndex]);
-                        } else if (mapping.type == String.class) {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
+                        if (rowValues != null) {
+                            if (columnIndex >= 0) {
+                                return NumberUtils.valueOf(rowValues[columnIndex]);
+                            } else if (mapping.type == String.class) {
+                                // append values :
+                                sb.setLength(0);
+                                for (int i = 0, len = rowValues.length; i < len; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    sb.append(rowValues[i]);
                                 }
-                                sb.append(rowValues[i]);
+                                return sb.toString();
                             }
-                            return sb.toString();
                         }
                     }
                     break;
@@ -335,18 +339,20 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final double[][] dValues = table.getColumnAsDoubles(column.getName());
                     if (dValues != null) {
                         final double[] rowValues = dValues[rowIndex];
-                        if (columnIndex >= 0) {
-                            return Double.valueOf(rowValues[columnIndex]);
-                        } else if (mapping.type == String.class) {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
+                        if (rowValues != null) {
+                            if (columnIndex >= 0) {
+                                return Double.valueOf(rowValues[columnIndex]);
+                            } else if (mapping.type == String.class) {
+                                // append values :
+                                sb.setLength(0);
+                                for (int i = 0, len = rowValues.length; i < len; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    sb.append(NumberUtils.format(rowValues[i]));
                                 }
-                                sb.append(NumberUtils.format(rowValues[i]));
+                                return sb.toString();
                             }
-                            return sb.toString();
                         }
                     }
                     break;
@@ -374,21 +380,23 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final float[][][] cValues = table.getColumnComplexes(column.getName());
                     if (cValues != null) {
                         final float[][] rowValues = cValues[rowIndex];
-                        // append values :
-                        sb.setLength(0);
-                        if (columnIndex >= 0) {
-                            // real,img pattern for complex values :
-                            sb.append(NumberUtils.format(rowValues[columnIndex][0])).append(',').append(NumberUtils.format(rowValues[columnIndex][1]));
-                        } else {
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
-                                }
+                        if (rowValues != null) {
+                            // append values :
+                            sb.setLength(0);
+                            if (columnIndex >= 0) {
                                 // real,img pattern for complex values :
-                                sb.append(NumberUtils.format(rowValues[i][0])).append(',').append(NumberUtils.format(rowValues[i][1]));
+                                sb.append(NumberUtils.format(rowValues[columnIndex][0])).append(',').append(NumberUtils.format(rowValues[columnIndex][1]));
+                            } else {
+                                for (int i = 0, len = rowValues.length; i < len; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    // real,img pattern for complex values :
+                                    sb.append(NumberUtils.format(rowValues[i][0])).append(',').append(NumberUtils.format(rowValues[i][1]));
+                                }
                             }
+                            return sb.toString();
                         }
-                        return sb.toString();
                     }
                     break;
                 }
@@ -400,31 +408,33 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final boolean[][][] bValues = table.getColumnBoolean3D(column.getName());
                     if (bValues != null) {
                         final boolean[][] rowValues = bValues[rowIndex];
-                        // append values :
-                        sb.setLength(0);
-                        if (columnIndex >= 0) {
-                            final boolean[] cellValues = rowValues[columnIndex];
-                            for (int j = 0, lenJ = cellValues.length; j < lenJ; j++) {
-                                if (j > 0) {
-                                    sb.append(',');
-                                }
-                                sb.append(cellValues[j] ? 'T' : 'F');
-                            }
-                        } else {
-                            for (int i = 0, lenI = rowValues.length; i < lenI; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
-                                }
-                                final boolean[] cellValues = rowValues[i];
+                        if (rowValues != null) {
+                            // append values :
+                            sb.setLength(0);
+                            if (columnIndex >= 0) {
+                                final boolean[] cellValues = rowValues[columnIndex];
                                 for (int j = 0, lenJ = cellValues.length; j < lenJ; j++) {
                                     if (j > 0) {
                                         sb.append(',');
                                     }
                                     sb.append(cellValues[j] ? 'T' : 'F');
                                 }
+                            } else {
+                                for (int i = 0, lenI = rowValues.length; i < lenI; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    final boolean[] cellValues = rowValues[i];
+                                    for (int j = 0, lenJ = cellValues.length; j < lenJ; j++) {
+                                        if (j > 0) {
+                                            sb.append(',');
+                                        }
+                                        sb.append(cellValues[j] ? 'T' : 'F');
+                                    }
+                                }
                             }
+                            return sb.toString();
                         }
-                        return sb.toString();
                     }
                     break;
                 }
@@ -432,18 +442,20 @@ public final class ColumnsTableModel extends AbstractTableModel {
                     final boolean[][] bValues = table.getColumnBooleans(column.getName());
                     if (bValues != null) {
                         final boolean[] rowValues = bValues[rowIndex];
-                        if (columnIndex >= 0) {
-                            return (rowValues[columnIndex] ? 'T' : 'F');
-                        } else {
-                            // append values :
-                            sb.setLength(0);
-                            for (int i = 0, len = rowValues.length; i < len; i++) {
-                                if (i > 0) {
-                                    sb.append(' ');
+                        if (rowValues != null) {
+                            if (columnIndex >= 0) {
+                                return (rowValues[columnIndex] ? 'T' : 'F');
+                            } else {
+                                // append values :
+                                sb.setLength(0);
+                                for (int i = 0, len = rowValues.length; i < len; i++) {
+                                    if (i > 0) {
+                                        sb.append(' ');
+                                    }
+                                    sb.append(rowValues[i] ? 'T' : 'F');
                                 }
-                                sb.append(rowValues[i] ? 'T' : 'F');
+                                return sb.toString();
                             }
-                            return sb.toString();
                         }
                     }
                     break;
