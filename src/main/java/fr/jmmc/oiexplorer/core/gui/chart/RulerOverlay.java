@@ -9,6 +9,7 @@ import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
 import fr.jmmc.oitools.image.FitsUnit;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import org.jfree.chart.ChartMouseEvent;
@@ -32,7 +33,8 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(RulerOverlay.class.getName());
 
-    private final static int RECT_SIZE = SwingUtils.adjustUISize(5);
+    private final static int RECT_SIZE = SwingUtils.adjustUISize(6);
+    private final static int ANG_SIZE = SwingUtils.adjustUISize(3);
     private final static int LINE_HEIGHT = SwingUtils.adjustUISize(15);
 
     enum Translation {
@@ -136,17 +138,19 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
      * @return distance in milli-arcsecs
      */
     private double calculateMeasure() {
-        return Math.sqrt(Math.pow((end.getX() - origin.getX()), 2) + Math.pow((end.getY() - origin.getY()), 2));
+        return Math.sqrt(Math.pow((end.getX() - origin.getX()), 2.0) + Math.pow((end.getY() - origin.getY()), 2.0));
     }
 
     private double calculateAngle() {
-        // TODO: correct orientation (north)
+        // correct orientation (north) as x and y inverted:
         return Math.toDegrees(Math.atan2(end.getX() - origin.getX(), end.getY() - origin.getY()));
     }
 
     @Override
     public void paintOverlay(final Graphics2D g2, final ChartPanel chartPanel) {
         if (rulerState != RulerState.DISABLED) {
+            final Shape savedClip = g2.getClip();
+
             logger.debug("paintOverlay: rulerState: {}", rulerState);
 
             g2.clip(chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea());
@@ -158,6 +162,8 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
             g2.setColor(((origin == end) || (rulerState == RulerState.EDIT_ORIG)) ? Color.MAGENTA : Color.GREEN);
             g2.drawRect((int) originCoords.getX() - RECT_SIZE, (int) originCoords.getY() - RECT_SIZE, RECT_SIZE * 2, RECT_SIZE * 2);
 
+            final double angle = calculateAngle();
+
             if (origin != end) {
                 g2.setColor((rulerState == RulerState.EDIT_END) ? Color.MAGENTA : Color.GREEN);
                 g2.drawRect((int) endCoords.getX() - RECT_SIZE, (int) endCoords.getY() - RECT_SIZE, RECT_SIZE * 2, RECT_SIZE * 2);
@@ -165,20 +171,32 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
                 g2.setColor(Color.GREEN);
                 g2.drawLine((int) originCoords.getX(), (int) originCoords.getY(), (int) endCoords.getX(), (int) endCoords.getY());
 
-                // TODO: show angle
-                // draw vertical at origin (north)
-                // draw arc between (north axis and vector)
+                if (rulerState != RulerState.EDIT_ORIG) {
+                    g2.setStroke(ChartUtils.DEFAULT_STROKE);
+
+                    // draw vertical at origin (north)
+                    g2.drawLine((int) originCoords.getX(), (int) originCoords.getY() - RECT_SIZE, (int) originCoords.getX(), (int) originCoords.getY());
+
+                    // draw arc between (north axis and vector)
+                    g2.drawArc((int) originCoords.getX() - ANG_SIZE, (int) originCoords.getY() - ANG_SIZE, ANG_SIZE * 2, ANG_SIZE * 2, 90, (int) angle);
+                }
             }
 
             // move info into another panel (label)
             final int height = chartPanel.getSize().height;
+            final int left = 160;
+
+            g2.setFont(ChartUtils.DEFAULT_FONT_MEDIUM);
 
             g2.setClip(chartPanel.getChartRenderingInfo().getChartArea());
             g2.setColor(Color.BLACK);
-            g2.drawString(String.format("Point 1: x=%.5f y=%.5f", origin.getX(), origin.getY()), 100, height - 6 * LINE_HEIGHT);
-            g2.drawString(String.format("Point 2: x=%.5f y=%.5f", end.getX(), end.getY()), 100, height - 5 * LINE_HEIGHT);
-            g2.drawString(String.format("Measure: %.5f mas", calculateMeasure()), 100, height - 4 * LINE_HEIGHT);
-            g2.drawString(String.format("Angle: %.5f °", calculateAngle()), 100, height - 3 * LINE_HEIGHT);
+
+            g2.drawString(String.format("Point 1: x=%.4f y=%.4f", origin.getX(), origin.getY()), left, height - 5 * LINE_HEIGHT);
+            g2.drawString(String.format("Point 2: x=%.4f y=%.4f", end.getX(), end.getY()), left, height - 4 * LINE_HEIGHT);
+            g2.drawString(String.format("Measure: %.3f mas", calculateMeasure()), left, height - 3 * LINE_HEIGHT);
+            g2.drawString(String.format("Angle: %.2f °", angle), left, height - 2 * LINE_HEIGHT);
+
+            g2.setClip(savedClip);
         }
     }
 
