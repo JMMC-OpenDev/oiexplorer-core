@@ -73,7 +73,7 @@ public class ChartUtils {
     public static final Font DEFAULT_SUBTITLE_FONT = getFont(13, Font.BOLD);
     /** The default font for axis tick labels, legend items. */
     public static final Font DEFAULT_FONT = getFont(12);
-    /** The default font for medium texxts. */
+    /** The default font for medium texts. */
     public static final Font DEFAULT_FONT_MEDIUM = getFont(10);
     /** The default font for small texts */
     public static final Font DEFAULT_TEXT_SMALL_FONT = getFont(9);

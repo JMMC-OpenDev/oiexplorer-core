@@ -104,7 +104,8 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
      */
     @Override
     public String getSubjectId(final OIFitsCollectionManagerEventType type) {
-        return DISCARDED_SUBJECT_ID;
+        // accept all
+        return null;
     }
 
     /**
