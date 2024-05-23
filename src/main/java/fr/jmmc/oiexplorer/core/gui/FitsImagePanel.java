@@ -1915,11 +1915,14 @@ public class FitsImagePanel extends javax.swing.JPanel implements Disposable, Ch
         int w = (int) Math.ceil(pixRatioX * imgRect.getWidth());
         int h = (int) Math.ceil(pixRatioY * imgRect.getHeight());
 
+        // Ensure square area:
+        w = h = Math.min(w, h);
+
         // check bounds:
-        x = checkBounds(x, 0, imageWidth - 1);
-        y = checkBounds(y, 0, imageHeight - 1);
-        w = checkBounds(w, 1, imageWidth - x);
-        h = checkBounds(h, 1, imageHeight - y);
+        w = checkBounds(w, 1, imageWidth);
+        h = checkBounds(h, 1, imageHeight);
+        x = checkBounds(x, 0, imageWidth - w);
+        y = checkBounds(y, 0, imageHeight - h);
 
         final boolean doCrop = ((x != 0) || (y != 0) || (w != imageWidth) || (h != imageHeight));
 
