@@ -38,7 +38,11 @@ public final class BeamOverlay extends AbstractOverlay implements Overlay {
     private final static int MARKER_SIZE = SwingUtils.adjustUISize(3);
 
     /* members */
+    /** parent FitsImagePanel */
     private final FitsImagePanel fitsImagePanel;
+    /** enabled flag to show beam overlay */
+    private boolean enabled = true;
+    /** Beam information */
     private BeamInfo beamInfo = null;
 
     private final Ellipse2D ellipse = new Ellipse2D.Double();
@@ -46,6 +50,17 @@ public final class BeamOverlay extends AbstractOverlay implements Overlay {
 
     public BeamOverlay(final FitsImagePanel fitsImagePanel) {
         this.fitsImagePanel = fitsImagePanel;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            fireOverlayChanged();
+        }
     }
 
     public BeamInfo getBeamInfo() {
@@ -61,7 +76,7 @@ public final class BeamOverlay extends AbstractOverlay implements Overlay {
 
     @Override
     public void paintOverlay(final Graphics2D g2, final ChartPanel chartPanel) {
-        if (beamInfo != null) {
+        if (enabled && (beamInfo != null)) {
             logger.debug("paintOverlay: beamInfo: {}", beamInfo);
 
             final PlotRenderingInfo plotInfo = chartPanel.getChartRenderingInfo().getPlotInfo();
