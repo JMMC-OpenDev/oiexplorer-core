@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui;
 
-import com.jidesoft.swing.RangeSlider;
 import javax.swing.SpinnerNumberModel;
 
 /**
@@ -12,10 +11,10 @@ import javax.swing.SpinnerNumberModel;
  */
 public class SliderEditor extends javax.swing.JFrame {
 
+    private static final long serialVersionUID = 1L;
+
     SliderPanel sliderPanel;
-    RangeSlider rangeSlider;
     int imagesCount = 0;
-    int range[];
 
     /**
      * Creates new form SliderEditor
