@@ -8,7 +8,7 @@ import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.StringUtils;
-import fr.jmmc.oiexplorer.core.util.ColorUtils;
+import fr.jmmc.jmcs.util.ColorUtils;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
