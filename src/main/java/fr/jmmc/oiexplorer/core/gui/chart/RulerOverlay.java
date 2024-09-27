@@ -5,6 +5,7 @@ package fr.jmmc.oiexplorer.core.gui.chart;
 
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.FitsImagePanel;
 import fr.jmmc.oitools.image.FitsUnit;
 import java.awt.Color;
@@ -143,7 +144,7 @@ public final class RulerOverlay extends AbstractOverlay implements Overlay, Enha
 
     private double calculateAngle() {
         // correct orientation (north) as x and y inverted:
-        return Math.toDegrees(Math.atan2(end.getX() - origin.getX(), end.getY() - origin.getY()));
+        return Math.toDegrees(NumberUtils.getArgument(end.getY() - origin.getY(), end.getX() - origin.getX()));
     }
 
     @Override
