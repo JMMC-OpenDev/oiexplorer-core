@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.oiexplorer.core.gui.selection;
 
+import fr.jmmc.oitools.model.ModelBase;
 import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIWavelength;
 
@@ -86,13 +87,23 @@ public final class DataPointer extends OIDataPointer {
     }
 
     public String getStaIndexName() {
-        final short[] staIndexes = checkRow() ? oiData.getStaIndex()[row] : null;
-        return oiData.getStaNames(staIndexes);
+        if (checkRow()) {
+            final short[][] staIndexes = oiData.getStaIndex();
+            if (staIndexes != null) {
+                return oiData.getStaNames(staIndexes[row]);
+            }
+        }
+        return ModelBase.UNDEFINED;
     }
 
     public String getStaConfName() {
-        final short[] staIndexes = checkRow() ? oiData.getStaConf()[row] : null;
-        return oiData.getStaNames(staIndexes);
+        if (checkRow()) {
+            final short[][] staConfs = oiData.getStaConf();
+            if (staConfs != null) {
+                return oiData.getStaNames(staConfs[row]);
+            }
+        }
+        return ModelBase.UNDEFINED;
     }
 
     public float getWaveLength() {

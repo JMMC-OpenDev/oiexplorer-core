@@ -10,9 +10,9 @@ import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEvent;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventListener;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventType;
 import static fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventType.SUBSET_CHANGED;
-import static fr.jmmc.oiexplorer.core.model.OIFitsCollectionManagerEventType.SUBSET_LIST_CHANGED;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import static fr.jmmc.oitools.OIFitsConstants.STA_NAME_SEPARATOR;
+import fr.jmmc.oitools.model.ModelBase;
 import fr.jmmc.oitools.processing.SelectorResult;
 import fr.jmmc.oitools.util.StationNamesComparator;
 import java.awt.Color;
@@ -307,10 +307,12 @@ public final class SharedSeriesAttributes implements OIFitsCollectionManagerEven
             for (String label : allSingles) {
                 addLabel(label);
             }
-
-            // Assign ONCE colors to labels automatically:
-            define();
         }
+        // always define UNDEFINED (missing StaIndex / StaConf)
+        addLabel(ModelBase.UNDEFINED);
+
+        // Assign ONCE colors to labels automatically:
+        define();
     }
 
     private static void classifyStaNames(final ArrayList<String> staNames,

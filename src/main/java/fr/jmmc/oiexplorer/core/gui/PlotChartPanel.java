@@ -1915,13 +1915,16 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 for (PlotInfo info : getPlotInfos()) {
                     distinctUsedStaIndexNames.addAll(info.usedStaIndexNames);
                 }
-
                 // Order by used color:
                 for (String staIndexName : distinctStaIndexNames) {
                     // is used ?
-                    if (distinctUsedStaIndexNames.contains(staIndexName)) {
+                    if (distinctUsedStaIndexNames.remove(staIndexName)) {
                         legendCollection.add(ChartUtils.createLegendItem(staIndexName, oixpAttrs.getColorAlpha(staIndexName)));
                     }
+                }
+                // Remaining (undefined ?):
+                for (String staIndexName : distinctUsedStaIndexNames) {
+                    legendCollection.add(ChartUtils.createLegendItem(staIndexName, oixpAttrs.getColorAlpha(staIndexName)));
                 }
             } else if (ColorMapping.CONFIGURATION == plotDef.getColorMapping()) {
                 // merge all used staConf names:
@@ -1930,13 +1933,16 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 for (PlotInfo info : getPlotInfos()) {
                     distinctUsedStaConfNames.addAll(info.usedStaConfNames);
                 }
-
                 // Order by used color:
                 for (String staConfName : distinctStaConfNames) {
                     // is used ?
-                    if (distinctUsedStaConfNames.contains(staConfName)) {
+                    if (distinctUsedStaConfNames.remove(staConfName)) {
                         legendCollection.add(ChartUtils.createLegendItem(staConfName, oixpAttrs.getColorAlpha(staConfName)));
                     }
+                }
+                // Remaining (undefined ?):
+                for (String staConfName : distinctUsedStaConfNames) {
+                    legendCollection.add(ChartUtils.createLegendItem(staConfName, oixpAttrs.getColorAlpha(staConfName)));
                 }
             }
 
@@ -1945,7 +1951,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 if (logger.isDebugEnabled()) {
                     logger.debug("legend items: {}", legendCollection.getItemCount());
                 }
-
                 legendCollection = new LegendItemCollection();
             }
         } else if (useWaveLengths && waveLengthRangeFull.getLength() > LAMBDA_EPSILON) {
@@ -2351,6 +2356,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // Use staIndex (baseline or triplet) on each data row ?
         final int nStaIndexes = oiData.getDistinctStaIndexCount();
+        final boolean hasStaIndex = (nStaIndexes != 0);
         final boolean checkStaIndex = (nStaIndexes > 1);
 
         if (isLogDebug) {
@@ -2359,7 +2365,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         }
 
         // anyway (color mapping or check sta index):
-        final short[][] distinctStaIndexes = oiData.getDistinctStaIndexes();
+        final short[][] distinctStaIndexes = (hasStaIndex) ? oiData.getDistinctStaIndexes() : null;
 
         // Use flags on every 2D data ?
         final int nFlagged = oiData.getNFlagged();
@@ -2522,26 +2528,32 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // TODO: unroll loops (wave / baseline) ... and avoid repeated checks on rows (targetId, baseline ...)
         // Iterate on baselines (k):
-        for (int k = 0, idx, nCut, prevL; k < nStaIndexes; k++) {
+        final int nIterStaIndexes = (hasStaIndex) ? nStaIndexes : 1;
+        
+        for (int k = 0, idx, nCut, prevL; k < nIterStaIndexes; k++) {
 
-            // get the sta index array:
-            currentStaIndex = distinctStaIndexes[k];
+            currentStaIndex = null;
             currentStaConf = null;
-
-            // resolve sorted StaNames (reference) to get its orientation:
-            currentSortedStaNamesDir = oiData.getSortedStaNamesDir(currentStaIndex);
 
             // reset (should not happen):
             isOtherOrientation = false;
             refStaNamesDir = null;
+            
+            if (hasStaIndex) {
+                // get the sta index array:
+                currentStaIndex = distinctStaIndexes[k];
 
-            if (currentSortedStaNamesDir != null) {
-                // find the previous (real) baseline corresponding to the sorted StaNames (stable):
-                refStaNamesDir = usedStaNamesMap.get(currentSortedStaNamesDir.getStaNames());
-                if (refStaNamesDir == null) {
-                    logger.warn("bad usedStaNamesMap: {} missing !", currentSortedStaNamesDir.getStaNames());
-                } else {
-                    isOtherOrientation = (refStaNamesDir.isOrientation() != currentSortedStaNamesDir.isOrientation());
+                // resolve sorted StaNames (reference) to get its orientation:
+                currentSortedStaNamesDir = oiData.getSortedStaNamesDir(currentStaIndex);
+
+                if (currentSortedStaNamesDir != null) {
+                    // find the previous (real) baseline corresponding to the sorted StaNames (stable):
+                    refStaNamesDir = usedStaNamesMap.get(currentSortedStaNamesDir.getStaNames());
+                    if (refStaNamesDir == null) {
+                        logger.warn("bad usedStaNamesMap: {} missing !", currentSortedStaNamesDir.getStaNames());
+                    } else {
+                        isOtherOrientation = (refStaNamesDir.isOrientation() != currentSortedStaNamesDir.isOrientation());
+                    }
                 }
             }
 
