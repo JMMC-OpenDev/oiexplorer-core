@@ -59,6 +59,8 @@ import fr.jmmc.oitools.meta.Units;
 import fr.jmmc.oitools.model.IndexMask;
 import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.StaNamesDir;
+import fr.jmmc.oitools.model.TargetIdMatcher;
+import fr.jmmc.oitools.model.TargetManager;
 import fr.jmmc.oitools.processing.SelectorResult;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -2383,6 +2385,10 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         final IndexMask maskOIData1D;
         final IndexMask maskOIData2D;
         IndexMask maskOIData2DRow = null;
+        // target manager to check targets
+        final TargetManager tm;
+        // selected targetUIDs from selector:
+        final List<String> targetUIDs;
         {
             final SelectorResult selectorResult = getSelectorResult();
 
@@ -2390,10 +2396,14 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 maskWavelength = null;
                 maskOIData1D = null;
                 maskOIData2D = null;
+                tm = null;
+                targetUIDs = null;
             } else {
                 maskWavelength = selectorResult.getWavelengthMaskNotFull(oiData.getOiWavelength());
                 maskOIData1D = selectorResult.getDataMask1DNotFull(oiData);
                 maskOIData2D = selectorResult.getDataMask2DNotFull(oiData);
+                tm = selectorResult.getOiFitsCollection().getTargetManager();
+                targetUIDs = selectorResult.getSelector().getTargetUIDs();
             }
         }
         if (isLogDebug) {
@@ -2404,6 +2414,26 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         final int idxNone = (maskOIData2D != null) ? maskOIData2D.getIndexNone() : -1;
         final int idxFull = (maskOIData2D != null) ? maskOIData2D.getIndexFull() : -1;
+
+        // optional filter targetId on each data row ?
+        final TargetIdMatcher targetIdMatcher;
+        if (skipFiltered || oiData.hasSingleTarget()) {
+            // implicitely matching selected target
+            targetIdMatcher = null;
+        } else {
+            // targetID can not be null as the OIData table is supposed to have the target:
+            final TargetIdMatcher matcher = oiData.getTargetIdMatcherByUIDs(tm, targetUIDs);
+            if (matcher != null) {
+                targetIdMatcher = (matcher.matchAll(oiData.getDistinctTargetId())) ? null : matcher;
+                if (isLogDebug) {
+                    logger.debug("targetIdMatcher: {}", targetIdMatcher);
+                }
+            } else {
+                targetIdMatcher = null;
+            }
+        }
+
+        final short[] targetIds = (targetIdMatcher != null) ? oiData.getTargetId() : null;
 
         // Get Global SharedSeriesAttributes:
         final SharedSeriesAttributes oixpAttrs = SharedSeriesAttributes.INSTANCE_OIXP;
@@ -2513,7 +2543,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         String staIndexName, staConfName;
 
-        int nSkipFlag = 0, nSkipRow = 0, nSkipWavelength = 0, nSkipCell = 0;
+        int nSkipFlag = 0, nSkipTarget = 0, nSkipRow = 0, nSkipWavelength = 0, nSkipCell = 0;
         boolean isFlag, isXErrValid, isYErrValid, useXErrInBounds, useYErrInBounds;
 
         // discarded data flags:
@@ -2529,7 +2559,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         // TODO: unroll loops (wave / baseline) ... and avoid repeated checks on rows (targetId, baseline ...)
         // Iterate on baselines (k):
         final int nIterStaIndexes = (hasStaIndex) ? nStaIndexes : 1;
-        
+
         for (int k = 0, idx, nCut, prevL; k < nIterStaIndexes; k++) {
 
             currentStaIndex = null;
@@ -2538,7 +2568,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             // reset (should not happen):
             isOtherOrientation = false;
             refStaNamesDir = null;
-            
+
             if (hasStaIndex) {
                 // get the sta index array:
                 currentStaIndex = distinctStaIndexes[k];
@@ -2609,6 +2639,13 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     } else {
                         isDiscardedRow = true;
                     }
+                }
+
+                // Ensure discarded rows correspond to the matching targets:
+                if (isDiscardedRow && (targetIdMatcher != null) && !targetIdMatcher.match(targetIds[i])) {
+                    // data row does not correspond to current target so skip it:
+                    nSkipTarget++;
+                    continue;
                 }
 
                 // check mask 2D for row None flag:
@@ -2982,6 +3019,9 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         if (isLogDebug) {
             if (nSkipFlag != 0) {
                 logger.debug("Nb SkipFlag: {}", nSkipFlag);
+            }
+            if (nSkipTarget != 0) {
+                logger.debug("Nb SkipTarget: {}", nSkipTarget);
             }
             if (nSkipRow != 0) {
                 logger.debug("Nb SkipRow: {}", nSkipRow);
