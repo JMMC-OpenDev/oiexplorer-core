@@ -127,41 +127,42 @@ public final class OIFitsTableBrowser extends javax.swing.JPanel implements OIFi
 
     private void updateSelection(final DataPointer ptr) {
         logger.debug("updateSelection: {}", ptr);
+        if (ptr != null) {
+            final OIData oiData = ptr.getOiData();
 
-        final OIData oiData = ptr.getOiData();
+            // lazy resolve HDU:
+            final OIFitsFile oiFitsFile = getOIFitsFile();
 
-        // lazy resolve HDU:
-        final OIFitsFile oiFitsFile = getOIFitsFile();
+            if (oiFitsFile != null) {
+                logger.debug("oiFitsFile: {}", oiFitsFile);
 
-        if (oiFitsFile != null) {
-            logger.debug("oiFitsFile: {}", oiFitsFile);
+                final GenericListModel<HduRef> listModel = (GenericListModel<HduRef>) this.jListTables.getModel();
 
-            final GenericListModel<HduRef> listModel = (GenericListModel<HduRef>) this.jListTables.getModel();
+                for (int i = 0, len = listModel.getSize(); i < len; i++) {
+                    final HduRef hduRef = listModel.get(i);
 
-            for (int i = 0, len = listModel.getSize(); i < len; i++) {
-                final HduRef hduRef = listModel.get(i);
+                    final FitsHDU hdu = getFitsHdu(hduRef, oiFitsFile);
 
-                final FitsHDU hdu = getFitsHdu(hduRef, oiFitsFile);
+                    if (oiData == hdu) {
+                        // table found:
+                        logger.debug("hdu found: {}", hdu);
 
-                if (oiData == hdu) {
-                    // table found:
-                    logger.debug("hdu found: {}", hdu);
-
-                    if (this.jListTables.getSelectedIndex() != i) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("change selected index: {}", i);
+                        if (this.jListTables.getSelectedIndex() != i) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("change selected index: {}", i);
+                            }
+                            this.jListTables.setSelectedIndex(i);
                         }
-                        this.jListTables.setSelectedIndex(i);
+
+                        // use invokeLater (if jListTables changed)
+                        SwingUtils.invokeLaterEDT(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableViewer.setSelection(ptr.getRow(), ptr.getCol());
+                            }
+                        });
+                        break;
                     }
-
-                    // use invokeLater (if jListTables changed)
-                    SwingUtils.invokeLaterEDT(new Runnable() {
-                        @Override
-                        public void run() {
-                            tableViewer.setSelection(ptr.getRow(), ptr.getCol());
-                        }
-                    });
-                    break;
                 }
             }
         }

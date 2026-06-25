@@ -57,7 +57,11 @@ import fr.jmmc.oitools.meta.ColumnMeta;
 import fr.jmmc.oitools.meta.DataRange;
 import fr.jmmc.oitools.meta.Units;
 import fr.jmmc.oitools.model.IndexMask;
+import fr.jmmc.oitools.model.IndexOIData;
 import fr.jmmc.oitools.model.OIData;
+import fr.jmmc.oitools.model.OIT3;
+import fr.jmmc.oitools.model.OIVis;
+import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.StaNamesDir;
 import fr.jmmc.oitools.model.TargetIdMatcher;
 import fr.jmmc.oitools.model.TargetManager;
@@ -127,8 +131,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private static final boolean PLOT_RDR_TIME = true;
     /** Enable Error bars */
     private static final boolean PLOT_ERR = true;
-    /** use plot (true) or overlay (false) crosshair support (faster is overlay) */
-    private static final boolean USE_PLOT_CROSSHAIR = false;
     /** enable mouse selection handling (DEV) TODO: enable selection ASAP (TODO sub plot support) */
     private static final boolean USE_SELECTION_SUPPORT = false;
     /** data margin in percents (5%) */
@@ -145,6 +147,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     /** double formatter for other values */
     private final static NumberFormat df2 = new DecimalFormat("0.00");
     public final static double LAMBDA_EPSILON = 1e-10; // 0.1 nm
+    /** max number of crosshairs per subplot (4 triplets sharing a baseline for 6 telescopes)  */
+    private final static int MAX_CROSS_HAIRS = 10;
 
     /* shared point shapes */
     private static final Shape shapePointValid;
@@ -282,9 +286,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         jPanelCrosshair = new javax.swing.JPanel();
         jButtonHideCrossHair = new javax.swing.JButton();
         jPanelCrosshairInfos = new javax.swing.JPanel();
-        jLabelCrosshairInfos = new javax.swing.JLabel();
-        fillerHz = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
-        fillerRigid = new javax.swing.Box.Filler(new java.awt.Dimension(1, 0), new java.awt.Dimension(1, 0), new java.awt.Dimension(1, 0));
+        jScrollPaneCrosshairInfos = new javax.swing.JScrollPane();
+        jTextAreaCrosshairInfos = new javax.swing.JTextArea();
         jSeparatorHoriz = new javax.swing.JSeparator();
         jPanelMouseInfos = new javax.swing.JPanel();
         jLabelInfos = new javax.swing.JLabel();
@@ -297,7 +300,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         jLabelMouse = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
-        setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
         setLayout(new java.awt.BorderLayout());
 
         jLabelNoData.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -322,11 +324,18 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         jPanelCrosshairInfos.setLayout(new javax.swing.BoxLayout(jPanelCrosshairInfos, javax.swing.BoxLayout.LINE_AXIS));
 
-        jLabelCrosshairInfos.setText("tooltip");
-        jLabelCrosshairInfos.setOpaque(true);
-        jPanelCrosshairInfos.add(jLabelCrosshairInfos);
-        jPanelCrosshairInfos.add(fillerHz);
-        jPanelCrosshairInfos.add(fillerRigid);
+        jScrollPaneCrosshairInfos.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPaneCrosshairInfos.setOpaque(false);
+
+        jTextAreaCrosshairInfos.setEditable(false);
+        jTextAreaCrosshairInfos.setLineWrap(true);
+        jTextAreaCrosshairInfos.setRows(4);
+        jTextAreaCrosshairInfos.setText("tooltip");
+        jTextAreaCrosshairInfos.setWrapStyleWord(true);
+        jTextAreaCrosshairInfos.setOpaque(false);
+        jScrollPaneCrosshairInfos.setViewportView(jTextAreaCrosshairInfos);
+
+        jPanelCrosshairInfos.add(jScrollPaneCrosshairInfos);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -435,7 +444,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonHideCrossHairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonHideCrossHairActionPerformed
-        resetCrosshairOverlay();
+        // reset the last data pointer to reset all plot views:
+        ocm.setSelection(null, null);
     }//GEN-LAST:event_jButtonHideCrossHairActionPerformed
 
     /**
@@ -577,7 +587,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         // enlarge right margin to have last displayed value:
         this.combinedXYPlot.setInsets(ChartUtils.NORMAL_PLOT_INSETS);
 
-        configureCrosshair(this.combinedXYPlot, USE_PLOT_CROSSHAIR);
+        configureCrosshair(this.combinedXYPlot);
 
         // get read-only subplot list:
         this.combinedXYPlotList = this.combinedXYPlot.getSubplots();
@@ -594,15 +604,12 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             this.chartPanel.addOverlay(this.selectionOverlay);
         }
 
-        if (!USE_PLOT_CROSSHAIR) {
-            this.crosshairOverlay = new CombinedCrosshairOverlay();
-            this.chartPanel.addOverlay(crosshairOverlay);
-        }
+        this.crosshairOverlay = new CombinedCrosshairOverlay();
+        this.chartPanel.addOverlay(crosshairOverlay);
+        this.chartPanel.addChartMouseListener(this);
 
-        if (USE_SELECTION_SUPPORT || !USE_PLOT_CROSSHAIR) {
-            this.chartPanel.addChartMouseListener(this);
-        }
-
+        this.chartPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
+        
         this.add(this.chartPanel, BorderLayout.CENTER);
 
         // Create sub plots (2 by default):
@@ -612,7 +619,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
         // Adjust fonts:
         final Font fixedFont = new Font(Font.MONOSPACED, Font.PLAIN, SwingUtils.adjustUISize(10));
-        this.jLabelCrosshairInfos.setFont(fixedFont);
+        this.jTextAreaCrosshairInfos.setFont(fixedFont);
         this.jLabelInfos.setFont(fixedFont);
         this.jLabelMouse.setFont(fixedFont);
         this.jLabelPoints.setFont(fixedFont);
@@ -626,25 +633,21 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private void addXYPlot() {
         final XYTextAnnotation aJMMCPlot = ChartUtils.createJMMCAnnotation(Constants.JMMC_ANNOTATION);
 
-        final XYPlot xyPlot = createScientificScatterPlot(null, "", USE_PLOT_CROSSHAIR);
+        final XYPlot xyPlot = createScientificScatterPlot(null, "");
         xyPlot.getRenderer().addAnnotation(aJMMCPlot, Layer.BACKGROUND);
 
-        final int size = this.xyPlotList.size();
+        // enable overlay crosshair support:
+        final Integer plotIndex = NumberUtils.valueOf(this.xyPlotList.size());
+
+        // symetry in UV plan needs up to 2x many crosshairs:
+        for (int i = 0; i < MAX_CROSS_HAIRS; i++) {
+            crosshairOverlay.addDomainCrosshair(plotIndex, createCrosshair());
+            crosshairOverlay.addRangeCrosshair(plotIndex, createCrosshair());
+        }
 
         // add plot and its annotation:
         this.xyPlotList.add(xyPlot);
         this.aJMMCPlots.add(aJMMCPlot);
-
-        if (!USE_PLOT_CROSSHAIR) {
-            // enable overlay crosshair support:
-            final Integer plotIndex = NumberUtils.valueOf(size);
-
-            // symetry in UV plan needs up to 2 crosshairs:
-            for (int i = 0; i < 2; i++) {
-                crosshairOverlay.addDomainCrosshair(plotIndex, createCrosshair());
-                crosshairOverlay.addRangeCrosshair(plotIndex, createCrosshair());
-            }
-        }
     }
 
     public JFreeChart getChart() {
@@ -671,17 +674,16 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
      * Create custom scatter plot with several display options (error renderer)
      * @param xAxisLabel x axis label
      * @param yAxisLabel y axis label
-     * @param usePlotCrossHairSupport flag to use internal crosshair support on plot
      * @return xy plot
      */
-    private static XYPlot createScientificScatterPlot(final String xAxisLabel, final String yAxisLabel, final boolean usePlotCrossHairSupport) {
+    private static XYPlot createScientificScatterPlot(final String xAxisLabel, final String yAxisLabel) {
 
         final XYPlot xyPlot = ChartUtils.createScatterPlot(null, xAxisLabel, yAxisLabel, null, PlotOrientation.VERTICAL, false, false);
 
         // Adjust outline :
         xyPlot.setOutlineStroke(ChartUtils.MEDIUM_STROKE);
 
-        configureCrosshair(xyPlot, usePlotCrossHairSupport);
+        configureCrosshair(xyPlot);
 
         final FastXYErrorRenderer renderer = (FastXYErrorRenderer) xyPlot.getRenderer();
 
@@ -710,13 +712,13 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         return xyPlot;
     }
 
-    private static void configureCrosshair(final XYPlot plot, final boolean usePlotCrossHairSupport) {
-        // configure xyplot or overlay crosshairs:
-        plot.setDomainCrosshairLockedOnData(usePlotCrossHairSupport);
-        plot.setDomainCrosshairVisible(usePlotCrossHairSupport);
+    private static void configureCrosshair(final XYPlot plot) {
+        // disable xyplot crosshairs:
+        plot.setDomainCrosshairLockedOnData(false);
+        plot.setDomainCrosshairVisible(false);
 
-        plot.setRangeCrosshairLockedOnData(usePlotCrossHairSupport);
-        plot.setRangeCrosshairVisible(usePlotCrossHairSupport);
+        plot.setRangeCrosshairLockedOnData(false);
+        plot.setRangeCrosshairVisible(false);
     }
 
     /* EnhancedChartMouseListener implementation */
@@ -788,27 +790,54 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
             // find matching data ie. closest data point according to its screen distance to the mouse clicked point:
             final DataPointer ptr = findDataPointer(info, xyPlot, domainValue, rangeValue, xRatio, yRatio);
 
-            if (ptr != null) {
-                refreshCrosshairs(ptr);
+            // update the new data pointer:
+            ocm.setSelection(null, ptr);
+        }
+    }
+
+    private void resetOffsetCrosshairOverlays() {
+        // reset crosshair offsets for all subplots:
+        if (this.crosshairOverlay != null) {
+            for (Integer plotIndex : this.plotMapping.values()) {
+                this.crosshairOverlay.setOffset(plotIndex, 0);
+            }
+        }
+    }
+
+    private void resetUnusedCrosshairOverlays() {
+        if (this.crosshairOverlay != null) {
+            for (Integer plotIndex : this.plotMapping.values()) {
+                final List<Crosshair> xCrosshairs = this.crosshairOverlay.getDomainCrosshairs(plotIndex);
+                final List<Crosshair> yCrosshairs = this.crosshairOverlay.getRangeCrosshairs(plotIndex);
+
+                final int ncx = xCrosshairs.size() - 1;
+                final int ncy = yCrosshairs.size() - 1;
+
+                int nx = this.crosshairOverlay.getOffset(plotIndex);
+                int ny = nx;
+                while (nx <= ncx) {
+                    xCrosshairs.get(nx++).setValue(Double.NaN);
+                }
+                while (ny <= ncy) {
+                    yCrosshairs.get(ny++).setValue(Double.NaN);
+                }
             }
         }
     }
 
     private void updateCrosshairs(final Map<XYPlot, XYPlotPoint[]> xyPointsMap) {
-        DataPointer ptr = null;
-
         // update other plot crosshairs:
-        for (Integer index : this.plotIndexMapping.keySet()) {
-            final List<Crosshair> xCrosshairs = this.crosshairOverlay.getDomainCrosshairs(index);
-            final List<Crosshair> yCrosshairs = this.crosshairOverlay.getRangeCrosshairs(index);
+        for (Integer plotIndex : this.plotIndexMapping.keySet()) {
+            final List<Crosshair> xCrosshairs = this.crosshairOverlay.getDomainCrosshairs(plotIndex);
+            final List<Crosshair> yCrosshairs = this.crosshairOverlay.getRangeCrosshairs(plotIndex);
 
             final int ncx = xCrosshairs.size() - 1;
             final int ncy = yCrosshairs.size() - 1;
 
-            final XYPlot xyPlot = this.plotIndexMapping.get(index);
-            final PlotInfo info = getPlotInfos().get(index);
-            int nx = 0;
-            int ny = 0;
+            final XYPlot xyPlot = this.plotIndexMapping.get(plotIndex);
+            final PlotInfo info = getPlotInfos().get(plotIndex);
+            int nx = this.crosshairOverlay.getOffset(plotIndex);
+            int ny = nx;
 
             if (xyPlot != null && info != null) {
                 final XYPlotPoint[] xyPoints = xyPointsMap.get(xyPlot);
@@ -816,10 +845,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                 if (xyPoints != null) {
                     for (XYPlotPoint xyPoint : xyPoints) {
                         if (xyPoint != null) {
-                            // use only first one for tooltip (same info) !
-                            if (ptr == null && xyPoint instanceof DataPointInfo) {
-                                ptr = ((DataPointInfo) xyPoint).getDataPointer();
-                            }
                             if (nx <= ncx) {
                                 // check field:
                                 xCrosshairs.get(nx++).setValue(
@@ -836,67 +861,121 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     }
                 }
             }
-
-            // reset unused crosshairs:
-            while (nx <= ncx) {
+            final int end = Math.max(nx, ny);
+            // reset useless crosshairs:
+            while (nx < end) {
                 xCrosshairs.get(nx++).setValue(Double.NaN);
             }
-            while (ny <= ncy) {
+            while (ny < end) {
                 yCrosshairs.get(ny++).setValue(Double.NaN);
             }
+            this.crosshairOverlay.setOffset(plotIndex, end);
+        } // subplots
+    }
+
+    private void fillTooltip(final DataPointer ptr, final StringBuilder sb, final boolean full) {
+        if (full) {
+            sb.append("ArrName:").append(ptr.getArrName());
+            sb.append(" | InsName:").append(ptr.getInsName());
+            sb.append(" | Date:").append(ptr.getOiData().getDateObs());
+            sb.append(" | Config:").append(ptr.getStaConfName());
+            sb.append(" | Target:").append(ptr.getTarget());
+
+            if (!Float.isNaN(ptr.getWaveLength())) {
+                sb.append(" | Wavelength:").append(df4.format(ConverterFactory.CONVERTER_MICRO_METER.evaluate(ptr.getWaveLength()))).append(' ').append(ConverterFactory.CONVERTER_MICRO_METER.getUnit());
+                if (!Double.isNaN(ptr.getSpatialFreq())) {
+                    sb.append(" | Spatial Freq:").append(df2.format(ConverterFactory.CONVERTER_MEGA_LAMBDA.evaluate(ptr.getSpatialFreq()))).append(' ').append(ConverterFactory.CONVERTER_MEGA_LAMBDA.getUnit());
+                }
+            }
+            if (!Double.isNaN(ptr.getRadius())) {
+                sb.append(" | Radius:").append(df2.format(ptr.getRadius())).append(' ').append(Units.UNIT_METER.getStandardRepresentation());
+                sb.append(" | Pos. angle:").append(df2.format(ptr.getPosAngle())).append(' ').append(Units.UNIT_DEGREE.getStandardRepresentation());
+            }
+            if (!Double.isNaN(ptr.getHourAngle())) {
+                sb.append(" | Hour angle:").append(df2.format(ptr.getHourAngle())).append(' ').append(Units.UNIT_HOUR.getStandardRepresentation());
+            }
         }
+        // short:
+        final int row = ptr.getRow();
+        final int col = ptr.getCol();
+        final OIData oiData = ptr.getOiData();
 
-        // All datapointer indicates the same reference:
-        // use only first one for tooltip (same info) !
-        if (ptr != null) {
-            this.jPanelCrosshair.setVisible(true);
+        sb.append("\nTable:").append(oiData.idToString());
+        sb.append(" | Row:").append(row);
+        sb.append(" | Col:").append(col);
+        sb.append(" | Baseline:").append(ptr.getStaIndexName());
 
-            // memorize the last data pointer:
-            ocm.setSelection(this, ptr);
-
-            final String textInfo = "<html>"
-                    + " ArrName: " + ptr.getArrName()
-                    + " | InsName: " + ptr.getInsName()
-                    + " | Date: " + ptr.getOiData().getDateObs()
-                    + " | Baseline: " + ptr.getStaIndexName()
-                    + " | Config: " + ptr.getStaConfName()
-                    + " | Target: " + ptr.getTarget()
-                    + "<br>"
-                    + ((!Float.isNaN(ptr.getWaveLength()))
-                    ? "Wavelength: " + df4.format(ConverterFactory.CONVERTER_MICRO_METER.evaluate(ptr.getWaveLength())) + ' ' + ConverterFactory.CONVERTER_MICRO_METER.getUnit()
-                    + ((!Double.isNaN(ptr.getSpatialFreq()))
-                    ? " | Spatial Freq: " + df2.format(ConverterFactory.CONVERTER_MEGA_LAMBDA.evaluate(ptr.getSpatialFreq())) + ' ' + ConverterFactory.CONVERTER_MEGA_LAMBDA.getUnit()
-                    : "") + " | "
-                    : "")
-                    + ((!Double.isNaN(ptr.getRadius()))
-                    ? "Radius: " + df2.format(ptr.getRadius()) + ' ' + Units.UNIT_METER.getStandardRepresentation()
-                    + " | Pos. angle: " + df2.format(ptr.getPosAngle()) + ' ' + Units.UNIT_DEGREE.getStandardRepresentation()
-                    : "")
-                    + ((!Double.isNaN(ptr.getHourAngle()))
-                    ? " | Hour angle: " + df2.format(ptr.getHourAngle()) + ' ' + Units.UNIT_HOUR.getStandardRepresentation()
-                    : "")
-                    + "<br>Table: " + ptr.getOiData().idToString()
-                    + " | Row: " + ptr.getRow()
-                    + " | Col: " + ptr.getCol()
-                    + " | File: " + ptr.getOIFitsFileName()
-                    + "</html>";
-
-            this.jLabelCrosshairInfos.setText(textInfo);
+        if (oiData instanceof OIVis) {
+            final OIVis oiVis = (OIVis) oiData;
+            sb.append(" | VISAMP:").append(df4.format(oiVis.getVisAmp()[row][col]));
+            sb.append(" | VISPHI:").append(df4.format(oiVis.getVisPhi()[row][col]));
+        } else if (oiData instanceof OIVis2) {
+            final OIVis2 oiVis2 = (OIVis2) oiData;
+            sb.append(" | VIS2:").append(df4.format(oiVis2.getVis2Data()[row][col]));
+            sb.append(" (").append(df4.format(oiVis2.getVis2Err()[row][col])).append(')');
+        } else if (oiData instanceof OIT3) {
+            final OIT3 oiT3 = (OIT3) oiData;
+            sb.append(" | T3PHI:").append(df4.format(oiT3.getT3Phi()[row][col]));
+            sb.append(" (").append(df4.format(oiT3.getT3PhiErr()[row][col])).append(')');
         }
+        sb.append(" | File:").append(ptr.getOIFitsFileName());
     }
 
     private void refreshCrosshairs(final DataPointer selPtr) {
-        if (selPtr != null) {
+        if (selPtr == null) {
+            resetCrosshairOverlay();
+        } else {
             logger.debug("refreshCrosshair: plot {} lookup for data pointer: {}", this.plotId, selPtr);
 
-            // find matching data in plots:
-            final Map<XYPlot, XYPlotPoint[]> xyPointsMap = findDataPoints(selPtr);
+            final StringBuilder sb = new StringBuilder(128);
+            fillTooltip(selPtr, sb, true); // full
 
-            if (xyPointsMap == null) {
-                resetCrosshairOverlay();
-            } else {
+            resetOffsetCrosshairOverlays();
+
+            // find matching data in plots:
+            Map<XYPlot, XYPlotPoint[]> xyPointsMap = findDataPoints(selPtr);
+
+            if (xyPointsMap != null) {
                 updateCrosshairs(xyPointsMap);
             }
+
+            // Anyway, add other crosshairs:
+            final SelectorResult selectorResult = getSelectorResult();
+
+            if (selectorResult != null) {
+                final OIData selOidata = selPtr.getOiData();
+                final int selRow = selPtr.getRow();
+                final int selCol = selPtr.getCol();
+
+                final ArrayList<IndexOIData> indexOIDataOutputList = new ArrayList<>(10);
+
+                // query the index for associated data (no cache):
+                // note: selPtr is not included:
+                selectorResult.getSiblingData(selOidata, selRow, indexOIDataOutputList);
+
+                logger.debug("refreshCrosshair: indexOIDataOutputList: {}", indexOIDataOutputList);
+
+                for (IndexOIData indexOiData : indexOIDataOutputList) {
+                    // implicit column values are equals ie insModes / wavelengths are compatible:
+                    final DataPointer otherPtr = new DataPointer(indexOiData.getOiData(), indexOiData.getRow(), selCol);
+
+                    logger.debug("refreshCrosshair: plot {} lookup for RELATED data pointer: {}", this.plotId, otherPtr);
+
+                    xyPointsMap = findDataPoints(otherPtr);
+
+                    if (xyPointsMap != null) {
+                        updateCrosshairs(xyPointsMap);
+
+                        fillTooltip(otherPtr, sb, false); // short
+                    }
+                }
+            }
+            resetUnusedCrosshairOverlays();
+
+            // always show tooltip:
+            this.jTextAreaCrosshairInfos.setText(sb.toString());
+            this.jTextAreaCrosshairInfos.setCaretPosition(0);
+            this.jPanelCrosshair.setVisible(true);
         }
     }
 
@@ -997,8 +1076,6 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
         Map<XYPlot, XYPlotPoint[]> dataPoints = null;
 
         if (selPtr != null) {
-            dataPoints = new IdentityHashMap<XYPlot, XYPlotPoint[]>(8);
-
             // TODO: move such code elsewhere : ChartUtils or XYDataSetUtils ?
             final long startTime = System.nanoTime();
 
@@ -1018,7 +1095,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                     for (int serie = 0, seriesCount = dataset.getSeriesCount(), item, itemCount, row, col; serie < seriesCount; serie++) {
                         final OITableSerieKey serieKey = (OITableSerieKey) dataset.getSeriesKey(serie);
 
-                        // check oidata pointer (OIData) and column index (wavelength ?)
+                        // check oidata pointer (OIData) then row and column index (wavelength ?)
                         if (serieKey.getDataPointer().equals(selPtr)) {
                             itemCount = dataset.getItemCount(serie);
 
@@ -1032,6 +1109,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                                         // matching
                                         logger.debug("matching point: serie={} item={}", serie, item);
 
+                                        // each serie contains only 2 times the same data point (oidata, row, col) due to symetry (uv)
                                         if (++nMatchs > 2) {
                                             logger.debug("Too much matching items for ptr: {}", selPtr);
                                             break;
@@ -1050,21 +1128,24 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
                                 }
                             }
                         }
-                    }
+                    } // series
 
                     logger.debug("matching points: {}", nMatchs);
 
                     if (nMatchs != 0) {
+                        if (dataPoints == null) {
+                            dataPoints = new IdentityHashMap<XYPlot, XYPlotPoint[]>(8);
+                        }
                         dataPoints.put(xyPlot, new XYPlotPoint[]{pt1, pt2});
                     }
                 }
-            }
+            } // sub plots
 
             if (logger.isDebugEnabled()) {
                 logger.debug("findDataPoints: duration = {} ms.", 1e-6d * (System.nanoTime() - startTime));
             }
         }
-        return (dataPoints != null && !dataPoints.isEmpty()) ? dataPoints : null;
+        return ((dataPoints != null) && !dataPoints.isEmpty()) ? dataPoints : null;
     }
 
     /**
@@ -1465,17 +1546,8 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
 
     private void resetCrosshairOverlay() {
         this.jPanelCrosshair.setVisible(false);
-
-        if (this.crosshairOverlay != null) {
-            for (Integer plotIndex : this.plotMapping.values()) {
-                for (Crosshair ch : this.crosshairOverlay.getDomainCrosshairs(plotIndex)) {
-                    ch.setValue(Double.NaN);
-                }
-                for (Crosshair ch : this.crosshairOverlay.getRangeCrosshairs(plotIndex)) {
-                    ch.setValue(Double.NaN);
-                }
-            }
-        }
+        resetOffsetCrosshairOverlays();
+        resetUnusedCrosshairOverlays();
     }
 
     /**
@@ -3127,10 +3199,7 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.Box.Filler fillerHz;
-    private javax.swing.Box.Filler fillerRigid;
     private javax.swing.JButton jButtonHideCrossHair;
-    private javax.swing.JLabel jLabelCrosshairInfos;
     private javax.swing.JLabel jLabelDataErrRange;
     private javax.swing.JLabel jLabelDataRange;
     private javax.swing.JLabel jLabelInfos;
@@ -3141,10 +3210,12 @@ public final class PlotChartPanel extends javax.swing.JPanel implements ChartPro
     private javax.swing.JPanel jPanelCrosshairInfos;
     private javax.swing.JPanel jPanelInfos;
     private javax.swing.JPanel jPanelMouseInfos;
+    private javax.swing.JScrollPane jScrollPaneCrosshairInfos;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparatorHoriz;
+    private javax.swing.JTextArea jTextAreaCrosshairInfos;
     // End of variables declaration//GEN-END:variables
     /** drawing started time value */
     private long chartDrawStartTime = 0l;

@@ -4,6 +4,7 @@
 package fr.jmmc.oiexplorer.core.gui.selection;
 
 import fr.jmmc.oitools.model.ModelBase;
+import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIWavelength;
 
@@ -22,7 +23,11 @@ public final class DataPointer extends OIDataPointer {
     private final int col;
 
     public DataPointer(final OIDataPointer ptr, final int row, final int col) {
-        super(ptr.getOiData());
+        this(ptr.getOiData(), row, col);
+    }
+
+    public DataPointer(final OIData oiData, final int row, final int col) {
+        super(oiData);
         this.row = row;
         this.col = col;
     }
@@ -70,12 +75,11 @@ public final class DataPointer extends OIDataPointer {
 
     @Override
     public String toString() {
-        return "DataPointer{oidata: " + oiData
+        return "DataPointer{ " + super.toString()
+                + " } row: " + row
+                + " col: " + col
                 + " staIndexName: " + getStaIndexName()
-                + " staConfName: " + getStaConfName()
-                + " ArrName: " + getArrName()
-                + " InsName: " + getInsName()
-                + " FileName: " + getOIFitsFileName() + '}';
+                + " staConfName: " + getStaConfName();
     }
 
     private final boolean checkRow() {
@@ -129,7 +133,6 @@ public final class DataPointer extends OIDataPointer {
                     return oiTarget.getTarget()[rowTarget.intValue()];
                 }
             }
-
         }
         return "";
     }

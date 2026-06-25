@@ -50,7 +50,7 @@ public class OIDataPointer {
 
     @Override
     public String toString() {
-        return "OIDataPointer{oidata: " + oiData
+        return "OIDataPointer{oidata: " + oiData.idToString()
                 + " ArrName: " + getArrName()
                 + " InsName: " + getInsName()
                 + " FileName: " + getOIFitsFileName() + '}';
