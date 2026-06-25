@@ -1227,6 +1227,9 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
                 updatePlotRef(source, plot);
             }
         }
+
+        // check that the current selection is compatible with selected data:
+        checkSelection(subsetDefinition);
     }
 
     /**
@@ -1810,6 +1813,20 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         return this.selectedDataPointer;
     }
 
+    private void checkSelection(final SubsetDefinition subsetDefinition) {
+        if (selectedDataPointer != null) {
+            final SelectorResult result = subsetDefinition.getSelectorResult();
+            if (result != null) {
+                if (!result.getOIDatas().contains(selectedDataPointer.getOiData())) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Reset selection ({})", selectedDataPointer);
+                    }
+                    setSelection(null, null);
+                }
+            }
+        }
+    }
+
     /* --- plot infos handling --------- ---------------------------- */
     /**
      * Define the PlotInfos data
@@ -2324,16 +2341,6 @@ public final class OIFitsCollectionManager implements OIFitsCollectionManagerEve
         logger.debug("onProcess {} - done", event);
     }
 
-    /*
-
-        // check and update references in current OiDataCollection:
-        // initialize current objects: subsetDefinition, plotDefinition, plot if NOT PRESENT:
-        checkReferences();
-
-        // finally: set the initial state of the user collection (after GUI updates => potentially modified) 
-        this.defineInitialUserCollection();
-    
-     */
     /**
      * Check bad references
      */
