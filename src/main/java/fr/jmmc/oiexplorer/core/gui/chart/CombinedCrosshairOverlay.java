@@ -4,6 +4,7 @@
 package fr.jmmc.oiexplorer.core.gui.chart;
 
 import fr.jmmc.jmcs.util.NumberUtils;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -19,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
@@ -50,12 +52,15 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
     public final static Integer MAIN_PLOT = NumberUtils.valueOf(0);
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
+    
+    private final static int XING_LEN = ChartUtils.scalePen(4);
 
-    /* TODO: use CrosshairPlotState class to store both x and y List<Crosshair> per plot */
     /** Storage for the cross-hairs along the x-axis. */
     private final Map<Integer, List<Crosshair>> xCrosshairs;
     /** Storage for the cross-hairs along the y-axis. */
     private final Map<Integer, List<Crosshair>> yCrosshairs;
+    /** TODO */
+    private final Map<Integer, AtomicInteger> offCrosshairs;
 
     /**
      * Default constructor.
@@ -64,8 +69,24 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         super();
         this.xCrosshairs = new HashMap<Integer, List<Crosshair>>();
         this.yCrosshairs = new HashMap<Integer, List<Crosshair>>();
+        this.offCrosshairs = new HashMap<Integer, AtomicInteger>();
     }
-
+    
+    public void setOffset(final Integer plotIndex, int off) {
+        AtomicInteger val = offCrosshairs.get(plotIndex);
+        if (val == null) {
+            val = new AtomicInteger(off);
+            offCrosshairs.put(plotIndex, val);
+        } else {
+            val.set(off);
+        }
+    }
+    
+    public int getOffset(final Integer plotIndex) {
+        AtomicInteger val = offCrosshairs.get(plotIndex);
+        return (val != null) ? val.get() : 0;
+    }
+    
     private static void add(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex, final Crosshair crosshair) {
         List<Crosshair> crosshairs = crosshairMap.get(plotIndex);
         if (crosshairs == null) {
@@ -74,7 +95,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         }
         crosshairs.add(crosshair);
     }
-
+    
     private static boolean remove(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex, final Crosshair crosshair) {
         final List<Crosshair> crosshairs = crosshairMap.get(plotIndex);
         if (crosshairs != null) {
@@ -82,7 +103,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         }
         return false;
     }
-
+    
     private void addCrosshair(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex, final Crosshair crosshair) {
         if (crosshair == null) {
             throw new IllegalArgumentException("Null 'crosshair' argument.");
@@ -90,7 +111,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         add(crosshairMap, plotIndex, crosshair);
         crosshair.addPropertyChangeListener(this);
     }
-
+    
     private void removeCrosshair(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex, final Crosshair crosshair) {
         if (crosshair == null) {
             throw new IllegalArgumentException("Null 'crosshair' argument.");
@@ -100,7 +121,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
             fireOverlayChanged();
         }
     }
-
+    
     private static List<Crosshair> getCrosshairs(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex) {
         final List<Crosshair> crosshairs = crosshairMap.get(plotIndex);
         if (crosshairs != null) {
@@ -108,7 +129,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         }
         return Collections.emptyList();
     }
-
+    
     public void clearCrosshairs(final Map<Integer, List<Crosshair>> crosshairMap, final Integer plotIndex) {
         if (crosshairMap.isEmpty()) {
             return;  // nothing to do
@@ -133,31 +154,31 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
     public void addDomainCrosshair(final Crosshair crosshair) {
         addCrosshair(this.xCrosshairs, MAIN_PLOT, crosshair);
     }
-
+    
     public void addDomainCrosshair(final Integer plotIndex, final Crosshair crosshair) {
         addCrosshair(this.xCrosshairs, plotIndex, crosshair);
     }
-
+    
     public void removeDomainCrosshair(final Crosshair crosshair) {
         removeCrosshair(this.xCrosshairs, MAIN_PLOT, crosshair);
     }
-
+    
     public void removeDomainCrosshair(final Integer plotIndex, final Crosshair crosshair) {
         removeCrosshair(this.xCrosshairs, plotIndex, crosshair);
     }
-
+    
     public void clearDomainCrosshairs() {
         clearCrosshairs(this.xCrosshairs, MAIN_PLOT);
     }
-
+    
     public void clearDomainCrosshairs(final Integer plotIndex) {
         clearCrosshairs(this.xCrosshairs, plotIndex);
     }
-
+    
     public List<Crosshair> getDomainCrosshairs() {
         return getCrosshairs(this.xCrosshairs, MAIN_PLOT);
     }
-
+    
     public List<Crosshair> getDomainCrosshairs(final Integer plotIndex) {
         return getCrosshairs(this.xCrosshairs, plotIndex);
     }
@@ -170,31 +191,31 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
     public void addRangeCrosshair(final Crosshair crosshair) {
         addCrosshair(this.yCrosshairs, MAIN_PLOT, crosshair);
     }
-
+    
     public void addRangeCrosshair(final Integer plotIndex, final Crosshair crosshair) {
         addCrosshair(this.yCrosshairs, plotIndex, crosshair);
     }
-
+    
     public void removeRangeCrosshair(final Crosshair crosshair) {
         removeCrosshair(this.yCrosshairs, MAIN_PLOT, crosshair);
     }
-
+    
     public void removeRangeCrosshair(final Integer plotIndex, final Crosshair crosshair) {
         removeCrosshair(this.yCrosshairs, plotIndex, crosshair);
     }
-
+    
     public void clearRangeCrosshairs() {
         clearCrosshairs(this.yCrosshairs, MAIN_PLOT);
     }
-
+    
     public void clearRangeCrosshairs(final Integer plotIndex) {
         clearCrosshairs(this.yCrosshairs, plotIndex);
     }
-
+    
     public List<Crosshair> getRangeCrosshairs() {
         return getCrosshairs(this.yCrosshairs, MAIN_PLOT);
     }
-
+    
     public List<Crosshair> getRangeCrosshairs(final Integer plotIndex) {
         return getCrosshairs(this.yCrosshairs, plotIndex);
     }
@@ -219,14 +240,14 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
     @Override
     public void paintOverlay(final Graphics2D g2, final ChartPanel chartPanel) {
         final Shape savedClip = g2.getClip();
-
+        
         final JFreeChart chart = chartPanel.getChart();
 
         // use chart's antialiasing rendering hints:
         g2.addRenderingHints(chart.getRenderingHints());
-
+        
         final XYPlot plot = (XYPlot) chart.getPlot();
-
+        
         final PlotRenderingInfo plotInfo = chartPanel.getChartRenderingInfo().getPlotInfo();
         if (plotInfo.getSubplotCount() > 0) {
             // subplot mode
@@ -239,37 +260,37 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                 System.out.println("Unsupported combined plot: " + plot);
                 subPlots = null;
             }
-
+            
             if (subPlots != null) {
                 for (int i = 0, len = subPlots.size(); i < len; i++) {
                     final XYPlot subPlot = (XYPlot) subPlots.get(i);
-
+                    
                     final Rectangle2D dataArea = chartPanel.scale(plotInfo.getSubplotInfo(i).getDataArea());
-
+                    
                     paintPlotCrosshair(g2, dataArea, subPlot, NumberUtils.valueOf(i));
 
                     // restore clip:
                     g2.setClip(savedClip);
                 }
             }
-
+            
         } else {
             // standard mode
             final Rectangle2D dataArea = chartPanel.getScreenDataArea();
             g2.clip(dataArea);
-
+            
             paintPlotCrosshair(g2, dataArea, plot, MAIN_PLOT);
         }
-
+        
         g2.setClip(savedClip);
     }
-
+    
     public void paintPlotCrosshair(final Graphics2D g2, final Rectangle2D dataArea, final XYPlot plot, final Integer plotIndex) {
         g2.clip(dataArea);
-
+        
         final ValueAxis xAxis = plot.getDomainAxis();
         final RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
-
+        
         double x, xx;
         for (Crosshair ch : this.getDomainCrosshairs(plotIndex)) {
             if (ch.isVisible()) {
@@ -284,10 +305,10 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                 }
             }
         }
-
+        
         final ValueAxis yAxis = plot.getRangeAxis();
         final RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
-
+        
         double y, yy;
         for (Crosshair ch : this.getRangeCrosshairs(plotIndex)) {
             if (ch.isVisible()) {
@@ -298,6 +319,47 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                         drawHorizontalCrosshair(g2, dataArea, yy, ch);
                     } else {
                         drawVerticalCrosshair(g2, dataArea, yy, ch);
+                    }
+                }
+            }
+        }
+        
+        if (true) {
+            // Make the cross visible (in black):
+            final List<Crosshair> xCrosshairs = this.getDomainCrosshairs(plotIndex);
+            final List<Crosshair> yCrosshairs = this.getRangeCrosshairs(plotIndex);
+            
+            final int ncx = xCrosshairs.size() - 1;
+            final int ncy = yCrosshairs.size() - 1;
+            
+            final int end = Math.min(ncx, ncy);
+            
+            for (int i = 0; i < end; i++) {
+                final Crosshair xCrosshair = xCrosshairs.get(i);
+                final Crosshair yCrosshair = yCrosshairs.get(i);
+                
+                if (xCrosshair.isVisible() && yCrosshair.isVisible()) {
+                    x = xCrosshair.getValue();
+                    y = yCrosshair.getValue();
+                    
+                    if (!Double.isNaN(x) && !Double.isNaN(y)) {
+                        xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
+                        yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
+                        
+                        if ((xx >= dataArea.getMinX() && xx <= dataArea.getMaxX())
+                                && (yy >= dataArea.getMinY() && yy <= dataArea.getMaxY())) {
+                            final Paint savedPaint = g2.getPaint();
+                            final Stroke savedStroke = g2.getStroke();
+                            
+                            g2.setPaint(Color.BLACK);
+                            g2.setStroke(xCrosshair.getStroke());
+                            
+                            g2.draw(new Line2D.Double(xx - XING_LEN, yy, xx + XING_LEN, yy));
+                            g2.draw(new Line2D.Double(xx, yy - XING_LEN, xx, yy + XING_LEN));
+                            
+                            g2.setPaint(savedPaint);
+                            g2.setStroke(savedStroke);
+                        }
                     }
                 }
             }
@@ -313,7 +375,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
      * @param crosshair  the cross-hair.
      */
     protected void drawHorizontalCrosshair(final Graphics2D g2, final Rectangle2D dataArea, final double y, final Crosshair crosshair) {
-
+        
         if (y >= dataArea.getMinY() && y <= dataArea.getMaxY()) {
             final Line2D line = new Line2D.Double(dataArea.getMinX(), y, dataArea.getMaxX(), y);
             final Paint savedPaint = g2.getPaint();
@@ -321,7 +383,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
             g2.setPaint(crosshair.getPaint());
             g2.setStroke(crosshair.getStroke());
             g2.draw(line);
-
+            
             if (crosshair.isLabelVisible()) {
                 final String label = crosshair.getLabelGenerator().generateLabel(crosshair);
                 RectangleAnchor anchor = crosshair.getLabelAnchor();
@@ -330,7 +392,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                 float yy = (float) pt.getY();
                 TextAnchor alignPt = textAlignPtForLabelAnchorH(anchor);
                 Shape hotspot = TextUtils.calculateRotatedStringBounds(label, g2, xx, yy, alignPt, 0.0, TextAnchor.CENTER);
-
+                
                 if (!dataArea.contains(hotspot.getBounds2D())) {
                     anchor = flipAnchorV(anchor);
                     pt = calculateLabelPoint(line, anchor, 5, 5);
@@ -339,7 +401,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                     alignPt = textAlignPtForLabelAnchorH(anchor);
                     hotspot = TextUtils.calculateRotatedStringBounds(label, g2, xx, yy, alignPt, 0.0, TextAnchor.CENTER);
                 }
-
+                
                 g2.setPaint(crosshair.getLabelBackgroundPaint());
                 g2.fill(hotspot);
                 g2.setPaint(crosshair.getLabelOutlinePaint());
@@ -360,7 +422,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
      * @param crosshair  the cross-hair.
      */
     protected void drawVerticalCrosshair(final Graphics2D g2, final Rectangle2D dataArea, final double x, final Crosshair crosshair) {
-
+        
         if (x >= dataArea.getMinX() && x <= dataArea.getMaxX()) {
             final Line2D line = new Line2D.Double(x, dataArea.getMinY(), x, dataArea.getMaxY());
             final Paint savedPaint = g2.getPaint();
@@ -368,7 +430,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
             g2.setPaint(crosshair.getPaint());
             g2.setStroke(crosshair.getStroke());
             g2.draw(line);
-
+            
             if (crosshair.isLabelVisible()) {
                 final String label = crosshair.getLabelGenerator().generateLabel(crosshair);
                 RectangleAnchor anchor = crosshair.getLabelAnchor();
@@ -377,7 +439,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
                 float yy = (float) pt.getY();
                 TextAnchor alignPt = textAlignPtForLabelAnchorV(anchor);
                 Shape hotspot = TextUtils.calculateRotatedStringBounds(label, g2, xx, yy, alignPt, 0.0, TextAnchor.CENTER);
-
+                
                 if (!dataArea.contains(hotspot.getBounds2D())) {
                     anchor = flipAnchorH(anchor);
                     pt = calculateLabelPoint(line, anchor, 5, 5);
@@ -516,7 +578,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         }
         return result;
     }
-
+    
     private static RectangleAnchor flipAnchorH(final RectangleAnchor anchor) {
         RectangleAnchor result = anchor;
         if (anchor.equals(RectangleAnchor.TOP_LEFT)) {
@@ -534,7 +596,7 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         }
         return result;
     }
-
+    
     private static RectangleAnchor flipAnchorV(final RectangleAnchor anchor) {
         RectangleAnchor result = anchor;
         if (anchor.equals(RectangleAnchor.TOP_LEFT)) {
@@ -591,60 +653,5 @@ public class CombinedCrosshairOverlay extends AbstractOverlay implements Overlay
         final CombinedCrosshairOverlay clone = (CombinedCrosshairOverlay) super.clone();
         // TODO: clone maps
         return clone;
-    }
-
-    private final static class CrosshairPlotState implements PublicCloneable, Cloneable, Serializable {
-
-        /** default serial UID for Serializable interface */
-        private static final long serialVersionUID = 1L;
-        /** Storage for the cross-hairs along the x-axis. */
-        private final List<Crosshair> xCrosshairs;
-        /** Storage for the cross-hairs along the y-axis. */
-        private final List<Crosshair> yCrosshairs;
-
-        private CrosshairPlotState() {
-            xCrosshairs = new ArrayList<Crosshair>();
-            yCrosshairs = new ArrayList<Crosshair>();
-        }
-
-        /**
-         * Tests this overlay for equality with an arbitrary object.
-         *
-         * @param obj  the object (<code>null</code> permitted).
-         *
-         * @return A boolean.
-         */
-        @Override
-        public boolean equals(final Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof CombinedCrosshairOverlay)) {
-                return false;
-            }
-            final CombinedCrosshairOverlay that = (CombinedCrosshairOverlay) obj;
-            if (!this.xCrosshairs.equals(that.xCrosshairs)) {
-                return false;
-            }
-            if (!this.yCrosshairs.equals(that.yCrosshairs)) {
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * Returns a clone of this instance.
-         *
-         * @return A clone of this instance.
-         *
-         * @throws java.lang.CloneNotSupportedException if there is some problem
-         *     with the cloning.
-         */
-        @Override
-        public Object clone() throws CloneNotSupportedException {
-            final CrosshairPlotState clone = (CrosshairPlotState) super.clone();
-            // TODO: clone
-            return clone;
-        }
     }
 }
